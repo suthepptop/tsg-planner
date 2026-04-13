@@ -610,7 +610,7 @@ function renderGantt(){
   ctx.fillStyle='#FFD700';ctx.fillRect(LABEL_W+80,ly-5,24,9);
   ctx.fillText('Actual',LABEL_W+108,ly+2);
   ctx.strokeStyle='#cc0000';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(LABEL_W+82,ly);ctx.lineTo(LABEL_W+102,ly);ctx.stroke();
-  ctx.fillStyle='#333';ctx.lineWidth=1;ctx.fillText('(red = Act%)',LABEL_W+160,ly+2);
+  ctx.fillStyle='#333';ctx.lineWidth=1;ctx.fillText('(black line = Act%)',LABEL_W+160,ly+2);
 }
 
 // ── S-CURVE ──
@@ -688,6 +688,24 @@ function drawSCurve(canvasId,rows,planColor,actColor){
 
   const drawLine=(pts,col,dash)=>{ctx.strokeStyle=col;ctx.lineWidth=2;ctx.setLineDash(dash||[]);ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);pts.forEach(([x,y])=>ctx.lineTo(x,y));ctx.stroke();ctx.setLineDash([]);};
   drawLine(pp,planColor);drawLine(ap,actColor,[6,3]);
+  // Show % at end of actual line
+  if(ap.length>0){
+    const lastPt=ap[ap.length-1];
+    const actPct=Math.round(act[Math.min(todayD,act.length-1)]*100);
+    ctx.fillStyle=actColor;
+    ctx.font='bold 11px Tahoma, Leelawadee UI, Thonburi';
+    ctx.textAlign='left';
+    ctx.fillText(actPct+'%', lastPt[0]+4, lastPt[1]+4);
+  }
+  // Show % at end of plan line
+  if(pp.length>0){
+    const lastPlan=pp[pp.length-1];
+    const planPct=Math.round(plan[plan.length-1]*100);
+    ctx.fillStyle=planColor;
+    ctx.font='bold 11px Tahoma, Leelawadee UI, Thonburi';
+    ctx.textAlign='left';
+    ctx.fillText(planPct+'%', lastPlan[0]+4, lastPlan[1]+4);
+  }
 
   if(today>=projStart&&today<=projEnd){
     const tx=px1+(dayDiff(projStart,today)/totalDays)*pw;
