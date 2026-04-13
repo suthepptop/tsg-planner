@@ -707,6 +707,10 @@ function drawSCurve(canvasId,rows,planColor,actColor){
 
   ctx.strokeStyle='#888';ctx.lineWidth=1;
   ctx.beginPath();ctx.moveTo(px1,py1);ctx.lineTo(px1,py2);ctx.lineTo(px2,py2);ctx.stroke();
+  // Today date top-right
+  const todayStr=today.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
+  ctx.fillStyle='#555';ctx.font='11px Tahoma, ThaiFont, Leelawadee UI, Thonburi';
+  ctx.textAlign='right';ctx.fillText('As of: '+todayStr, px2, py1-4);
 
   const step=Math.max(1,Math.floor(totalDays/300));
   const pp=[],ap=[];
