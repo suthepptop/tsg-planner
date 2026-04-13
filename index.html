@@ -240,7 +240,7 @@ function getRange(rows){
 
 // ── AUTH ──
 window.onload=()=>{
-  google.accounts.id.initialize({client_id:GCI,callback:onLogin});
+  google.accounts.id.initialize({client_id:GCI,callback:onLogin,auto_select:true});
   google.accounts.id.renderButton($('gBtn'),{theme:'filled_blue',size:'small',text:'signin_with',shape:'rectangular'});
   loadData();
 };
@@ -311,6 +311,7 @@ function confirmPAT(){const v=$('patIn').value.trim();if(!v)return;sessionStorag
 function showPg(id){document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));$(id).classList.add('on');}
 function goPlan(p){
   plan=p;
+  sessionStorage.setItem('lastPlan',p);
   $('ptit').textContent=p==='material'?'📦 Material Plan':'🔧 Installation Plan';
   $('rwn').value=D[p].rows.length;
   document.querySelectorAll('.tnb').forEach(b=>b.classList.remove('on'));
@@ -322,6 +323,7 @@ function goPlan(p){
 }
 function goHome(){
   plan=null;
+  sessionStorage.removeItem('lastPlan');
   document.querySelectorAll('.tnb').forEach(b=>b.classList.remove('on'));
   showPg('hpg');
   requestAnimationFrame(()=>requestAnimationFrame(renderHome));
@@ -541,7 +543,7 @@ function drawSC(cvId,rows,pc,ac){
 
   // Title top-left
   const title=cvId==='cSC'?(plan==='material'?'Material S-Curve':'Installation S-Curve'):cvId==='cMat'?'Material S-Curve':'Installation S-Curve';
-  ctx.fillStyle='#333';ctx.font='bold 11px '+FN;ctx.textAlign='left';ctx.fillText(title,6,16);
+  ctx.fillStyle='#333';ctx.font='bold 11px '+FN;ctx.textAlign='left';ctx.fillText(title,px1,py1-4);
   // As-of date top-right
   ctx.fillStyle='#666';ctx.font='10px '+FN;ctx.textAlign='right';
   ctx.fillText('As of: '+today.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}),W-6,16);
@@ -619,7 +621,15 @@ function renderHome(){
   const sw=(id,v)=>{const e=$(id);if(e)e.style.width=v+'%';};
   se('hmp',mp+'%');se('hip',ip+'%');sw('hmb',mp);sw('hib',ip);
 }
-function renderAll(){initD();requestAnimationFrame(()=>requestAnimationFrame(renderHome));}
+function renderAll(){
+  initD();
+  const lp=sessionStorage.getItem('lastPlan');
+  if(lp){
+    requestAnimationFrame(()=>requestAnimationFrame(()=>goPlan(lp)));
+  } else {
+    requestAnimationFrame(()=>requestAnimationFrame(renderHome));
+  }
+}
 let _rt;
 window.addEventListener('resize',()=>{clearTimeout(_rt);_rt=setTimeout(()=>{renderGantt();renderSC();renderHome();},120);});
 window.addEventListener('orientationchange',()=>setTimeout(()=>{renderGantt();renderSC();},300));
