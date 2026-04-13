@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSG Project Planner — Energy Services Co., Ltd.</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+:root {
+  --bg:#0f1117; --surface:#161b24; --surface2:#1e2530; --surface3:#242d3a;
+  --border:#2a3444; --border2:#1e2838;
+  --text:#e2e8f0; --text2:#94a3b8; --text3:#64748b;
+  --accent:#3b82f6; --accent2:#60a5fa;
+  --green:#22c55e; --green2:#16a34a;
+  --yellow:#eab308; --yellow2:#ca8a04;
+  --orange:#f97316; --red:#ef4444;
+  --plan-l1:#3b82f6; --plan-l2:#60a5fa; --plan-l3:#e6a85a;
+  --actual-l1:#22c55e; --actual-l2:#4ade80; --actual-l3:#6ee7a0;
+  --font:'IBM Plex Sans',system-ui,sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+/* ── TOPBAR ── */
+#topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 20px;background:var(--surface);border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:200;height:44px;
+}
+#topbar h1{font-size:12px;font-weight:600;color:var(--text2);letter-spacing:0.06em;}
+#topbar .right{display:flex;align-items:center;gap:10px;}
+#userInfo{font-size:11px;color:var(--text3);font-family:var(--mono);}
+.btn{
+  padding:5px 13px;border-radius:5px;border:1px solid var(--border);
+  background:var(--surface2);color:var(--text);font-size:11px;font-family:var(--font);
+  cursor:pointer;transition:all 0.15s;white-space:nowrap;
+}
+.btn:hover{background:var(--surface3);border-color:var(--text3);}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+.btn-primary:hover{background:var(--accent2);border-color:var(--accent2);}
+.btn-danger{background:transparent;border-color:var(--red);color:var(--red);}
+.btn-danger:hover{background:rgba(239,68,68,0.1);}
+.btn-sm{padding:3px 8px;font-size:10px;}
+
+/* ── PAGES ── */
+.page{display:none;height:calc(100vh - 44px);}
+.page.active{display:flex;flex-direction:column;}
+
+/* ══════════════════════════════
+   HOME PAGE
+══════════════════════════════ */
+#homePage{flex-direction:row!important;}
+.home-left{
+  width:320px;min-width:320px;
+  background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:16px;padding:40px 24px;
+}
+.home-left h2{font-size:13px;color:var(--text2);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;}
+.plan-btn{
+  width:100%;padding:20px 16px;border-radius:8px;border:1px solid var(--border);
+  background:var(--surface2);cursor:pointer;transition:all 0.2s;
+  text-align:left;font-family:var(--font);
+}
+.plan-btn:hover{border-color:var(--accent);background:var(--surface3);}
+.plan-btn .pb-icon{font-size:22px;margin-bottom:6px;}
+.plan-btn .pb-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px;}
+.plan-btn .pb-sub{font-size:10px;color:var(--text3);}
+.plan-btn.mat .pb-icon{color:#e2e8f0;}
+.plan-btn.inst .pb-icon{color:var(--yellow);}
+
+.home-right{
+  flex:1;display:flex;flex-direction:column;
+  padding:16px;gap:12px;overflow:hidden;
+}
+.home-chart-wrap{flex:1;min-height:0;position:relative;}
+.home-chart-title{
+  position:absolute;top:8px;left:50%;transform:translateX(-50%);
+  font-size:10px;font-weight:600;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;
+  pointer-events:none;
+}
+.home-chart-wrap canvas{display:block;width:100%;height:100%;}
+
+/* ══════════════════════════════
+   PLAN PAGE
+══════════════════════════════ */
+#planPage{overflow:hidden;}
+.plan-topbar{
+  display:flex;align-items:center;gap:12px;padding:8px 16px;
+  background:var(--surface);border-bottom:1px solid var(--border);
+  flex-wrap:wrap;
+}
+.plan-topbar .plan-title{font-size:12px;font-weight:700;color:var(--text);letter-spacing:0.04em;}
+.plan-topbar .spacer{flex:1;}
+.row-input-wrap{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);}
+.row-input-wrap input{
+  width:52px;padding:3px 6px;border-radius:4px;border:1px solid var(--border);
+  background:var(--surface2);color:var(--text);font-size:11px;font-family:var(--mono);
+  text-align:center;
+}
+.row-input-wrap input:focus{outline:none;border-color:var(--accent);}
+
+.plan-body{display:flex;flex:1;overflow:hidden;}
+
+/* Table side */
+.table-side{
+  width:42%;min-width:340px;
+  display:flex;flex-direction:column;
+  border-right:1px solid var(--border);overflow:hidden;
+}
+.table-wrap{flex:1;overflow:auto;}
+table{width:100%;border-collapse:collapse;font-size:11px;}
+thead th{
+  padding:5px 5px;font-size:9.5px;font-weight:600;color:var(--text3);
+  letter-spacing:0.06em;text-transform:uppercase;
+  background:var(--surface2);border-bottom:1px solid var(--border);
+  white-space:nowrap;position:sticky;top:0;z-index:10;
+}
+tbody tr{border-bottom:1px solid var(--border2);transition:background 0.1s;}
+tbody tr:hover{background:var(--surface2);}
+td{padding:2px 3px;vertical-align:middle;}
+
+/* Editable cells */
+.cell-input{
+  width:100%;background:transparent;border:1px solid transparent;
+  color:var(--text);font-size:10.5px;font-family:var(--font);
+  padding:2px 3px;border-radius:3px;transition:all 0.15s;
+}
+.cell-input:focus{outline:none;border-color:var(--accent);background:var(--surface2);}
+.cell-input[readonly]{color:var(--text3);background:#1a2030;cursor:default;}
+.cell-input.mono{font-family:var(--mono);font-size:10px;}
+.cell-input.num{text-align:right;}
+body.editable .cell-input:not([readonly]){background:rgba(255,255,255,0.04);}
+body:not(.editable) .cell-input{pointer-events:none;background:#141920;}
+
+/* Weight sum */
+.weight-bar{
+  padding:5px 12px;border-top:1px solid var(--border);
+  display:flex;gap:16px;font-size:10px;font-family:var(--mono);color:var(--text3);
+}
+.wok{color:var(--green)!important;} .wwarn{color:var(--red)!important;}
+
+/* Gantt+Scurve side */
+.chart-side{flex:1;display:flex;flex-direction:row;overflow:hidden;}
+.gantt-wrap{flex:1;overflow:hidden;position:relative;}
+.gantt-wrap canvas{display:block;}
+.scurve-wrap{
+  width:30%;min-width:160px;
+  display:flex;flex-direction:column;
+  border-left:1px solid var(--border);
+}
+.sc-half{flex:1;position:relative;overflow:hidden;}
+.sc-half:first-child{border-bottom:1px solid var(--border);}
+.sc-half canvas{display:block;}
+.sc-label{
+  position:absolute;top:6px;left:50%;transform:translateX(-50%);
+  font-size:9px;font-weight:600;color:var(--text3);letter-spacing:0.08em;
+  text-transform:uppercase;pointer-events:none;white-space:nowrap;
+}
+
+/* ── MODAL ── */
+.modal-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);
+  z-index:500;align-items:center;justify-content:center;
+}
+.modal-overlay.show{display:flex;}
+.modal{
+  background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:28px 32px;min-width:340px;max-width:480px;
+}
+.modal h2{font-size:14px;font-weight:700;margin-bottom:6px;}
+.modal p{font-size:11px;color:var(--text3);margin-bottom:18px;line-height:1.6;}
+.modal input{
+  width:100%;padding:7px 10px;border-radius:5px;border:1px solid var(--border);
+  background:var(--surface2);color:var(--text);font-size:11px;font-family:var(--mono);
+  margin-bottom:10px;
+}
+.modal input:focus{outline:none;border-color:var(--accent);}
+.modal .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:8px;}
+.modal label{font-size:10px;color:var(--text3);display:block;margin-bottom:3px;}
+
+/* ── TOAST ── */
+#toast{
+  position:fixed;bottom:20px;right:20px;background:var(--surface3);
+  border:1px solid var(--border);border-radius:6px;padding:8px 16px;
+  font-size:11px;color:var(--text);z-index:999;opacity:0;
+  transition:opacity 0.3s;pointer-events:none;
+}
+#toast.show{opacity:1;}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <h1>TSG PROJECT PLANNER — Energy Services Co., Ltd.</h1>
+  <div class="right">
+    <span id="userInfo">Not signed in</span>
+    <div id="googleBtn"></div>
+    <button class="btn btn-sm" id="signOutBtn" style="display:none" onclick="signOut()">Sign Out</button>
+  </div>
+</div>
+
+<!-- HOME PAGE -->
+<div class="page active" id="homePage">
+  <div class="home-left">
+    <h2>Select Plan</h2>
+    <button class="plan-btn mat" onclick="goToPlan('material')">
+      <div class="pb-icon">📦</div>
+      <div class="pb-title">Material Plan Progress</div>
+      <div class="pb-sub">Track material procurement & delivery</div>
+    </button>
+    <button class="plan-btn inst" onclick="goToPlan('installation')">
+      <div class="pb-icon">🔧</div>
+      <div class="pb-title">Installation Plan Progress</div>
+      <div class="pb-sub">Track installation & commissioning</div>
+    </button>
+  </div>
+  <div class="home-right">
+    <div class="home-chart-wrap" id="homeMatWrap">
+      <div class="home-chart-title" style="color:#e2e8f0">MATERIAL S-CURVE</div>
+      <canvas id="homeMatCanvas"></canvas>
+    </div>
+    <div class="home-chart-wrap" id="homeInstWrap">
+      <div class="home-chart-title" style="color:var(--yellow)">INSTALLATION S-CURVE</div>
+      <canvas id="homeInstCanvas"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- PLAN PAGE -->
+<div class="page" id="planPage">
+  <div class="plan-topbar">
+    <button class="btn btn-sm" onclick="goHome()">← Home</button>
+    <span class="plan-title" id="planTitle">—</span>
+    <div class="spacer"></div>
+    <div class="row-input-wrap" id="rowInputWrap">
+      <span>Rows:</span>
+      <input type="number" id="rowCountInput" min="1" max="200" value="16">
+      <button class="btn btn-sm" onclick="applyRowCount()">Apply</button>
+    </div>
+    <button class="btn btn-sm btn-primary" id="saveBtn" onclick="saveData()" style="display:none">💾 Save</button>
+  </div>
+  <div class="plan-body">
+    <!-- Table -->
+    <div class="table-side">
+      <div class="table-wrap">
+        <table id="dataTable">
+          <thead>
+            <tr>
+              <th style="width:28px">No.</th>
+              <th style="width:52px">Item No.</th>
+              <th>Description</th>
+              <th style="width:70px">Start</th>
+              <th style="width:70px">Finish</th>
+              <th style="width:38px">Wt%</th>
+              <th style="width:38px">Act%</th>
+            </tr>
+          </thead>
+          <tbody id="dataBody"></tbody>
+        </table>
+      </div>
+      <div class="weight-bar">
+        Weight: <span id="wtSum" class="wwarn">0%</span>
+        &nbsp;|&nbsp; Act loaded: <span id="actCount">0</span> rows
+      </div>
+    </div>
+    <!-- Charts -->
+    <div class="chart-side">
+      <div class="gantt-wrap" id="ganttWrap">
+        <canvas id="ganttCanvas"></canvas>
+      </div>
+      <div class="scurve-wrap">
+        <div class="sc-half" id="scHalf1">
+          <div class="sc-label" id="scLabel1">S-CURVE PLAN</div>
+          <canvas id="scCanvas1"></canvas>
+        </div>
+        <div class="sc-half" id="scHalf2">
+          <div class="sc-label" id="scLabel2">S-CURVE ACTUAL</div>
+          <canvas id="scCanvas2"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAT MODAL -->
+<div class="modal-overlay" id="patModal">
+  <div class="modal">
+    <h2>GitHub Access Token</h2>
+    <p>Enter your GitHub Personal Access Token (PAT) to enable saving.<br>
+    This is stored in your browser session only — never in the file.</p>
+    <label>Personal Access Token</label>
+    <input type="password" id="patInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+    <div class="modal-actions">
+      <button class="btn" onclick="closePatModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="savePAT()">Save & Continue</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ════════════════════════════════════════
+// CONFIG
+// ════════════════════════════════════════
+const GOOGLE_CLIENT_ID = '695932302309-p1rccufdkq9itb5paam78j1ll1ejb1uu.apps.googleusercontent.com';
+const EDITOR_EMAIL     = 'suthepp.top@gmail.com';
+const GITHUB_REPO      = 'suthepptop/tsg-planner';
+const DATA_FILE        = 'data.json';
+const GITHUB_API       = `https://api.github.com/repos/${GITHUB_REPO}/contents/${DATA_FILE}`;
+
+// ════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════
+let currentUser  = null;
+let isEditor     = false;
+let currentPlan  = null; // 'material' | 'installation'
+let dataFileSha  = null; // github file sha for update
+let appData = {
+  material:     { rows: [] },
+  installation: { rows: [] }
+};
+
+// ════════════════════════════════════════
+// GOOGLE AUTH
+// ════════════════════════════════════════
+window.onload = () => {
+  google.accounts.id.initialize({
+    client_id: GOOGLE_CLIENT_ID,
+    callback: handleCredential,
+  });
+  google.accounts.id.renderButton(
+    document.getElementById('googleBtn'),
+    { theme:'filled_black', size:'small', text:'signin_with', shape:'rectangular' }
+  );
+  loadDataFromGitHub();
+  setTimeout(resizeAll, 300);
+};
+
+function handleCredential(response) {
+  const payload = parseJwt(response.credential);
+  currentUser = payload;
+  isEditor = payload.email === EDITOR_EMAIL;
+  document.getElementById('userInfo').textContent = payload.email;
+  document.getElementById('googleBtn').style.display = 'none';
+  document.getElementById('signOutBtn').style.display = 'inline-block';
+  if(isEditor) {
+    document.body.classList.add('editable');
+    document.getElementById('saveBtn').style.display = 'inline-block';
+    document.getElementById('rowInputWrap').style.display = 'flex';
+  }
+  toast(isEditor ? '✓ Signed in as editor' : '✓ Signed in as viewer');
+}
+
+function signOut() {
+  google.accounts.id.disableAutoSelect();
+  currentUser = null; isEditor = false;
+  document.body.classList.remove('editable');
+  document.getElementById('userInfo').textContent = 'Not signed in';
+  document.getElementById('googleBtn').style.display = 'block';
+  document.getElementById('signOutBtn').style.display = 'none';
+  document.getElementById('saveBtn').style.display = 'none';
+  renderTable();
+}
+
+function parseJwt(token) {
+  return JSON.parse(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+}
+
+// ════════════════════════════════════════
+// GITHUB DATA
+// ════════════════════════════════════════
+async function loadDataFromGitHub() {
+  try {
+    const res = await fetch(GITHUB_API + '?t=' + Date.now());
+    if(!res.ok) { initDefaultData(); renderAll(); return; }
+    const json = await res.json();
+    dataFileSha = json.sha;
+    const decoded = JSON.parse(atob(json.content.replace(/\n/g,'')));
+    if(decoded.material)     appData.material     = decoded.material;
+    if(decoded.installation) appData.installation = decoded.installation;
+    toast('✓ Data loaded from GitHub');
+  } catch(e) {
+    initDefaultData();
+  }
+  renderAll();
+}
+
+function initDefaultData() {
+  const makeRows = (n) => Array.from({length:n},(_,i)=>({no:i+1,itemNo:'',desc:'',start:'',finish:'',wt:0,actPct:0,actStart:'',actFinish:''}));
+  appData.material.rows     = appData.material.rows.length     ? appData.material.rows     : makeRows(16);
+  appData.installation.rows = appData.installation.rows.length ? appData.installation.rows : makeRows(16);
+}
+
+async function saveData() {
+  let pat = sessionStorage.getItem('ghPAT');
+  if(!pat) { openPatModal(); return; }
+  const content = btoa(unescape(encodeURIComponent(JSON.stringify(appData, null, 2))));
+  const body = { message:`Update ${currentPlan} plan data`, content, ...(dataFileSha?{sha:dataFileSha}:{}) };
+  try {
+    const res = await fetch(GITHUB_API, {
+      method: dataFileSha ? 'PUT' : 'PUT',
+      headers: { Authorization:`token ${pat}`, 'Content-Type':'application/json' },
+      body: JSON.stringify(body)
+    });
+    if(!res.ok) { const e=await res.json(); toast('✗ Save failed: '+e.message, true); return; }
+    const json = await res.json();
+    dataFileSha = json.content.sha;
+    toast('✓ Saved to GitHub');
+  } catch(e) { toast('✗ Network error', true); }
+}
+
+// PAT modal
+function openPatModal() { document.getElementById('patModal').classList.add('show'); }
+function closePatModal() { document.getElementById('patModal').classList.remove('show'); }
+function savePAT() {
+  const val = document.getElementById('patInput').value.trim();
+  if(!val) return;
+  sessionStorage.setItem('ghPAT', val);
+  closePatModal();
+  saveData();
+}
+
+// ════════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════════
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  setTimeout(resizeAll, 50);
+}
+
+function goToPlan(plan) {
+  currentPlan = plan;
+  document.getElementById('planTitle').textContent = plan==='material' ? '📦 Material Plan' : '🔧 Installation Plan';
+  document.getElementById('scLabel1').textContent  = plan==='material' ? 'MATERIAL — PLAN' : 'INSTALL — PLAN';
+  document.getElementById('scLabel2').textContent  = plan==='material' ? 'MATERIAL — ACTUAL' : 'INSTALL — ACTUAL';
+  if(isEditor) {
+    document.getElementById('saveBtn').style.display = 'inline-block';
+    document.getElementById('rowInputWrap').style.display = 'flex';
+  }
+  const rows = appData[plan].rows;
+  document.getElementById('rowCountInput').value = rows.length;
+  showPage('planPage');
+  renderTable();
+  renderGantt();
+  renderSCurves();
+}
+
+function goHome() {
+  currentPlan = null;
+  showPage('homePage');
+  renderHomeCharts();
+}
+
+// ════════════════════════════════════════
+// ROW MANAGEMENT
+// ════════════════════════════════════════
+function applyRowCount() {
+  if(!isEditor) return;
+  const n = parseInt(document.getElementById('rowCountInput').value)||16;
+  const rows = appData[currentPlan].rows;
+  while(rows.length < n) rows.push({no:rows.length+1,itemNo:'',desc:'',start:'',finish:'',wt:0,actPct:0,actStart:'',actFinish:''});
+  if(rows.length > n) rows.splice(n);
+  renderTable(); renderGantt(); renderSCurves();
+}
+
+// ════════════════════════════════════════
+// TABLE RENDER + PASTE SUPPORT
+// ════════════════════════════════════════
+function renderTable() {
+  if(!currentPlan) return;
+  const rows = appData[currentPlan].rows;
+  const tbody = document.getElementById('dataBody');
+  tbody.innerHTML = '';
+  const ro = !isEditor;
+
+  rows.forEach((r,i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input class="cell-input mono num" value="${r.no}" ${ro?'readonly':''} onchange="upd(${i},'no',this.value)" style="width:26px"></td>
+      <td><input class="cell-input mono" value="${r.itemNo||''}" ${ro?'readonly':''} onchange="upd(${i},'itemNo',this.value)" style="width:50px"></td>
+      <td><input class="cell-input" value="${r.desc||''}" ${ro?'readonly':''} onchange="upd(${i},'desc',this.value)"></td>
+      <td><input class="cell-input mono" value="${r.start||''}" ${ro?'readonly':''} onchange="updDate(${i},'start',this.value)" placeholder="dd/mm/yyyy" style="width:68px"></td>
+      <td><input class="cell-input mono" value="${r.finish||''}" ${ro?'readonly':''} onchange="updDate(${i},'finish',this.value)" placeholder="dd/mm/yyyy" style="width:68px"></td>
+      <td><input class="cell-input mono num" value="${r.wt||0}" ${ro?'readonly':''} onchange="upd(${i},'wt',+this.value)" style="width:36px"></td>
+      <td><input class="cell-input mono num" value="${r.actPct||0}" ${ro?'readonly':''} onchange="upd(${i},'actPct',+this.value)" style="width:36px"></td>`;
+    tbody.appendChild(tr);
+  });
+
+  // Enable paste on table
+  if(isEditor) setupPaste();
+  updateWeightSum();
+}
+
+function upd(i, key, val) {
+  appData[currentPlan].rows[i][key] = val;
+  updateWeightSum(); renderGantt(); renderSCurves();
+}
+
+function updDate(i, key, val) {
+  appData[currentPlan].rows[i][key] = val;
+  // default actual = plan if not set
+  const r = appData[currentPlan].rows[i];
+  if(key==='start'  && !r.actStart)  r.actStart  = val;
+  if(key==='finish' && !r.actFinish) r.actFinish = val;
+  updateWeightSum(); renderGantt(); renderSCurves();
+}
+
+function updateWeightSum() {
+  if(!currentPlan) return;
+  const rows = appData[currentPlan].rows;
+  const sum = rows.reduce((s,r)=>s+(+r.wt||0),0);
+  const actRows = rows.filter(r=>r.actPct>0).length;
+  const el = document.getElementById('wtSum');
+  el.textContent = sum.toFixed(1)+'%';
+  el.className = Math.abs(sum-100)<0.5 ? 'wok' : 'wwarn';
+  document.getElementById('actCount').textContent = actRows;
+}
+
+// ── PASTE FROM EXCEL ──
+function setupPaste() {
+  const tbody = document.getElementById('dataBody');
+  tbody.addEventListener('paste', e => {
+    e.preventDefault();
+    const text = (e.clipboardData || window.clipboardData).getData('text');
+    const rows = text.trim().split('\n').map(r=>r.split('\t'));
+    // find focused cell row/col
+    const active = document.activeElement;
+    const allInputs = Array.from(tbody.querySelectorAll('input'));
+    let startIdx = allInputs.indexOf(active);
+    if(startIdx<0) startIdx=0;
+    const colsPerRow = 7; // no,itemNo,desc,start,finish,wt,actPct
+    const startRow = Math.floor(startIdx/colsPerRow);
+    const startCol = startIdx % colsPerRow;
+    const cols = ['no','itemNo','desc','start','finish','wt','actPct'];
+    const dataRows = appData[currentPlan].rows;
+
+    rows.forEach((pasteRow, ri) => {
+      const rowIdx = startRow + ri;
+      if(rowIdx >= dataRows.length) return;
+      pasteRow.forEach((val, ci) => {
+        const colIdx = startCol + ci;
+        if(colIdx >= cols.length) return;
+        const key = cols[colIdx];
+        let v = val.trim();
+        // normalise date: Excel might give dd/mm/yyyy or d/m/yyyy
+        if(key==='start'||key==='finish') v = normaliseDate(v);
+        dataRows[rowIdx][key] = (key==='wt'||key==='actPct'||key==='no') ? (+v||0) : v;
+        // default actuals
+        if(key==='start'  && !dataRows[rowIdx].actStart)  dataRows[rowIdx].actStart  = v;
+        if(key==='finish' && !dataRows[rowIdx].actFinish) dataRows[rowIdx].actFinish = v;
+      });
+    });
+    renderTable(); renderGantt(); renderSCurves();
+  });
+}
+
+function normaliseDate(s) {
+  if(!s) return '';
+  // already dd/mm/yyyy
+  if(/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) {
+    const [d,m,y] = s.split('/');
+    return `${d.padStart(2,'0')}/${m.padStart(2,'0')}/${y}`;
+  }
+  // yyyy-mm-dd
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+    const [y,m,d] = s.split('-');
+    return `${d}/${m}/${y}`;
+  }
+  // Excel serial number
+  if(/^\d{5}$/.test(s)) {
+    const d = excelSerialToDate(+s);
+    return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+  }
+  return s;
+}
+function excelSerialToDate(serial) {
+  return new Date((serial - 25569) * 86400000);
+}
+
+// ════════════════════════════════════════
+// DATE HELPERS
+// ════════════════════════════════════════
+function parseDate(s) {
+  if(!s) return null;
+  const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if(!m) return null;
+  return new Date(+m[3], +m[2]-1, +m[1]);
+}
+function fmtDate(d) {
+  if(!d) return '';
+  return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+}
+function dayDiff(a,b) { return Math.round((b-a)/86400000); }
+
+function getProjectRange(rows) {
+  let mn=null, mx=null;
+  rows.forEach(r=>{
+    const s=parseDate(r.start), e=parseDate(r.finish);
+    if(s&&(!mn||s<mn)) mn=s;
+    if(e&&(!mx||e>mx)) mx=e;
+  });
+  if(!mn) mn=new Date('2026-02-16');
+  if(!mx) mx=new Date('2026-07-15');
+  return {start:mn, end:mx, days:dayDiff(mn,mx)+1};
+}
+
+// ════════════════════════════════════════
+// GANTT CANVAS
+// ════════════════════════════════════════
+function renderGantt() {
+  const wrap = document.getElementById('ganttWrap');
+  const canvas = document.getElementById('ganttCanvas');
+  if(!wrap||!canvas) return;
+  const W=wrap.clientWidth, H=wrap.clientHeight;
+  if(!W||!H) return;
+  canvas.width=W; canvas.height=H;
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+
+  if(!currentPlan) return;
+  const rows = appData[currentPlan].rows;
+  const {start:pStart, end:pEnd, days:totalDays} = getProjectRange(rows);
+  const today = new Date();
+
+  const LABEL_W=180, HDR_H=26, LEG_H=20;
+  const N=rows.length;
+  const rowH=Math.max(18,(H-HDR_H-LEG_H)/N);
+  const barW=W-LABEL_W;
+  const dx=d=>LABEL_W+(d/totalDays)*barW;
+  const dxDate=d=>dx(dayDiff(pStart,d));
+
+  // BG
+  ctx.fillStyle='#0f1117';
+  ctx.fillRect(0,0,W,H);
+
+  // Month bands + header
+  const months=[];
+  let mc=new Date(pStart.getFullYear(),pStart.getMonth(),1);
+  while(mc<=pEnd){months.push(new Date(mc));mc=new Date(mc.getFullYear(),mc.getMonth()+1,1);}
+
+  months.forEach((m,i)=>{
+    const x1=Math.max(LABEL_W,dxDate(m));
+    const x2=Math.min(W,dxDate(new Date(m.getFullYear(),m.getMonth()+1,1)));
+    ctx.fillStyle=i%2===0?'rgba(255,255,255,0.02)':'transparent';
+    ctx.fillRect(x1,HDR_H,x2-x1,H-HDR_H-LEG_H);
+    ctx.fillStyle=i%2===0?'#1e2530':'#242d3a';
+    ctx.fillRect(x1,0,x2-x1,HDR_H);
+    ctx.fillStyle='#94a3b8';
+    ctx.font='600 9.5px IBM Plex Sans';
+    ctx.textAlign='center';
+    ctx.fillText(m.toLocaleString('default',{month:'short'})+"'"+String(m.getFullYear()).slice(2),(x1+x2)/2,17);
+  });
+
+  // Label header
+  ctx.fillStyle='#161b24';
+  ctx.fillRect(0,0,LABEL_W,HDR_H);
+  ctx.fillStyle='#64748b';
+  ctx.font='600 9px IBM Plex Sans';
+  ctx.textAlign='center';
+  ctx.fillText('DESCRIPTION',LABEL_W/2,17);
+
+  // divider
+  ctx.strokeStyle='#2a3444'; ctx.lineWidth=1; ctx.setLineDash([]);
+  ctx.beginPath();ctx.moveTo(LABEL_W,0);ctx.lineTo(LABEL_W,H);ctx.stroke();
+
+  // month lines
+  months.forEach(m=>{
+    const x=dxDate(m);
+    if(x>LABEL_W){
+      ctx.strokeStyle='#2a3444';ctx.lineWidth=0.5;
+      ctx.beginPath();ctx.moveTo(x,HDR_H);ctx.lineTo(x,H-LEG_H);ctx.stroke();
+    }
+  });
+
+  // Today
+  if(today>=pStart&&today<=pEnd){
+    const tx=dxDate(today);
+    ctx.strokeStyle='#ef4444';ctx.lineWidth=1.5;ctx.setLineDash([4,3]);
+    ctx.beginPath();ctx.moveTo(tx,HDR_H);ctx.lineTo(tx,H-LEG_H);ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle='#ef4444';ctx.font='700 8px IBM Plex Sans';ctx.textAlign='center';
+    ctx.fillText('TODAY',tx,HDR_H-3);
+  }
+  ctx.setLineDash([]);
+
+  // Rows
+  rows.forEach((r,i)=>{
+    const y=HDR_H+i*rowH; const rh=rowH-1.5;
+
+    // row bg
+    ctx.fillStyle=i%2===0?'rgba(255,255,255,0.015)':'transparent';
+    ctx.fillRect(0,y,W,rh);
+    ctx.strokeStyle='#1e2838';ctx.lineWidth=0.5;
+    ctx.beginPath();ctx.moveTo(0,y+rh);ctx.lineTo(W,y+rh);ctx.stroke();
+
+    // label
+    ctx.fillStyle=r.desc?'#e2e8f0':'#3a4555';
+    ctx.font=`400 9.5px IBM Plex Sans`;
+    ctx.textAlign='left';
+    const lbl=r.desc?`${r.itemNo?r.itemNo+' ':''}${r.desc}`:`— row ${r.no}`;
+    ctx.fillText(lbl.substring(0,32),6,y+rh*0.65);
+
+    const ps=parseDate(r.start), pe=parseDate(r.finish);
+    if(!ps||!pe) return;
+
+    // Plan bar (upper)
+    const bx=dxDate(ps), ex=dxDate(pe), bw=Math.max(ex-bx,2);
+    const planH=rh*0.36, planY=y+rh*0.06;
+    ctx.fillStyle='#3b82f6';
+    ctx.beginPath();
+    if(ctx.roundRect) ctx.roundRect(bx,planY,bw,planH,2); else ctx.rect(bx,planY,bw,planH);
+    ctx.fill();
+
+    // dates outside bar
+    const midY=planY+planH/2+3.5;
+    ctx.fillStyle='#64748b';ctx.font='600 7.5px IBM Plex Mono';
+    ctx.textAlign='right'; ctx.fillText(fmtDate(ps),bx-2,midY);
+    ctx.textAlign='left';  ctx.fillText(fmtDate(pe),bx+bw+2,midY);
+
+    // dur inside
+    if(bw>22){
+      const dur=dayDiff(ps,pe)+1;
+      ctx.fillStyle='rgba(255,255,255,0.8)';ctx.font='600 7px IBM Plex Mono';
+      ctx.textAlign='center';ctx.fillText(dur+'d',bx+bw/2,planY+planH*0.76);
+    }
+
+    // Actual bar (lower) — driven by actPct
+    const actPct=(+r.actPct||0)/100;
+    if(actPct<=0) return;
+    const actDur=dayDiff(ps,pe)*actPct;
+    const aeDate=new Date(ps.getTime()+actDur*86400000);
+    const ax=dxDate(ps), aew=Math.max(dxDate(aeDate)-ax,2);
+    const actH=rh*0.30, actY=y+rh*0.56;
+    ctx.fillStyle='#22c55e';
+    ctx.beginPath();
+    if(ctx.roundRect) ctx.roundRect(ax,actY,aew,actH,2); else ctx.rect(ax,actY,aew,actH);
+    ctx.fill();
+    if(aew>18){
+      ctx.fillStyle='rgba(255,255,255,0.85)';ctx.font='600 7px IBM Plex Mono';
+      ctx.textAlign='center';ctx.fillText(r.actPct+'%',ax+aew/2,actY+actH*0.78);
+    }
+  });
+
+  // Legend
+  ctx.fillStyle='#161b24';ctx.fillRect(0,H-LEG_H,W,LEG_H);
+  ctx.strokeStyle='#2a3444';ctx.lineWidth=0.5;
+  ctx.beginPath();ctx.moveTo(0,H-LEG_H);ctx.lineTo(W,H-LEG_H);ctx.stroke();
+  const ly=H-LEG_H+7;
+  ctx.fillStyle='#3b82f6';ctx.fillRect(LABEL_W+10,ly-4,20,7);
+  ctx.fillStyle='#64748b';ctx.font='9px IBM Plex Sans';ctx.textAlign='left';
+  ctx.fillText('Plan',LABEL_W+34,ly+1.5);
+  ctx.fillStyle='#22c55e';ctx.fillRect(LABEL_W+74,ly-4,20,7);
+  ctx.fillText('Actual (% complete)',LABEL_W+98,ly+1.5);
+}
+
+// ════════════════════════════════════════
+// S-CURVE
+// ════════════════════════════════════════
+function buildSCurve(rows) {
+  const {start:pStart, days:totalDays} = getProjectRange(rows);
+  const totalW = rows.reduce((s,r)=>s+(+r.wt||0),0);
+  const plan=new Array(totalDays).fill(0);
+  const act=new Array(totalDays).fill(0);
+  if(!totalW) return {plan,act,totalDays,pStart};
+
+  rows.forEach(r=>{
+    const w=(+r.wt||0)/totalW;
+    if(!w) return;
+    const ps=parseDate(r.start), pe=parseDate(r.finish);
+    if(!ps||!pe) return;
+    const sd=Math.max(0,dayDiff(pStart,ps));
+    const ed=Math.min(totalDays-1,dayDiff(pStart,pe));
+    const span=ed-sd+1; if(span<=0) return;
+    const daily=w/span;
+    for(let d=sd;d<=ed;d++) plan[d]+=daily;
+
+    const pct=(+r.actPct||0)/100;
+    if(pct<=0) return;
+    const actDur=dayDiff(ps,pe)*pct;
+    const aeDate=new Date(ps.getTime()+actDur*86400000);
+    const aed=Math.min(totalDays-1,dayDiff(pStart,aeDate));
+    const aspan=aed-sd+1; if(aspan<=0) return;
+    for(let d=sd;d<=aed;d++) act[d]+=w*pct/aspan;
+  });
+
+  for(let d=1;d<totalDays;d++){plan[d]+=plan[d-1];act[d]+=act[d-1];}
+  return {plan,act,totalDays,pStart};
+}
+
+function drawSCurve(canvasId, rows, planColor, actColor) {
+  const canvas=document.getElementById(canvasId);
+  if(!canvas) return;
+  const wrap=canvas.parentElement;
+  const W=wrap.clientWidth, H=wrap.clientHeight;
+  if(!W||!H) return;
+  canvas.width=W; canvas.height=H;
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#0f1117';ctx.fillRect(0,0,W,H);
+
+  const PL=36,PR=12,PT=24,PB=26;
+  const pw=W-PL-PR, ph=H-PT-PB;
+  const px1=PL,py1=PT,px2=PL+pw,py2=PT+ph;
+
+  const {plan,act,totalDays,pStart}=buildSCurve(rows);
+  const {start:projStart,end:projEnd}=getProjectRange(rows);
+  const today=new Date();
+
+  // Y grid
+  for(let p=0;p<=100;p+=20){
+    const gy=py2-(p/100)*ph;
+    ctx.strokeStyle=p===0||p===100?'#2a3444':'rgba(42,52,68,0.5)';
+    ctx.lineWidth=p===0||p===100?1:0.5;
+    ctx.setLineDash(p===0||p===100?[]:[2,3]);
+    ctx.beginPath();ctx.moveTo(px1,gy);ctx.lineTo(px2,gy);ctx.stroke();
+    ctx.fillStyle='#64748b';ctx.font='8px IBM Plex Mono';
+    ctx.textAlign='right';ctx.fillText(p+'%',px1-3,gy+3);
+  }
+  ctx.setLineDash([]);
+
+  // X months
+  const months=[];
+  let mc=new Date(projStart.getFullYear(),projStart.getMonth(),1);
+  while(mc<=projEnd){months.push(new Date(mc));mc=new Date(mc.getFullYear(),mc.getMonth()+1,1);}
+  months.forEach((m,i)=>{
+    const gx=px1+(dayDiff(projStart,m)/totalDays)*pw;
+    ctx.strokeStyle='rgba(42,52,68,0.6)';ctx.lineWidth=0.5;ctx.setLineDash([2,3]);
+    ctx.beginPath();ctx.moveTo(gx,py1);ctx.lineTo(gx,py2);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='#64748b';ctx.font='8px IBM Plex Sans';ctx.textAlign='center';
+    ctx.fillText(m.toLocaleString('default',{month:'short'}),gx,py2+14);
+  });
+
+  // Axes
+  ctx.strokeStyle='#2a3444';ctx.lineWidth=1;ctx.setLineDash([]);
+  ctx.beginPath();ctx.moveTo(px1,py1);ctx.lineTo(px1,py2);ctx.lineTo(px2,py2);ctx.stroke();
+
+  const step=Math.max(1,Math.floor(totalDays/300));
+  const planPts=[],actPts=[];
+  for(let d=0;d<totalDays;d+=step){
+    planPts.push([px1+(d/totalDays)*pw, py2-plan[d]*ph]);
+    actPts.push([px1+(d/totalDays)*pw,  py2-act[d]*ph]);
+  }
+
+  const drawLine=(pts,color,dash)=>{
+    if(!pts.length) return;
+    ctx.strokeStyle=color;ctx.lineWidth=1.8;ctx.setLineDash(dash||[]);
+    ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);
+    pts.forEach(([x,y])=>ctx.lineTo(x,y));
+    ctx.stroke();ctx.setLineDash([]);
+  };
+
+  // fill
+  ctx.beginPath();ctx.moveTo(planPts[0][0],py2);
+  planPts.forEach(([x,y])=>ctx.lineTo(x,y));
+  ctx.lineTo(planPts[planPts.length-1][0],py2);ctx.closePath();
+  ctx.fillStyle=planColor+'20';ctx.fill();
+
+  drawLine(planPts,planColor);
+  drawLine(actPts,actColor,[5,3]);
+
+  // Today
+  if(today>=projStart&&today<=projEnd){
+    const tx=px1+(dayDiff(projStart,today)/totalDays)*pw;
+    ctx.strokeStyle='#ef4444';ctx.lineWidth=1;ctx.setLineDash([3,3]);
+    ctx.beginPath();ctx.moveTo(tx,py1);ctx.lineTo(tx,py2);ctx.stroke();ctx.setLineDash([]);
+  }
+
+  // Legend
+  ctx.fillStyle=planColor;ctx.fillRect(px1+3,py2-16,14,4);
+  ctx.fillStyle='#64748b';ctx.font='8px IBM Plex Sans';ctx.textAlign='left';ctx.fillText('Plan',px1+20,py2-13);
+  ctx.strokeStyle=actColor;ctx.lineWidth=1.8;ctx.setLineDash([4,2]);
+  ctx.beginPath();ctx.moveTo(px1+48,py2-14);ctx.lineTo(px1+62,py2-14);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#64748b';ctx.fillText('Actual',px1+65,py2-13);
+}
+
+function renderSCurves() {
+  if(!currentPlan) return;
+  const rows=appData[currentPlan].rows;
+  // Top half: plan curve, bottom half: actual progress curve (same data, different view label)
+  drawSCurve('scCanvas1',rows,'#e2e8f0','#3b82f6');
+  drawSCurve('scCanvas2',rows,'#eab308','#22c55e');
+}
+
+// ════════════════════════════════════════
+// HOME CHARTS
+// ════════════════════════════════════════
+function renderHomeCharts() {
+  drawSCurve('homeMatCanvas',  appData.material.rows,     '#e2e8f0','#3b82f6');
+  drawSCurve('homeInstCanvas', appData.installation.rows, '#eab308','#22c55e');
+  resizeHomeCharts();
+}
+
+function resizeHomeCharts() {
+  ['homeMatWrap','homeInstWrap'].forEach(id=>{
+    const wrap=document.getElementById(id);
+    const canvas=wrap.querySelector('canvas');
+    if(canvas){canvas.style.width=wrap.clientWidth+'px';canvas.style.height=wrap.clientHeight+'px';}
+  });
+}
+
+// ════════════════════════════════════════
+// RESIZE
+// ════════════════════════════════════════
+function resizeAll() {
+  const activePage=document.querySelector('.page.active');
+  if(!activePage) return;
+  if(activePage.id==='homePage') {
+    renderHomeCharts();
+    return;
+  }
+  if(activePage.id==='planPage') {
+    renderGantt();
+    renderSCurves();
+  }
+}
+
+let _rt;
+window.addEventListener('resize',()=>{clearTimeout(_rt);_rt=setTimeout(resizeAll,80);});
+
+// ════════════════════════════════════════
+// RENDER ALL (after data load)
+// ════════════════════════════════════════
+function renderAll() {
+  initDefaultData();
+  setTimeout(()=>{
+    renderHomeCharts();
+  },200);
+}
+
+// ════════════════════════════════════════
+// TOAST
+// ════════════════════════════════════════
+function toast(msg, err=false) {
+  const el=document.getElementById('toast');
+  el.textContent=msg;
+  el.style.borderColor=err?'#ef4444':'#2a3444';
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2800);
+}
+</script>
+</body>
+</html>
