@@ -535,14 +535,14 @@ function renderGantt(){
     const x2=Math.min(W,dx(new Date(m.getFullYear(),m.getMonth()+1,1)));
     ctx.fillStyle=i%2===0?'#1560a8':'#1050a0';
     ctx.fillRect(x1,0,x2-x1,HDR_H);
-    ctx.fillStyle='#fff';ctx.font='bold 13px Tahoma, Leelawadee UI, Thonburi'Leelawadee UI', Thonburi, 'Noto Sans Thai''Leelawadee UI', Thonburi';ctx.textAlign='center';
+    ctx.fillStyle='#fff';ctx.font='bold 13px Tahoma, Leelawadee UI, Thonburi';ctx.textAlign='center';
     ctx.fillText(m.toLocaleString('default',{month:'short'})+"'"+String(m.getFullYear()).slice(2),(x1+x2)/2,HDR_H-10);
     if(x1>LABEL_W){ctx.strokeStyle='#e0e0e0';ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(x1,HDR_H);ctx.lineTo(x1,H-LEG_H);ctx.stroke();}
   });
 
   // Label header
   ctx.fillStyle='#1560a8';ctx.fillRect(0,0,LABEL_W,HDR_H);
-  ctx.fillStyle='#fff';ctx.font='bold 13px Tahoma, Leelawadee UI, Thonburi'Leelawadee UI', Thonburi, 'Noto Sans Thai''Leelawadee UI', Thonburi';ctx.textAlign='center';
+  ctx.fillStyle='#fff';ctx.font='bold 13px Tahoma, Leelawadee UI, Thonburi';ctx.textAlign='center';
   ctx.fillText('Item / Description',LABEL_W/2,HDR_H-10);
   ctx.strokeStyle='#999';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(LABEL_W,0);ctx.lineTo(LABEL_W,H);ctx.stroke();
 
@@ -551,7 +551,7 @@ function renderGantt(){
     const tx=dx(today);
     ctx.strokeStyle='#cc0000';ctx.lineWidth=1.5;ctx.setLineDash([5,3]);
     ctx.beginPath();ctx.moveTo(tx,HDR_H);ctx.lineTo(tx,H-LEG_H);ctx.stroke();ctx.setLineDash([]);
-    ctx.fillStyle='#cc0000';ctx.font='bold 11px Tahoma, Leelawadee UI, Thonburi'Leelawadee UI', Thonburi, 'Noto Sans Thai''Leelawadee UI', Thonburi';ctx.textAlign='center';
+    ctx.fillStyle='#cc0000';ctx.font='bold 11px Tahoma, Leelawadee UI, Thonburi';ctx.textAlign='center';
     ctx.fillText('TODAY',tx,HDR_H-2);
   }
 
@@ -575,9 +575,9 @@ function renderGantt(){
     const planH=ROW_H*0.38,planY=y+ROW_H*0.08;
     ctx.fillStyle='#1560a8';
     ctx.beginPath();if(ctx.roundRect)ctx.roundRect(bx,planY,bw,planH,3);else ctx.rect(bx,planY,bw,planH);ctx.fill();
-    if(bw>28){ctx.fillStyle='#fff';ctx.font='bold 11px Tahoma, Leelawadee UI, Thonburi'Leelawadee UI', Thonburi, 'Noto Sans Thai''Leelawadee UI', Thonburi';ctx.textAlign='center';ctx.fillText(dayDiff(ps,pe)+1+'d',bx+bw/2,planY+planH*0.75);}
+    if(bw>28){ctx.fillStyle='#fff';ctx.font='bold 11px Tahoma, Leelawadee UI, Thonburi';ctx.textAlign='center';ctx.fillText(dayDiff(ps,pe)+1+'d',bx+bw/2,planY+planH*0.75);}
     const midY=planY+planH/2+4;
-    ctx.fillStyle='#666';ctx.font='10px Tahoma, Leelawadee UI, Thonburi'Leelawadee UI', Thonburi, 'Noto Sans Thai''Leelawadee UI', Thonburi';
+    ctx.fillStyle='#666';ctx.font='10px Tahoma, Leelawadee UI, Thonburi';
     ctx.textAlign='right';ctx.fillText(fmtD(r.ps),bx-3,midY);
     ctx.textAlign='left';ctx.fillText(fmtD(r.pe),bx+bw+3,midY);
 
@@ -596,7 +596,7 @@ function renderGantt(){
       ctx.strokeStyle='#000000';ctx.lineWidth=3;ctx.lineCap='round';
       ctx.beginPath();ctx.moveTo(ax,midActY);ctx.lineTo(redX,midActY);ctx.stroke();
       ctx.lineCap='butt';ctx.lineWidth=1;
-      ctx.fillStyle='#000';ctx.font='bold 10px Tahoma, Leelawadee UI, Thonburi'Leelawadee UI', Thonburi, 'Noto Sans Thai''Leelawadee UI', Thonburi';ctx.textAlign='right';
+      ctx.fillStyle='#000';ctx.font='bold 10px Tahoma, Leelawadee UI, Thonburi';ctx.textAlign='right';
       ctx.fillText(pct+'%', ax-3, actY+actH*0.75);
     }
   });
@@ -606,7 +606,7 @@ function renderGantt(){
   ctx.strokeStyle='#ddd';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,H-LEG_H);ctx.lineTo(W,H-LEG_H);ctx.stroke();
   const ly=H-LEG_H+9;
   ctx.fillStyle='#1560a8';ctx.fillRect(LABEL_W+10,ly-5,24,9);
-  ctx.fillStyle='#333';ctx.font='11px Tahoma, Leelawadee UI, Thonburi'Leelawadee UI', Thonburi, 'Noto Sans Thai''Leelawadee UI', Thonburi';ctx.textAlign='left';ctx.fillText('Plan',LABEL_W+38,ly+2);
+  ctx.fillStyle='#333';ctx.font='11px Tahoma, Leelawadee UI, Thonburi';ctx.textAlign='left';ctx.fillText('Plan',LABEL_W+38,ly+2);
   ctx.fillStyle='#FFD700';ctx.fillRect(LABEL_W+80,ly-5,24,9);
   ctx.fillText('Actual',LABEL_W+108,ly+2);
   ctx.strokeStyle='#cc0000';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(LABEL_W+82,ly);ctx.lineTo(LABEL_W+102,ly);ctx.stroke();
@@ -658,7 +658,7 @@ function drawSCurve(canvasId,rows,planColor,actColor){
     ctx.strokeStyle=p===0||p===100?'#bbb':'#e8e8e8';ctx.lineWidth=p===0||p===100?1:0.5;
     ctx.setLineDash(p===0||p===100?[]:[3,3]);
     ctx.beginPath();ctx.moveTo(px1,gy);ctx.lineTo(px2,gy);ctx.stroke();
-    ctx.fillStyle='#888';ctx.font='10px Tahoma, Leelawadee UI, Thonburi'Leelawadee UI', Thonburi, 'Noto Sans Thai''Leelawadee UI', Thonburi';ctx.textAlign='right';ctx.fillText(p+'%',px1-4,gy+3.5);
+    ctx.fillStyle='#888';ctx.font='10px Tahoma, Leelawadee UI, Thonburi';ctx.textAlign='right';ctx.fillText(p+'%',px1-4,gy+3.5);
   });
   ctx.setLineDash([]);
 
@@ -668,7 +668,7 @@ function drawSCurve(canvasId,rows,planColor,actColor){
     const gx=px1+(dayDiff(projStart,m)/totalDays)*pw;
     ctx.strokeStyle='#e8e8e8';ctx.lineWidth=0.5;ctx.setLineDash([2,3]);
     ctx.beginPath();ctx.moveTo(gx,py1);ctx.lineTo(gx,py2);ctx.stroke();ctx.setLineDash([]);
-    ctx.fillStyle='#888';ctx.font='10px Tahoma, Leelawadee UI, Thonburi'Leelawadee UI', Thonburi, 'Noto Sans Thai''Leelawadee UI', Thonburi';ctx.textAlign='center';
+    ctx.fillStyle='#888';ctx.font='10px Tahoma, Leelawadee UI, Thonburi';ctx.textAlign='center';
     ctx.fillText(m.toLocaleString('default',{month:'short'}),gx,py2+14);
   });
 
@@ -692,7 +692,7 @@ function drawSCurve(canvasId,rows,planColor,actColor){
   }
 
   ctx.fillStyle=planColor;ctx.fillRect(px1+4,py2-14,16,5);
-  ctx.fillStyle='#555';ctx.font='10px Tahoma, Leelawadee UI, Thonburi'Leelawadee UI', Thonburi, 'Noto Sans Thai''Leelawadee UI', Thonburi';ctx.textAlign='left';ctx.fillText('Plan',px1+23,py2-10);
+  ctx.fillStyle='#555';ctx.font='10px Tahoma, Leelawadee UI, Thonburi';ctx.textAlign='left';ctx.fillText('Plan',px1+23,py2-10);
   ctx.strokeStyle=actColor;ctx.lineWidth=2;ctx.setLineDash([5,3]);
   ctx.beginPath();ctx.moveTo(px1+55,py2-12);ctx.lineTo(px1+71,py2-12);ctx.stroke();ctx.setLineDash([]);
   ctx.fillStyle='#555';ctx.fillText('Actual',px1+74,py2-10);
