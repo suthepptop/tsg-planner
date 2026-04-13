@@ -259,7 +259,7 @@ async function loadData(){
     const r=await fetch(API+'?t='+Date.now());
     if(!r.ok){initRows();renderAll();return;}
     const j=await r.json();sha=j.sha;
-    const d=JSON.parse(atob(j.content.replace(/\n/g,'')));
+    const d=JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,'')))));
     if(d.material)data.material=d.material;
     if(d.installation)data.installation=d.installation;
     toast('✓ Data loaded');
@@ -422,7 +422,7 @@ function renderGantt(){
     const y=HH+i*RH;
     ctx.fillStyle=i%2===0?'#f7f9fb':'#fff';ctx.fillRect(0,y,W,RH);
     ctx.strokeStyle='#e5e5e5';ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(0,y+RH);ctx.lineTo(W,y+RH);ctx.stroke();
-    const lbl=((r.itemNo?r.itemNo+' ':'')+(r.desc||'')).substring(0,34);
+    const lbl=((r.itemNo?r.itemNo+' ':'')+(r.desc||'')).substring(0,42);
     ctx.fillStyle=r.desc?'#111':'#aaa';
     ctx.font=r.desc?"13px sans-serif":"italic 12px sans-serif";
     ctx.textAlign='left';ctx.fillText(lbl||('row '+r.no),6,y+RH*0.65);
