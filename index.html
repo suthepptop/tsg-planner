@@ -8,15 +8,15 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 :root {
-  --bg:#0f1117; --surface:#161b24; --surface2:#1e2530; --surface3:#242d3a;
-  --border:#2a3444; --border2:#1e2838;
-  --text:#e2e8f0; --text2:#94a3b8; --text3:#64748b;
-  --accent:#3b82f6; --accent2:#60a5fa;
-  --green:#22c55e; --green2:#16a34a;
-  --yellow:#eab308; --yellow2:#ca8a04;
-  --orange:#f97316; --red:#ef4444;
-  --plan-l1:#3b82f6; --plan-l2:#60a5fa; --plan-l3:#e6a85a;
-  --actual-l1:#22c55e; --actual-l2:#4ade80; --actual-l3:#6ee7a0;
+  --bg:#ffffff; --surface:#f8f9fa; --surface2:#f1f3f5; --surface3:#e9ecef;
+  --border:#ced4da; --border2:#dee2e6;
+  --text:#212529; --text2:#495057; --text3:#868e96;
+  --accent:#1971c2; --accent2:#1864ab;
+  --green:#2f9e44; --green2:#2b8a3e;
+  --yellow:#e67700; --yellow2:#d9480f;
+  --orange:#e8590c; --red:#c92a2a;
+  --plan-l1:#1971c2; --plan-l2:#339af0; --plan-l3:#e8590c;
+  --actual-l1:#2f9e44; --actual-l2:#51cf66; --actual-l3:#69db7c;
   --font:'Sarabun','IBM Plex Sans',system-ui,sans-serif;
   --mono:'IBM Plex Mono',monospace;
 }
@@ -26,26 +26,26 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 /* ── TOPBAR ── */
 #topbar{
   display:flex;align-items:center;justify-content:space-between;
-  padding:8px 20px;background:var(--surface);border-bottom:1px solid var(--border);
-  position:sticky;top:0;z-index:200;height:44px;
+  padding:6px 16px;background:#1971c2;border-bottom:1px solid #1864ab;
+  position:sticky;top:0;z-index:200;height:40px;
 }
-#topbar h1{font-size:12px;font-weight:600;color:var(--text2);letter-spacing:0.06em;}
+#topbar h1{font-size:12px;font-weight:700;color:#fff;letter-spacing:0.04em;}
 #topbar .right{display:flex;align-items:center;gap:10px;}
-#userInfo{font-size:11px;color:var(--text3);font-family:var(--mono);}
+#userInfo{font-size:11px;color:rgba(255,255,255,0.8);font-family:var(--mono);}
 .btn{
-  padding:5px 13px;border-radius:5px;border:1px solid var(--border);
-  background:var(--surface2);color:var(--text);font-size:11px;font-family:var(--font);
+  padding:4px 12px;border-radius:4px;border:1px solid var(--border);
+  background:#fff;color:var(--text);font-size:11px;font-family:var(--font);
   cursor:pointer;transition:all 0.15s;white-space:nowrap;
 }
-.btn:hover{background:var(--surface3);border-color:var(--text3);}
-.btn-primary{background:var(--accent);border-color:var(--accent);color:#fff;}
-.btn-primary:hover{background:var(--accent2);border-color:var(--accent2);}
-.btn-danger{background:transparent;border-color:var(--red);color:var(--red);}
-.btn-danger:hover{background:rgba(239,68,68,0.1);}
+.btn:hover{background:var(--surface2);}
+.btn-primary{background:#1971c2;border-color:#1971c2;color:#fff;}
+.btn-primary:hover{background:#1864ab;}
+.btn-danger{background:#fff;border-color:#c92a2a;color:#c92a2a;}
+.btn-danger:hover{background:#fff5f5;}
 .btn-sm{padding:3px 8px;font-size:10px;}
 
 /* ── PAGES ── */
-.page{display:none;height:calc(100vh - 44px);}
+.page{display:none;height:calc(100vh - 40px);}
 .page.active{display:flex;flex-direction:column;}
 
 /* ══════════════════════════════
@@ -69,11 +69,11 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .plan-btn .pb-title{font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px;}
 .plan-btn .pb-sub{font-size:9px;color:var(--text3);}
 .plan-btn.mat .pb-icon{color:#e2e8f0;}
-.plan-btn.inst .pb-icon{color:var(--yellow);}
+.plan-btn.inst .pb-icon{color:#e67700;}
 
 .home-right{
   flex:1;display:flex;flex-direction:column;
-  padding:16px;gap:12px;overflow:hidden;
+  padding:12px;gap:10px;overflow:hidden;background:#f8f9fa;
 }
 .home-chart-wrap{flex:1;min-height:0;position:relative;}
 .home-chart-title{
@@ -88,8 +88,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 ══════════════════════════════ */
 #planPage{overflow:hidden;}
 .plan-topbar{
-  display:flex;align-items:center;gap:12px;padding:8px 16px;
-  background:var(--surface);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:8px;padding:6px 12px;
+  background:#f1f3f5;border-bottom:1px solid var(--border);
   flex-wrap:wrap;
 }
 .plan-topbar .plan-title{font-size:12px;font-weight:700;color:var(--text);letter-spacing:0.04em;}
@@ -102,72 +102,80 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 }
 .row-input-wrap input:focus{outline:none;border-color:var(--accent);}
 
-.plan-body{display:flex;flex:1;overflow:hidden;min-height:0;}
+.plan-body{display:flex;flex-direction:column;flex:1;overflow:hidden;min-height:0;}
 
-/* Table side */
+/* S-curve section - top */
+.scurve-section{
+  height:220px;min-height:220px;
+  border-bottom:1px solid var(--border);
+  background:#fff;
+}
+
+/* Gantt section - middle */
+.gantt-section{
+  height:280px;min-height:280px;
+  border-bottom:1px solid var(--border);
+  background:#fff;position:relative;
+  overflow:hidden;
+}
+
+/* Table section - bottom */
 .table-side{
-  width:42%;min-width:340px;
+  flex:1;min-height:180px;
   display:flex;flex-direction:column;
-  border-right:1px solid var(--border);overflow:hidden;
+  overflow:hidden;background:#fff;
 }
 .table-wrap{flex:1;overflow:auto;}
 table{width:100%;border-collapse:collapse;font-size:11px;}
 thead th{
-  padding:5px 5px;font-size:9.5px;font-weight:600;color:var(--text3);
-  letter-spacing:0.06em;text-transform:uppercase;
-  background:var(--surface2);border-bottom:1px solid var(--border);
+  padding:2px 4px;font-size:9px;font-weight:700;color:#495057;
+  letter-spacing:0.04em;text-transform:uppercase;
+  background:#e9ecef;border:1px solid #ced4da;
   white-space:nowrap;position:sticky;top:0;z-index:10;
+  font-family:var(--font);
 }
-tbody tr{border-bottom:1px solid var(--border2);transition:background 0.1s;}
-tbody tr:hover{background:var(--surface2);}
-td{padding:2px 3px;vertical-align:middle;}
+tbody tr{border-bottom:1px solid #dee2e6;}
+tbody tr:hover{background:#f1f8ff;}
+tbody tr:nth-child(even){background:#f8f9fa;}
+tbody tr:nth-child(even):hover{background:#f1f8ff;}
+td{padding:1px 3px;vertical-align:middle;border-right:1px solid #dee2e6;}
+td:first-child{border-left:1px solid #dee2e6;}
 
-/* Editable cells */
+/* Editable cells - Excel like */
 .cell-input{
-  width:100%;background:transparent;border:1px solid transparent;
+  width:100%;background:transparent;border:none;
   color:var(--text);font-size:10.5px;font-family:var(--font);
-  padding:2px 3px;border-radius:3px;transition:all 0.15s;
+  padding:1px 2px;transition:all 0.1s;
 }
-.cell-input:focus{outline:none;border-color:var(--accent);background:var(--surface2);}
-.cell-input[readonly]{color:var(--text3);background:#1a2030;cursor:default;}
+.cell-input:focus{outline:2px solid #1971c2;outline-offset:-1px;background:#fff;}
+.cell-input[readonly]{color:var(--text3);cursor:default;}
 .cell-input.mono{font-family:var(--mono);font-size:10px;}
 .cell-input.num{text-align:right;}
 body.editable .cell-input:not([readonly]){
-  background:#1e2d40;
-  color:#e2e8f0;
-  cursor:text;
-  pointer-events:all;
-  border-color:#2a3f55;
+  background:#fff;color:#212529;cursor:text;pointer-events:all;
 }
 body:not(.editable) .cell-input{
-  pointer-events:none;
-  background:#141920;
-  color:#4a5568;
-  cursor:default;
+  pointer-events:none;background:transparent;color:#495057;cursor:default;
 }
 
 /* Weight sum */
 .weight-bar{
-  padding:5px 12px;border-top:1px solid var(--border);
-  display:flex;gap:16px;font-size:10px;font-family:var(--mono);color:var(--text3);
+  padding:4px 12px;border-top:1px solid var(--border);
+  display:flex;gap:16px;font-size:10px;font-family:var(--mono);color:var(--text2);
+  background:#f8f9fa;
 }
 .wok{color:var(--green)!important;} .wwarn{color:var(--red)!important;}
 
-/* Gantt+Scurve side */
-.chart-side{flex:1;display:flex;flex-direction:row;overflow:hidden;min-height:0;}
-.gantt-wrap{flex:1;overflow:hidden;position:relative;}
+/* Gantt wrap */
+.gantt-wrap{width:100%;height:100%;overflow:hidden;position:relative;}
 .gantt-wrap canvas{display:block;}
-.scurve-wrap{
-  width:30%;min-width:160px;
-  display:flex;flex-direction:column;
-  border-left:1px solid var(--border);
-}
+/* Scurve wrap */
+.scurve-wrap{width:100%;height:100%;display:flex;flex-direction:column;}
 .sc-half{flex:1;position:relative;overflow:hidden;}
-.sc-half:first-child{border-bottom:1px solid var(--border);}
 .sc-half canvas{display:block;}
 .sc-label{
   position:absolute;top:6px;left:50%;transform:translateX(-50%);
-  font-size:9px;font-weight:600;color:var(--text3);letter-spacing:0.08em;
+  font-size:9px;font-weight:600;color:#495057;letter-spacing:0.08em;
   text-transform:uppercase;pointer-events:none;white-space:nowrap;
 }
 
@@ -178,14 +186,15 @@ body:not(.editable) .cell-input{
 }
 .modal-overlay.show{display:flex;}
 .modal{
-  background:var(--surface);border:1px solid var(--border);border-radius:10px;
-  padding:28px 32px;min-width:340px;max-width:480px;
+  background:#ffffff;border:1px solid #ced4da;border-radius:8px;
+  padding:24px 28px;min-width:340px;max-width:480px;
+  box-shadow:0 4px 24px rgba(0,0,0,0.12);
 }
 .modal h2{font-size:14px;font-weight:700;margin-bottom:6px;}
 .modal p{font-size:11px;color:var(--text3);margin-bottom:18px;line-height:1.6;}
 .modal input{
-  width:100%;padding:7px 10px;border-radius:5px;border:1px solid var(--border);
-  background:var(--surface2);color:var(--text);font-size:11px;font-family:var(--mono);
+  width:100%;padding:6px 10px;border-radius:4px;border:1px solid #ced4da;
+  background:#fff;color:#212529;font-size:11px;font-family:var(--mono);
   margin-bottom:10px;
 }
 .modal input:focus{outline:none;border-color:var(--accent);}
@@ -194,9 +203,10 @@ body:not(.editable) .cell-input{
 
 /* ── TOAST ── */
 #toast{
-  position:fixed;bottom:20px;right:20px;background:var(--surface3);
-  border:1px solid var(--border);border-radius:6px;padding:8px 16px;
-  font-size:11px;color:var(--text);z-index:999;opacity:0;
+  position:fixed;bottom:20px;right:20px;background:#fff;
+  border:1px solid #ced4da;border-radius:6px;padding:8px 16px;
+  font-size:11px;color:#212529;z-index:999;opacity:0;
+  box-shadow:0 2px 12px rgba(0,0,0,0.1);
   transition:opacity 0.3s;pointer-events:none;
 }
 #toast.show{opacity:1;}
@@ -214,7 +224,7 @@ body:not(.editable) .cell-input{
   .home-left {
     width:100% !important; min-width:unset !important;
     flex-direction:row !important; flex-wrap:wrap;
-    border-right:none !important; border-bottom:1px solid var(--border);
+    border-right:none !important; border-bottom:1px solid #dee2e6;
     padding:10px 12px !important; gap:8px !important;
     justify-content:flex-start !important;
   }
@@ -226,23 +236,10 @@ body:not(.editable) .cell-input{
   .plan-body { flex-direction:column !important; overflow-y:auto !important; }
   .chart-side { flex-direction:column !important; height:auto !important; }
 
-  /* Mobile order: s-curve top, gantt middle, table bottom */
-  .scurve-wrap {
-    width:100% !important; min-width:unset !important;
-    height:220px; min-height:220px;
-    border-left:none !important; border-bottom:1px solid var(--border);
-    order:1;
-  }
-  .gantt-wrap {
-    width:100%; height:280px; min-height:280px;
-    order:2; border-bottom:1px solid var(--border);
-  }
-  .table-side {
-    width:100% !important; min-width:unset !important;
-    height:300px; min-height:300px;
-    border-right:none !important;
-    order:3;
-  }
+  /* Mobile: already vertical, just adjust heights */
+  .scurve-section { height:180px !important; min-height:180px !important; }
+  .gantt-section  { height:240px !important; min-height:240px !important; }
+  .table-side     { min-height:200px !important; }
 
   /* Table horizontal scroll */
   .table-wrap { overflow-x:auto; }
@@ -325,7 +322,22 @@ body:not(.editable) .cell-input{
     <button class="btn btn-sm btn-primary" id="saveBtn" onclick="saveData()" style="display:none">💾 Save</button>
   </div>
   <div class="plan-body">
-    <!-- Table -->
+    <!-- S-CURVE TOP -->
+    <div class="scurve-section">
+      <div class="scurve-wrap">
+        <div class="sc-half" id="scHalf1">
+          <div class="sc-label" id="scLabel1">S-CURVE</div>
+          <canvas id="scCanvas1"></canvas>
+        </div>
+      </div>
+    </div>
+    <!-- GANTT MIDDLE -->
+    <div class="gantt-section">
+      <div class="gantt-wrap" id="ganttWrap">
+        <canvas id="ganttCanvas"></canvas>
+      </div>
+    </div>
+    <!-- TABLE BOTTOM -->
     <div class="table-side">
       <div class="table-wrap">
         <table id="dataTable">
@@ -334,12 +346,12 @@ body:not(.editable) .cell-input{
               <th style="width:28px">No.</th>
               <th style="width:52px">Item No.</th>
               <th>Description</th>
-              <th style="width:70px">Start</th>
-              <th style="width:70px">Finish</th>
-              <th style="width:38px">Wt%</th>
-              <th style="width:78px">Act Start</th>
-              <th style="width:78px">Act Finish</th>
-              <th style="width:38px">Act%</th>
+              <th style="width:76px">Plan Start</th>
+              <th style="width:76px">Plan Finish</th>
+              <th style="width:36px">Wt%</th>
+              <th style="width:76px">Act Start</th>
+              <th style="width:76px">Act Finish</th>
+              <th style="width:36px">Act%</th>
             </tr>
           </thead>
           <tbody id="dataBody"></tbody>
@@ -350,20 +362,7 @@ body:not(.editable) .cell-input{
         &nbsp;|&nbsp; Act loaded: <span id="actCount">0</span> rows
       </div>
     </div>
-    <!-- Charts -->
-    <div class="chart-side">
-      <div class="gantt-wrap" id="ganttWrap">
-        <canvas id="ganttCanvas"></canvas>
-      </div>
-      <div class="scurve-wrap">
-        <div class="sc-half" id="scHalf1" style="flex:1">
-          <div class="sc-label" id="scLabel1">S-CURVE</div>
-          <canvas id="scCanvas1"></canvas>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+  </div></div>
 
 <!-- PAT MODAL -->
 <div class="modal-overlay" id="patModal">
@@ -531,8 +530,10 @@ function goToPlan(plan) {
   document.getElementById('rowCountInput').value = rows.length;
   showPage('planPage');
   renderTable();
-  renderGantt();
-  renderSCurves();
+  document.fonts.ready.then(()=>{
+    renderGantt();
+    renderSCurves();
+  });
   if(isEditor) setupPaste();
 }
 
@@ -778,8 +779,8 @@ function renderGantt() {
   const dx=d=>LABEL_W+(d/totalDays)*barW;
   const dxDate=d=>dx(dayDiff(pStart,d));
 
-  // BG
-  ctx.fillStyle='#0f1117';
+  // BG white
+  ctx.fillStyle='#ffffff';
   ctx.fillRect(0,0,W,H);
 
   // Month bands + header
@@ -792,24 +793,24 @@ function renderGantt() {
     const x2=Math.min(W,dxDate(new Date(m.getFullYear(),m.getMonth()+1,1)));
     ctx.fillStyle=i%2===0?'rgba(255,255,255,0.02)':'transparent';
     ctx.fillRect(x1,HDR_H,x2-x1,H-HDR_H-LEG_H);
-    ctx.fillStyle=i%2===0?'#1e2530':'#242d3a';
+    ctx.fillStyle=i%2===0?'#1971c2':'#1864ab';
     ctx.fillRect(x1,0,x2-x1,HDR_H);
-    ctx.fillStyle='#94a3b8';
+    ctx.fillStyle='#ffffff';
     ctx.font='600 9.5px Sarabun, IBM Plex Sans';
     ctx.textAlign='center';
     ctx.fillText(m.toLocaleString('default',{month:'short'})+"'"+String(m.getFullYear()).slice(2),(x1+x2)/2,17);
   });
 
   // Label header
-  ctx.fillStyle='#161b24';
+  ctx.fillStyle='#1971c2';
   ctx.fillRect(0,0,LABEL_W,HDR_H);
-  ctx.fillStyle='#64748b';
+  ctx.fillStyle='#ffffff';
   ctx.font='600 9px Sarabun, IBM Plex Sans';
   ctx.textAlign='center';
   ctx.fillText('DESCRIPTION',LABEL_W/2,17);
 
   // divider
-  ctx.strokeStyle='#2a3444'; ctx.lineWidth=1; ctx.setLineDash([]);
+  ctx.strokeStyle='#adb5bd'; ctx.lineWidth=1; ctx.setLineDash([]);
   ctx.beginPath();ctx.moveTo(LABEL_W,0);ctx.lineTo(LABEL_W,H);ctx.stroke();
 
   // month lines
@@ -837,16 +838,17 @@ function renderGantt() {
     const y=HDR_H+i*rowH; const rh=rowH-1.5;
 
     // row bg
-    ctx.fillStyle=i%2===0?'rgba(255,255,255,0.015)':'transparent';
+    ctx.fillStyle=i%2===0?'#f8f9fa':'#ffffff';
     ctx.fillRect(0,y,W,rh);
-    ctx.strokeStyle='#1e2838';ctx.lineWidth=0.5;
+    ctx.strokeStyle='#dee2e6';ctx.lineWidth=0.5;
     ctx.beginPath();ctx.moveTo(0,y+rh);ctx.lineTo(W,y+rh);ctx.stroke();
 
-    // item no only in gantt
-    ctx.fillStyle=r.itemNo?'#94a3b8':'#3a4555';
-    ctx.font=`600 9px Sarabun, IBM Plex Sans`;
+    // item no + description in gantt
+    ctx.fillStyle=r.desc?'#212529':'#adb5bd';
+    ctx.font=`${r.desc?'600':'400'} 9px Sarabun,IBM Plex Sans`;
     ctx.textAlign='left';
-    ctx.fillText(r.itemNo||String(r.no), 6, y+rh*0.65);
+    const ganttLbl=(r.itemNo?(r.itemNo+' '):'')+(r.desc||('row '+r.no));
+    ctx.fillText(ganttLbl.substring(0,28), 5, y+rh*0.68);
 
     const ps=parseDate(r.start), pe=parseDate(r.finish);
     if(!ps||!pe) return;
@@ -854,14 +856,14 @@ function renderGantt() {
     // Plan bar (upper)
     const bx=dxDate(ps), ex=dxDate(pe), bw=Math.max(ex-bx,2);
     const planH=rh*0.36, planY=y+rh*0.06;
-    ctx.fillStyle='#3b82f6';
+    ctx.fillStyle='#1971c2';
     ctx.beginPath();
     if(ctx.roundRect) ctx.roundRect(bx,planY,bw,planH,2); else ctx.rect(bx,planY,bw,planH);
     ctx.fill();
 
     // dates outside bar
     const midY=planY+planH/2+3.5;
-    ctx.fillStyle='#64748b';ctx.font='600 7.5px IBM Plex Mono';
+    ctx.fillStyle='#868e96';ctx.font='600 7.5px IBM Plex Mono';
     ctx.textAlign='right'; ctx.fillText(fmtDate(ps),bx-2,midY);
     ctx.textAlign='left';  ctx.fillText(fmtDate(pe),bx+bw+2,midY);
 
@@ -896,8 +898,8 @@ function renderGantt() {
   });
 
   // Legend
-  ctx.fillStyle='#161b24';ctx.fillRect(0,H-LEG_H,W,LEG_H);
-  ctx.strokeStyle='#2a3444';ctx.lineWidth=0.5;
+  ctx.fillStyle='#f1f3f5';ctx.fillRect(0,H-LEG_H,W,LEG_H);
+  ctx.strokeStyle='#dee2e6';ctx.lineWidth=0.5;
   ctx.beginPath();ctx.moveTo(0,H-LEG_H);ctx.lineTo(W,H-LEG_H);ctx.stroke();
   const ly=H-LEG_H+7;
   ctx.fillStyle='#3b82f6';ctx.fillRect(LABEL_W+10,ly-4,20,7);
@@ -949,7 +951,7 @@ function drawSCurve(canvasId, rows, planColor, actColor) {
   if(!W||!H) return;
   canvas.width=W; canvas.height=H;
   const ctx=canvas.getContext('2d');
-  ctx.fillStyle='#0f1117';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#ffffff';ctx.fillRect(0,0,W,H);
 
   const PL=36,PR=12,PT=24,PB=26;
   const pw=W-PL-PR, ph=H-PT-PB;
@@ -962,11 +964,11 @@ function drawSCurve(canvasId, rows, planColor, actColor) {
   // Y grid
   for(let p=0;p<=100;p+=20){
     const gy=py2-(p/100)*ph;
-    ctx.strokeStyle=p===0||p===100?'#2a3444':'rgba(42,52,68,0.5)';
+    ctx.strokeStyle=p===0||p===100?'#ced4da':'rgba(206,212,218,0.6)';
     ctx.lineWidth=p===0||p===100?1:0.5;
     ctx.setLineDash(p===0||p===100?[]:[2,3]);
     ctx.beginPath();ctx.moveTo(px1,gy);ctx.lineTo(px2,gy);ctx.stroke();
-    ctx.fillStyle='#64748b';ctx.font='8px IBM Plex Mono';
+    ctx.fillStyle='#868e96';ctx.font='8px IBM Plex Mono';
     ctx.textAlign='right';ctx.fillText(p+'%',px1-3,gy+3);
   }
   ctx.setLineDash([]);
@@ -977,14 +979,14 @@ function drawSCurve(canvasId, rows, planColor, actColor) {
   while(mc<=projEnd){months.push(new Date(mc));mc=new Date(mc.getFullYear(),mc.getMonth()+1,1);}
   months.forEach((m,i)=>{
     const gx=px1+(dayDiff(projStart,m)/totalDays)*pw;
-    ctx.strokeStyle='rgba(42,52,68,0.6)';ctx.lineWidth=0.5;ctx.setLineDash([2,3]);
+    ctx.strokeStyle='rgba(206,212,218,0.8)';ctx.lineWidth=0.5;ctx.setLineDash([2,3]);
     ctx.beginPath();ctx.moveTo(gx,py1);ctx.lineTo(gx,py2);ctx.stroke();ctx.setLineDash([]);
     ctx.fillStyle='#64748b';ctx.font='8px Sarabun, IBM Plex Sans';ctx.textAlign='center';
     ctx.fillText(m.toLocaleString('default',{month:'short'}),gx,py2+14);
   });
 
   // Axes
-  ctx.strokeStyle='#2a3444';ctx.lineWidth=1;ctx.setLineDash([]);
+  ctx.strokeStyle='#495057';ctx.lineWidth=1;ctx.setLineDash([]);
   ctx.beginPath();ctx.moveTo(px1,py1);ctx.lineTo(px1,py2);ctx.lineTo(px2,py2);ctx.stroke();
 
   const step=Math.max(1,Math.floor(totalDays/300));
@@ -1034,7 +1036,7 @@ function drawSCurveCombined(canvasId, rows) {
   if(!W||!H) return;
   canvas.width=W; canvas.height=H;
   const ctx=canvas.getContext('2d');
-  ctx.fillStyle='#0f1117'; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,W,H);
 
   const PL=38,PR=14,PT=28,PB=28;
   const pw=W-PL-PR, ph=H-PT-PB;
@@ -1070,11 +1072,11 @@ function drawSCurveCombined(canvasId, rows) {
   // Y grid
   for(let p=0;p<=100;p+=20){
     const gy=py2-(p/100)*ph;
-    ctx.strokeStyle=p===0||p===100?'#2a3444':'rgba(42,52,68,0.5)';
+    ctx.strokeStyle=p===0||p===100?'#ced4da':'rgba(206,212,218,0.6)';
     ctx.lineWidth=p===0||p===100?1:0.5;
     ctx.setLineDash(p===0||p===100?[]:[2,3]);
     ctx.beginPath();ctx.moveTo(px1,gy);ctx.lineTo(px2,gy);ctx.stroke();
-    ctx.fillStyle='#64748b';ctx.font='8px IBM Plex Mono';
+    ctx.fillStyle='#868e96';ctx.font='8px IBM Plex Mono';
     ctx.textAlign='right';ctx.fillText(p+'%',px1-3,gy+3);
   }
   ctx.setLineDash([]);
@@ -1085,14 +1087,14 @@ function drawSCurveCombined(canvasId, rows) {
   while(mc<=projEnd){months.push(new Date(mc));mc=new Date(mc.getFullYear(),mc.getMonth()+1,1);}
   months.forEach(m=>{
     const gx=px1+(dayDiff(projStart,m)/totalDays)*pw;
-    ctx.strokeStyle='rgba(42,52,68,0.6)';ctx.lineWidth=0.5;ctx.setLineDash([2,3]);
+    ctx.strokeStyle='rgba(206,212,218,0.8)';ctx.lineWidth=0.5;ctx.setLineDash([2,3]);
     ctx.beginPath();ctx.moveTo(gx,py1);ctx.lineTo(gx,py2);ctx.stroke();ctx.setLineDash([]);
-    ctx.fillStyle='#64748b';ctx.font='8px Sarabun,IBM Plex Sans';ctx.textAlign='center';
+    ctx.fillStyle='#868e96';ctx.font='8px Sarabun,IBM Plex Sans';ctx.textAlign='center';
     ctx.fillText(m.toLocaleString('default',{month:'short'}),gx,py2+14);
   });
 
   // Axes
-  ctx.strokeStyle='#2a3444';ctx.lineWidth=1;ctx.setLineDash([]);
+  ctx.strokeStyle='#495057';ctx.lineWidth=1;ctx.setLineDash([]);
   ctx.beginPath();ctx.moveTo(px1,py1);ctx.lineTo(px1,py2);ctx.lineTo(px2,py2);ctx.stroke();
 
   const step=Math.max(1,Math.floor(totalDays/300));
@@ -1114,9 +1116,9 @@ function drawSCurveCombined(canvasId, rows) {
   ctx.beginPath();ctx.moveTo(planPts[0][0],py2);
   planPts.forEach(([x,y])=>ctx.lineTo(x,y));
   ctx.lineTo(planPts[planPts.length-1][0],py2);ctx.closePath();
-  ctx.fillStyle='#e2e8f020';ctx.fill();
+  ctx.fillStyle='rgba(25,113,194,0.08)';ctx.fill();
 
-  drawLine(planPts,'#e2e8f0');
+  drawLine(planPts,'#1971c2');
   drawLine(actPts,'#eab308',[5,3]);
 
   // Today
@@ -1127,12 +1129,12 @@ function drawSCurveCombined(canvasId, rows) {
   }
 
   // Legend
-  ctx.fillStyle='#e2e8f0';ctx.fillRect(px1+4,py2-18,16,4);
+  ctx.fillStyle='#1971c2';ctx.fillRect(px1+4,py2-18,16,4);
   ctx.fillStyle='#94a3b8';ctx.font='8px Sarabun,IBM Plex Sans';ctx.textAlign='left';
   ctx.fillText('Plan',px1+23,py2-15);
   ctx.strokeStyle='#eab308';ctx.lineWidth=2;ctx.setLineDash([5,3]);
   ctx.beginPath();ctx.moveTo(px1+52,py2-16);ctx.lineTo(px1+68,py2-16);ctx.stroke();ctx.setLineDash([]);
-  ctx.fillStyle='#94a3b8';ctx.fillText('Actual',px1+71,py2-15);
+  ctx.fillStyle='#495057';ctx.fillText('Actual',px1+71,py2-15);
 }
 
 function renderSCurves() {
@@ -1161,7 +1163,8 @@ function resizeHomeCharts() {
 // ════════════════════════════════════════
 // RESIZE
 // ════════════════════════════════════════
-function resizeAll() {
+async function resizeAll() {
+  await document.fonts.ready;
   const activePage=document.querySelector('.page.active');
   if(!activePage) return;
   if(activePage.id==='homePage') {
@@ -1184,9 +1187,9 @@ window.addEventListener('orientationchange',()=>{setTimeout(resizeAll,200);});
 // ════════════════════════════════════════
 function renderAll() {
   initDefaultData();
-  setTimeout(()=>{
+  document.fonts.ready.then(()=>{
     renderHomeCharts();
-  },200);
+  });
 }
 
 // ════════════════════════════════════════
