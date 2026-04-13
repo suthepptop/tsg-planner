@@ -452,8 +452,7 @@ function showPage(id) {
 function goToPlan(plan) {
   currentPlan = plan;
   document.getElementById('planTitle').textContent = plan==='material' ? '📦 Material Plan' : '🔧 Installation Plan';
-  document.getElementById('scLabel1').textContent  = plan==='material' ? 'MATERIAL — PLAN' : 'INSTALL — PLAN';
-  document.getElementById('scLabel2').textContent  = plan==='material' ? 'MATERIAL — ACTUAL' : 'INSTALL — ACTUAL';
+  document.getElementById('scLabel1').textContent  = plan==='material' ? 'MATERIAL S-CURVE' : 'INSTALL S-CURVE';
   if(isEditor) {
     document.getElementById('saveBtn').style.display = 'inline-block';
     document.getElementById('resetBtn').style.display = 'inline-block';
