@@ -72,7 +72,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .plan-btn .pb-icon{font-size:16px;margin-bottom:3px;}
 .plan-btn .pb-title{font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px;}
 .plan-btn .pb-sub{font-size:9px;color:var(--text3);}
-.plan-btn.mat .pb-icon{color:#e2e8f0;}
+.plan-btn.mat .pb-icon{color:#1971c2;}
 .plan-btn.inst .pb-icon{color:#e67700;}
 
 .home-right{
@@ -91,14 +91,14 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 /* ══════════════════════════════
    PLAN PAGE
 ══════════════════════════════ */
-#planPage{overflow:hidden;}
+#planPage{overflow-y:auto;}
 .plan-topbar{
   display:flex;align-items:center;gap:8px;padding:6px 12px;
   background:#f1f3f5;border-bottom:1px solid var(--border);
   flex-wrap:wrap;
   position:sticky;top:40px;z-index:100;
 }
-.plan-topbar .plan-title{font-size:12px;font-weight:700;color:var(--text);letter-spacing:0.04em;}
+.plan-title{font-size:14px;font-weight:700;color:var(--text);letter-spacing:0.04em;}
 .plan-topbar .spacer{flex:1;}
 .row-input-wrap{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);}
 .row-input-wrap input{
@@ -755,13 +755,10 @@ function getProjectRange(rows) {
 // GANTT CANVAS
 // ════════════════════════════════════════
 async async function waitFonts() {
-  try {
-    await Promise.all([
-      document.fonts.load("400 16px Tahoma"),
-      document.fonts.load("600 16px Tahoma"),
-      document.fonts.load("700 16px Tahoma")
-    ]);
-  } catch(e){}
+  // Tahoma is a system font - just wait for document fonts ready
+  try { await document.fonts.ready; } catch(e){}
+  // Small delay to ensure layout is complete
+  await new Promise(r => setTimeout(r, 50));
 }
 
 function renderGantt() {
