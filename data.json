@@ -1,0 +1,428 @@
+{
+  "material": {
+    "rows": [
+      {
+        "no": 1,
+        "itemNo": "5.1",
+        "desc": "MDB-1 / MDB-1 Main Distribution Board",
+        "start": "21-04-2026",
+        "finish": "31-05-2026",
+        "wt": 7,
+        "actPct": 0,
+        "actStart": "01-04-2026",
+        "actFinish": "31-05-2026"
+      },
+      {
+        "no": 2,
+        "itemNo": "5.2",
+        "desc": "MCC / Motor Control Center",
+        "start": "01-04-2026",
+        "finish": "31-05-2026",
+        "wt": 7,
+        "actPct": 0,
+        "actStart": "01-04-2026",
+        "actFinish": "31-05-2026"
+      },
+      {
+        "no": 3,
+        "itemNo": "5.3",
+        "desc": "PLC Panel + UPS / PLC Panel + UPS 40kVA + Battery",
+        "start": "01-04-2026",
+        "finish": "10-06-2026",
+        "wt": 9,
+        "actPct": 0,
+        "actStart": "01-04-2026",
+        "actFinish": "10-06-2026"
+      },
+      {
+        "no": 4,
+        "itemNo": "5.4",
+        "desc": "Control Desk / Control Desk",
+        "start": "01-04-2026",
+        "finish": "10-06-2026",
+        "wt": 9,
+        "actPct": 0,
+        "actStart": "01-04-2026",
+        "actFinish": "10-06-2026"
+      },
+      {
+        "no": 5,
+        "itemNo": "5.5",
+        "desc": "Control Marshalling / Control Marshalling Panel",
+        "start": "01-04-2026",
+        "finish": "31-05-2026",
+        "wt": 9,
+        "actPct": 0,
+        "actStart": "01-04-2026",
+        "actFinish": "31-05-2026"
+      },
+      {
+        "no": 6,
+        "itemNo": "5.6",
+        "desc": "I/O Remote Box (Fiber) / I/O Module Remote Box x3",
+        "start": "01-04-2026",
+        "finish": "31-05-2026",
+        "wt": 6,
+        "actPct": 0,
+        "actStart": "01-04-2026",
+        "actFinish": "31-05-2026"
+      },
+      {
+        "no": 7,
+        "itemNo": "6.2",
+        "desc": "Conduit & Fitting (Zone 1-4) / Conduit & Fitting all zones",
+        "start": "06-04-2026",
+        "finish": "25-05-2026",
+        "wt": 4,
+        "actPct": 0,
+        "actStart": "06-04-2026",
+        "actFinish": "25-05-2026"
+      },
+      {
+        "no": 8,
+        "itemNo": "6.3",
+        "desc": "Accessories / Cable Tie, Gland, Accessories",
+        "start": "06-04-2026",
+        "finish": "25-05-2026",
+        "wt": 4,
+        "actPct": 0,
+        "actStart": "06-04-2026",
+        "actFinish": "25-05-2026"
+      },
+      {
+        "no": 9,
+        "itemNo": "6.4",
+        "desc": "Junction Box (Field) / Field Junction Box x12 sets",
+        "start": "06-04-2026",
+        "finish": "25-05-2026",
+        "wt": 4,
+        "actPct": 0,
+        "actStart": "06-04-2026",
+        "actFinish": "25-05-2026"
+      },
+      {
+        "no": 10,
+        "itemNo": "7.4",
+        "desc": "Ground Test Box x7 / Ground Test Box (Steel) x7 sets",
+        "start": "01-04-2026",
+        "finish": "07-05-2026",
+        "wt": 4,
+        "actPct": 0,
+        "actStart": "01-04-2026",
+        "actFinish": "07-05-2026"
+      },
+      {
+        "no": 11,
+        "itemNo": "7.5",
+        "desc": "Accessories / Grounding Accessories",
+        "start": "23-03-2026",
+        "finish": "30-04-2026",
+        "wt": 10,
+        "actPct": 0,
+        "actStart": "23-03-2026",
+        "actFinish": "30-04-2026"
+      },
+      {
+        "no": 12,
+        "itemNo": "8.5",
+        "desc": "Accessories / Instrument Accessories",
+        "start": "27-04-2026",
+        "finish": "31-05-2026",
+        "wt": 4,
+        "actPct": 0,
+        "actStart": "27-04-2026",
+        "actFinish": "31-05-2026"
+      },
+      {
+        "no": 13,
+        "itemNo": "9.1",
+        "desc": "ตู้ Load Center x2 / Load Center Panel x2",
+        "start": "01-04-2026",
+        "finish": "31-05-2026",
+        "wt": 5,
+        "actPct": 0,
+        "actStart": "01-04-2026",
+        "actFinish": "31-05-2026"
+      },
+      {
+        "no": 14,
+        "itemNo": "9.2",
+        "desc": "Conduit & Fitting / Lighting Conduit",
+        "start": "01-04-2026",
+        "finish": "31-05-2026",
+        "wt": 5,
+        "actPct": 0,
+        "actStart": "01-04-2026",
+        "actFinish": "31-05-2026"
+      },
+      {
+        "no": 15,
+        "itemNo": "9.3",
+        "desc": "สายไฟแสงสว่าง / Lighting Cable",
+        "start": "01-04-2026",
+        "finish": "31-05-2026",
+        "wt": 5,
+        "actPct": 0,
+        "actStart": "01-04-2026",
+        "actFinish": "31-05-2026"
+      },
+      {
+        "no": 16,
+        "itemNo": "9.4",
+        "desc": "โคมไฟ + หลอดไฟ / High Bay 200W + Fluorescent",
+        "start": "01-04-2026",
+        "finish": "31-05-2026",
+        "wt": 5,
+        "actPct": 0,
+        "actStart": "01-04-2026",
+        "actFinish": "31-05-2026"
+      },
+      {
+        "no": 17,
+        "itemNo": "9.5",
+        "desc": "Accessories / Lighting Accessories",
+        "start": "01-04-2026",
+        "finish": "31-05-2026",
+        "wt": 5,
+        "actPct": 0,
+        "actStart": "01-04-2026",
+        "actFinish": "31-05-2026"
+      },
+      {
+        "no": 18,
+        "itemNo": "10.1",
+        "desc": "กล้อง CCTV WiFi x9 / CCTV Camera IP67 x9",
+        "start": "23-03-2026",
+        "finish": "25-05-2026",
+        "wt": 7,
+        "actPct": 0,
+        "actStart": "23-03-2026",
+        "actFinish": "25-05-2026"
+      },
+      {
+        "no": 19,
+        "itemNo": "10.2",
+        "desc": "NVR/DVR + HDD / NVR 16CH + HDD",
+        "start": "23-03-2026",
+        "finish": "25-05-2026",
+        "wt": 7,
+        "actPct": 0,
+        "actStart": "23-03-2026",
+        "actFinish": "25-05-2026"
+      },
+      {
+        "no": 20,
+        "itemNo": "10.3",
+        "desc": "Media Converter x3 / Industrial Media Converter x3",
+        "start": "23-03-2026",
+        "finish": "25-05-2026",
+        "wt": 7,
+        "actPct": 0,
+        "actStart": "23-03-2026",
+        "actFinish": "25-05-2026"
+      },
+      {
+        "no": 21,
+        "itemNo": "10.4",
+        "desc": "สาย LAN/Fiber Optic / LAN Cat6 + Fiber Optic Cable",
+        "start": "23-03-2026",
+        "finish": "25-05-2026",
+        "wt": 7,
+        "actPct": 0,
+        "actStart": "23-03-2026",
+        "actFinish": "25-05-2026"
+      },
+      {
+        "no": 22,
+        "itemNo": "12.2",
+        "desc": "Support for Cable Tray / Cable Tray Support Structure",
+        "start": "01-04-2026",
+        "finish": "31-05-2026",
+        "wt": 4,
+        "actPct": 0,
+        "actStart": "01-04-2026",
+        "actFinish": "31-05-2026"
+      }
+    ]
+  },
+  "installation": {
+    "rows": [
+      {
+        "no": 1,
+        "itemNo": "",
+        "desc": "",
+        "start": "",
+        "finish": "",
+        "wt": 0,
+        "actPct": 0,
+        "actStart": "",
+        "actFinish": ""
+      },
+      {
+        "no": 2,
+        "itemNo": "",
+        "desc": "",
+        "start": "",
+        "finish": "",
+        "wt": 0,
+        "actPct": 0,
+        "actStart": "",
+        "actFinish": ""
+      },
+      {
+        "no": 3,
+        "itemNo": "",
+        "desc": "",
+        "start": "",
+        "finish": "",
+        "wt": 0,
+        "actPct": 0,
+        "actStart": "",
+        "actFinish": ""
+      },
+      {
+        "no": 4,
+        "itemNo": "",
+        "desc": "",
+        "start": "",
+        "finish": "",
+        "wt": 0,
+        "actPct": 0,
+        "actStart": "",
+        "actFinish": ""
+      },
+      {
+        "no": 5,
+        "itemNo": "",
+        "desc": "",
+        "start": "",
+        "finish": "",
+        "wt": 0,
+        "actPct": 0,
+        "actStart": "",
+        "actFinish": ""
+      },
+      {
+        "no": 6,
+        "itemNo": "",
+        "desc": "",
+        "start": "",
+        "finish": "",
+        "wt": 0,
+        "actPct": 0,
+        "actStart": "",
+        "actFinish": ""
+      },
+      {
+        "no": 7,
+        "itemNo": "",
+        "desc": "",
+        "start": "",
+        "finish": "",
+        "wt": 0,
+        "actPct": 0,
+        "actStart": "",
+        "actFinish": ""
+      },
+      {
+        "no": 8,
+        "itemNo": "",
+        "desc": "",
+        "start": "",
+        "finish": "",
+        "wt": 0,
+        "actPct": 0,
+        "actStart": "",
+        "actFinish": ""
+      },
+      {
+        "no": 9,
+        "itemNo": "",
+        "desc": "",
+        "start": "",
+        "finish": "",
+        "wt": 0,
+        "actPct": 0,
+        "actStart": "",
+        "actFinish": ""
+      },
+      {
+        "no": 10,
+        "itemNo": "",
+        "desc": "",
+        "start": "",
+        "finish": "",
+        "wt": 0,
+        "actPct": 0,
+        "actStart": "",
+        "actFinish": ""
+      },
+      {
+        "no": 11,
+        "itemNo": "",
+        "desc": "",
+        "start": "",
+        "finish": "",
+        "wt": 0,
+        "actPct": 0,
+        "actStart": "",
+        "actFinish": ""
+      },
+      {
+        "no": 12,
+        "itemNo": "",
+        "desc": "",
+        "start": "",
+        "finish": "",
+        "wt": 0,
+        "actPct": 0,
+        "actStart": "",
+        "actFinish": ""
+      },
+      {
+        "no": 13,
+        "itemNo": "",
+        "desc": "",
+        "start": "",
+        "finish": "",
+        "wt": 0,
+        "actPct": 0,
+        "actStart": "",
+        "actFinish": ""
+      },
+      {
+        "no": 14,
+        "itemNo": "",
+        "desc": "",
+        "start": "",
+        "finish": "",
+        "wt": 0,
+        "actPct": 0,
+        "actStart": "",
+        "actFinish": ""
+      },
+      {
+        "no": 15,
+        "itemNo": "",
+        "desc": "",
+        "start": "",
+        "finish": "",
+        "wt": 0,
+        "actPct": 0,
+        "actStart": "",
+        "actFinish": ""
+      },
+      {
+        "no": 16,
+        "itemNo": "",
+        "desc": "",
+        "start": "",
+        "finish": "",
+        "wt": 0,
+        "actPct": 0,
+        "actStart": "",
+        "actFinish": ""
+      }
+    ]
+  }
+}
