@@ -6,7 +6,6 @@
 <meta http-equiv="Cache-Control" content="no-cache">
 <title>TSG Project Planner</title>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 
 <style>
@@ -213,13 +212,9 @@ body:not(.ed) .ci {pointer-events:none}
 </div>
 
 <div class="pg" id="ppg">
-  <div class="ptb" id="planToolbar">
+  <div class="ptb">
     <button class="btn btnsm" onclick="goHome()">← Home</button>
     <span class="ptit" id="ptit"></span>
-    
-    <button class="btn btnsm" style="margin-left:8px; border-color:#d97706; color:#d97706;" onclick="exportPDF()">📄 PDF</button>
-    <button class="btn btnsm" style="border-color:#2a8a2a; color:#2a8a2a;" onclick="exportExcel()">📊 Excel</button>
-    
     <div class="sp"></div>
     <div class="rwc" id="rwc" style="display:none">
       Rows:<input type="number" id="rwn" min="1" max="300" value="16">
@@ -302,59 +297,6 @@ function getRange(rows){
   return{start:mn,end:mx,days:dd(mn,mx)+1};
 }
 
-// ── EXPORT FUNCTIONS ──
-function exportExcel() {
-  if(!plan) return;
-  const rows = D[plan].rows;
-  // Use UTF-8 BOM so Excel natively handles Thai characters
-  let csv = "\ufeffNo.,Item No.,Description,Plan Start,Plan Finish,Wt%,Act Start,Act Finish,Act%\n";
-  
-  rows.forEach(r => {
-    // Escape quotes inside description to prevent CSV breaking
-    const desc = (r.desc || '').replace(/"/g, '""');
-    csv += `${r.no || ''},"${r.itemNo || ''}","${desc}",${r.ps || ''},${r.pe || ''},${r.wt || 0},${r.as || ''},${r.ae || ''},${r.pct || 0}\n`;
-  });
-  
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = `TSG_${plan}_plan.csv`;
-  link.click();
-  toast('✓ Excel (CSV) Exported');
-}
-
-function exportPDF() {
-  if(!plan) return;
-  toast('Generating continuous PDF...');
-  
-  const element = document.getElementById('ppg');
-  const toolbar = document.getElementById('planToolbar');
-  
-  // Temporarily hide the toolbar so buttons don't show up in the PDF
-  toolbar.style.display = 'none';
-  
-  // Get exact dimensions of the content to force a continuous, single-page PDF
-  const w = element.scrollWidth;
-  const h = element.scrollHeight;
-  
-  const opt = {
-    margin:       [10, 10], // px margins
-    filename:     `TSG_${plan}_plan.pdf`,
-    image:        { type: 'jpeg', quality: 0.98 },
-    html2canvas:  { scale: 2, windowWidth: w },
-    // Format custom size to bypass A4 slicing
-    jsPDF:        { unit: 'px', format: [w + 20, h + 20], orientation: 'landscape' } 
-  };
-  
-  html2pdf().set(opt).from(element).save().then(() => {
-    toolbar.style.display = 'flex'; // Restore toolbar
-    toast('✓ PDF Exported Successfully');
-  }).catch(() => {
-    toolbar.style.display = 'flex'; // Restore even on fail
-    toast('✗ PDF generation failed', true);
-  });
-}
-
 // ── SESSION RESTORE ──
 function restoreSession() {
   const storedEd = sessionStorage.getItem('isEd');
@@ -372,8 +314,9 @@ function restoreSession() {
 
 // ── AUTH ──
 window.onload=()=>{
-  restoreSession(); 
+  restoreSession(); // Check session first to avoid logout flash
   
+  // Instantly route to correct page based on cache
   const lp = sessionStorage.getItem('lastPlan');
   if(lp) {
     plan = lp;
@@ -574,14 +517,9 @@ function renderGantt(){
   const rows=D[plan].rows;
   const{start:ps,end:pe,days:td}=getRange(rows);
   const today=new Date();
-  
+  const LW=270,HH=34,RH=38,LH=26;
   const W=Math.max(sec.getBoundingClientRect().width||sec.offsetWidth||900,600);
-  
-  // Adjusted Gantt column split: 35% for descriptions, 65% for chart
-  const LW = Math.floor(W * 0.35); 
-  const HH=34,RH=38,LH=26;
   const H=HH+rows.length*RH+LH;
-  
   cv.width=W;cv.height=H;cv.style.width=W+'px';cv.style.height=H+'px';
   const ctx=cv.getContext('2d');
   const BW=W-LW;
