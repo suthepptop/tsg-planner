@@ -677,7 +677,11 @@ function drawSCurve(canvasId,rows,planColor,actColor){
 
   const step=Math.max(1,Math.floor(totalDays/300));
   const pp=[],ap=[];
-  for(let d=0;d<totalDays;d+=step){pp.push([px1+(d/totalDays)*pw,py2-plan[d]*ph]);ap.push([px1+(d/totalDays)*pw,py2-act[d]*ph]);}
+  const todayD=Math.min(totalDays-1,dayDiff(projStart,today));
+  for(let d=0;d<totalDays;d+=step){
+    pp.push([px1+(d/totalDays)*pw,py2-plan[d]*ph]);
+    if(d<=todayD) ap.push([px1+(d/totalDays)*pw,py2-act[d]*ph]);
+  }
 
   ctx.beginPath();ctx.moveTo(pp[0][0],py2);pp.forEach(([x,y])=>ctx.lineTo(x,y));ctx.lineTo(pp[pp.length-1][0],py2);ctx.closePath();
   ctx.fillStyle=planColor+'22';ctx.fill();
