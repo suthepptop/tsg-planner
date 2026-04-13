@@ -74,7 +74,7 @@ body {background:#fff;color:#222}
 .gs {background:#fff;border-bottom:1px solid #ddd;overflow-x:auto}
 .gs canvas {display:block}
 
-/* --- OPTIMIZED TABLE --- */
+/* TABLE */
 .ts {background:#fff}
 .tw {overflow-x:auto}
 
@@ -82,7 +82,7 @@ table {
   border-collapse: collapse;
   font-size: 13px;
   width: 100%;
-  min-width: 1000px; /* Prevents columns from squishing on small screens */
+  min-width: 1000px;
   table-layout: fixed;
 }
 
@@ -99,11 +99,10 @@ thead th {
   text-align: left;
 }
 
-/* Specific Flexible Column Widths */
 .col-no    { width: 45px;  text-align: center; }
 .col-item  { width: 100px; }
-.col-desc  { width: auto;  } /* Auto width lets the description grow */
-.col-date  { width: 135px; } /* Wider to perfectly fit date picker UI */
+.col-desc  { width: auto;  } 
+.col-date  { width: 135px; } 
 .col-pct   { width: 60px;  text-align: center; }
 
 tbody tr:nth-child(even) {background:#f7f9fb}
@@ -187,7 +186,7 @@ body:not(.ed) .ci {pointer-events:none}
   </div>
 </div>
 
-<div class="pg on" id="hpg">
+<div class="pg" id="hpg">
   <div class="hsb">
     <div class="hslb">Select Plan</div>
     <button class="pb" onclick="goPlan('material')">
@@ -298,15 +297,46 @@ function getRange(rows){
   return{start:mn,end:mx,days:dd(mn,mx)+1};
 }
 
+// ── SESSION RESTORE ──
+function restoreSession() {
+  const storedEd = sessionStorage.getItem('isEd');
+  const storedEmail = sessionStorage.getItem('email');
+  if (storedEd === 'true') {
+    isEd = true;
+    $('uinfo').textContent = storedEmail;
+    $('gBtn').style.display = 'none';
+    $('soBtn').style.display = 'inline-block';
+    document.body.classList.add('ed');
+    showEdUI();
+    setupPaste();
+  }
+}
+
 // ── AUTH ──
 window.onload=()=>{
+  restoreSession(); // Check session first to avoid logout flash
+  
+  // Instantly route to correct page based on cache
+  const lp = sessionStorage.getItem('lastPlan');
+  if(lp) {
+    plan = lp;
+    showPg('ppg');
+    $('ptit').textContent=lp==='material'?'📦 Material Plan':'🔧 Installation Plan';
+    $(lp==='material'?'nbM':'nbI').classList.add('on');
+  } else {
+    showPg('hpg');
+  }
+
   google.accounts.id.initialize({client_id:GCI,callback:onLogin,auto_select:true});
   google.accounts.id.renderButton($('gBtn'),{theme:'filled_blue',size:'small',text:'signin_with',shape:'rectangular'});
   loadData();
 };
+
 function onLogin(resp){
   const p=JSON.parse(atob(resp.credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
   isEd=p.email===EE;
+  sessionStorage.setItem('isEd', isEd);
+  sessionStorage.setItem('email', p.email);
   $('uinfo').textContent=p.email;
   $('gBtn').style.display='none';
   $('soBtn').style.display='inline-block';
@@ -314,15 +344,21 @@ function onLogin(resp){
   if(plan)renderTable();
   toast(isEd?'✓ Editor':'✓ View only');
 }
+
 function showEdUI(){
   $('savBtn').style.display='inline-block';
   $('rstBtn').style.display='inline-block';
   $('rwc').style.display='flex';
 }
+
 function signOut(){
-  google.accounts.id.disableAutoSelect();isEd=false;
+  google.accounts.id.disableAutoSelect();
+  isEd=false;
+  sessionStorage.removeItem('isEd');
+  sessionStorage.removeItem('email');
   document.body.classList.remove('ed');
-  $('uinfo').textContent='';$('gBtn').style.display='block';
+  $('uinfo').textContent='';
+  $('gBtn').style.display='block';
   ['soBtn','savBtn','rstBtn'].forEach(id=>$(id).style.display='none');
   $('rwc').style.display='none';
   if(plan)renderTable();
@@ -344,11 +380,13 @@ async function loadData(){
   }catch(e){initD();}
   renderAll();
 }
+
 function initD(){
   const mk=n=>Array.from({length:n},(_,i)=>({no:i+1,itemNo:'',desc:'',ps:'',pe:'',wt:0,as:'',ae:'',pct:0}));
   if(!D.material.rows.length)D.material.rows=mk(16);
   if(!D.installation.rows.length)D.installation.rows=mk(16);
 }
+
 async function saveData(){
   let pat=sessionStorage.getItem('ghPAT');
   if(!pat){$('patMo').classList.add('on');return;}
@@ -363,6 +401,7 @@ async function saveData(){
     const j=await r.json();sha=j.content.sha;toast('✓ Saved');
   }catch(e){toast('✗ Error',true);}
 }
+
 function confirmPAT(){const v=$('patIn').value.trim();if(!v)return;sessionStorage.setItem('ghPAT',v);$('patMo').classList.remove('on');saveData();}
 
 // ── NAV ──
@@ -512,6 +551,7 @@ function renderGantt(){
     ctx.font=(r.desc?'13px ':'italic 12px ')+FN;
     ctx.textAlign='left';ctx.fillText(lbl||('row '+r.no),5,y+RH*0.65);
     const s=pd(r.ps),e=pd(r.pe);if(!s||!e)return;
+    
     // Plan bar
     const bx=dx(s),ex=dx(e),bw=Math.max(ex-bx,3);
     const pH=RH*0.38,pY=y+RH*0.08;
@@ -522,6 +562,7 @@ function renderGantt(){
     ctx.fillStyle='#666';ctx.font='10px '+FN;
     ctx.textAlign='right';ctx.fillText(fd(r.ps),bx-3,mY);
     ctx.textAlign='left';ctx.fillText(fd(r.pe),bx+bw+3,mY);
+    
     // Actual bar
     const as=pd(r.as||r.ps),ae=pd(r.ae||r.pe);if(!as||!ae)return;
     const ax=dx(as),aex=dx(ae),aw=Math.max(aex-ax,3);
@@ -602,9 +643,18 @@ function drawSC(cvId,rows,pc,ac){
   // Title top-left
   const title=cvId==='cSC'?(plan==='material'?'Material S-Curve':'Installation S-Curve'):cvId==='cMat'?'Material S-Curve':'Installation S-Curve';
   ctx.fillStyle='#333';ctx.font='bold 11px '+FN;ctx.textAlign='left';ctx.fillText(title,px1,py1-4);
+  
   // As-of date top-right
   ctx.fillStyle='#666';ctx.font='10px '+FN;ctx.textAlign='right';
   ctx.fillText('As of: '+today.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}),W-6,16);
+
+  // Legend (Moved to upper left, just below the title)
+  const legY = py1 + 18; 
+  ctx.fillStyle=pc;ctx.fillRect(px1+3,legY-4,14,4);
+  ctx.fillStyle='#555';ctx.font='10px '+FN;ctx.textAlign='left';ctx.fillText('Plan',px1+20,legY);
+  ctx.strokeStyle=ac;ctx.lineWidth=2;ctx.setLineDash([5,3]);
+  ctx.beginPath();ctx.moveTo(px1+52,legY-2);ctx.lineTo(px1+66,legY-2);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#555';ctx.fillText('Actual',px1+69,legY);
 
   // Y grid
   [0,20,40,60,80,100].forEach(p=>{
@@ -660,13 +710,6 @@ function drawSC(cvId,rows,pc,ac){
     ctx.strokeStyle='#c00';ctx.lineWidth=1;ctx.setLineDash([3,3]);
     ctx.beginPath();ctx.moveTo(tx,py1);ctx.lineTo(tx,py2);ctx.stroke();ctx.setLineDash([]);
   }
-
-  // Legend
-  ctx.fillStyle=pc;ctx.fillRect(px1+3,py2-13,14,4);
-  ctx.fillStyle='#555';ctx.font='10px '+FN;ctx.textAlign='left';ctx.fillText('Plan',px1+20,py2-10);
-  ctx.strokeStyle=ac;ctx.lineWidth=2;ctx.setLineDash([5,3]);
-  ctx.beginPath();ctx.moveTo(px1+52,py2-11);ctx.lineTo(px1+66,py2-11);ctx.stroke();ctx.setLineDash([]);
-  ctx.fillStyle='#555';ctx.fillText('Actual',px1+69,py2-10);
 }
 
 function renderSC(){if(!plan)return;drawSC('cSC',D[plan].rows,plan==='material'?'#1560a8':'#d97706','#2a8a2a');}
