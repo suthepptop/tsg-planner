@@ -4,31 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>TSG Project Planner — Energy Services Co., Ltd.</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
 
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
-/* @font-face for Thai - direct from gstatic */
-@font-face {
-  font-family: 'Sarabun';
-  font-weight: 400;
-  src: local('Sarabun'),
-       url('https://fonts.gstatic.com/s/sarabun/v13/DtVmJx26TKEr37c9YK5sulol.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'Sarabun';
-  font-weight: 600;
-  src: local('Sarabun SemiBold'),
-       url('https://fonts.gstatic.com/s/sarabun/v13/DtVhJx26TKEr37c9YNpo-us.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'Sarabun';
-  font-weight: 700;
-  src: local('Sarabun Bold'),
-       url('https://fonts.gstatic.com/s/sarabun/v13/DtVhJx26TKEr37c9YL5r-us.woff2') format('woff2');
-}
+
 :root {
   --bg:#ffffff; --surface:#f8f9fa; --surface2:#f1f3f5; --surface3:#e9ecef;
   --border:#ced4da; --border2:#dee2e6;
@@ -39,11 +18,11 @@
   --orange:#e8590c; --red:#c92a2a;
   --plan-l1:#1971c2; --plan-l2:#339af0; --plan-l3:#e8590c;
   --actual-l1:#2f9e44; --actual-l2:#51cf66; --actual-l3:#69db7c;
-  --font:'Sarabun',sans-serif;
-  --mono:'IBM Plex Mono','Sarabun',monospace;
+  --font:'Tahoma',sans-serif;
+  --mono:'Tahoma',monospace;
 }
-*{font-family:'Sarabun',sans-serif;}
-input,select,textarea,button{font-family:'Sarabun',sans-serif;}
+*{font-family:'Tahoma',sans-serif;}
+input,select,textarea,button{font-family:'Tahoma',sans-serif;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
 
@@ -163,7 +142,7 @@ thead th{
   letter-spacing:0.02em;text-transform:uppercase;
   background:#e9ecef;border:1px solid #ced4da;
   white-space:nowrap;position:sticky;top:0;z-index:10;
-  font-family:'Sarabun',sans-serif;
+  font-family:'Tahoma',sans-serif;
 }
 tbody tr{border-bottom:1px solid #dee2e6;}
 tbody tr:hover{background:#f1f8ff;}
@@ -175,7 +154,7 @@ td:first-child{border-left:1px solid #dee2e6;}
 /* Editable cells - Excel like */
 .cell-input{
   width:100%;background:transparent;border:none;
-  color:var(--text);font-size:14px;font-family:'Sarabun',sans-serif;
+  color:var(--text);font-size:14px;font-family:'Tahoma',sans-serif;
   padding:3px 4px;transition:all 0.1s;
 }
 .cell-input:focus{outline:2px solid #1971c2;outline-offset:-1px;background:#fff;}
@@ -778,9 +757,9 @@ function getProjectRange(rows) {
 async async function waitFonts() {
   try {
     await Promise.all([
-      document.fonts.load("400 16px Sarabun"),
-      document.fonts.load("600 16px Sarabun"),
-      document.fonts.load("700 16px Sarabun")
+      document.fonts.load("400 16px Tahoma"),
+      document.fonts.load("600 16px Tahoma"),
+      document.fonts.load("700 16px Tahoma")
     ]);
   } catch(e){}
 }
@@ -833,7 +812,7 @@ function renderGantt() {
     ctx.fillStyle=i%2===0?'#1971c2':'#1864ab';
     ctx.fillRect(x1,0,x2-x1,HDR_H);
     ctx.fillStyle='#ffffff';
-    ctx.font='600 19px Sarabun';
+    ctx.font='600 19px Tahoma';
     ctx.textAlign='center';
     ctx.fillText(m.toLocaleString('default',{month:'short'})+"'"+String(m.getFullYear()).slice(2),(x1+x2)/2,17);
   });
@@ -842,7 +821,7 @@ function renderGantt() {
   ctx.fillStyle='#1971c2';
   ctx.fillRect(0,0,LABEL_W,HDR_H);
   ctx.fillStyle='#ffffff';
-  ctx.font='700 22px Sarabun';
+  ctx.font='700 22px Tahoma';
   ctx.textAlign='center';
   ctx.fillText('DESCRIPTION',LABEL_W/2,19);
 
@@ -865,7 +844,7 @@ function renderGantt() {
     ctx.strokeStyle='#ef4444';ctx.lineWidth=1.5;ctx.setLineDash([4,3]);
     ctx.beginPath();ctx.moveTo(tx,HDR_H);ctx.lineTo(tx,H-LEG_H);ctx.stroke();
     ctx.setLineDash([]);
-    ctx.fillStyle='#ef4444';ctx.font='700 16px Sarabun';ctx.textAlign='center';
+    ctx.fillStyle='#ef4444';ctx.font='700 16px Tahoma';ctx.textAlign='center';
     ctx.fillText('TODAY',tx,HDR_H-3);
   }
   ctx.setLineDash([]);
@@ -882,7 +861,7 @@ function renderGantt() {
 
     // item no + description in gantt
     ctx.fillStyle=r.desc?'#212529':'#adb5bd';
-    ctx.font=`${r.desc?'700':'400'} 22px Sarabun`;
+    ctx.font=`${r.desc?'700':'400'} 22px Tahoma`;
     ctx.textAlign='left';
     const ganttLbl=(r.itemNo?(r.itemNo+' '):'')+(r.desc||('row '+r.no));
     ctx.fillText(ganttLbl.substring(0,28), 5, y+rh*0.68);
@@ -900,14 +879,14 @@ function renderGantt() {
 
     // dates outside bar
     const midY=planY+planH/2+3.5;
-    ctx.fillStyle='#868e96';ctx.font='600 18px Sarabun';
+    ctx.fillStyle='#868e96';ctx.font='600 18px Tahoma';
     ctx.textAlign='right'; ctx.fillText(fmtDate(ps),bx-2,midY);
     ctx.textAlign='left';  ctx.fillText(fmtDate(pe),bx+bw+2,midY);
 
     // dur inside
     if(bw>22){
       const dur=dayDiff(ps,pe)+1;
-      ctx.fillStyle='rgba(255,255,255,0.8)';ctx.font='600 14px Sarabun';
+      ctx.fillStyle='rgba(255,255,255,0.8)';ctx.font='600 14px Tahoma';
       ctx.textAlign='center';ctx.fillText(dur+'d',bx+bw/2,planY+planH*0.76);
     }
 
@@ -929,7 +908,7 @@ function renderGantt() {
       ctx.beginPath();ctx.moveTo(ax,actMidY);ctx.lineTo(redW,actMidY);ctx.stroke();
       ctx.lineCap='butt';
       // % label above bar
-      ctx.fillStyle='#ef4444';ctx.font='700 20px Sarabun';
+      ctx.fillStyle='#ef4444';ctx.font='700 20px Tahoma';
       ctx.textAlign='center';ctx.fillText(actPct+'%',ax+(actPct/100)*aew/2,actY-2);
     }
   });
@@ -940,7 +919,7 @@ function renderGantt() {
   ctx.beginPath();ctx.moveTo(0,H-LEG_H);ctx.lineTo(W,H-LEG_H);ctx.stroke();
   const ly=H-LEG_H+7;
   ctx.fillStyle='#3b82f6';ctx.fillRect(LABEL_W+10,ly-4,20,7);
-  ctx.fillStyle='#64748b';ctx.font='18px Sarabun';ctx.textAlign='left';
+  ctx.fillStyle='#64748b';ctx.font='18px Tahoma';ctx.textAlign='left';
   ctx.fillText('Plan',LABEL_W+34,ly+1.5);
   ctx.fillStyle='#22c55e';ctx.fillRect(LABEL_W+74,ly-4,20,7);
   ctx.fillText('Actual (% complete)',LABEL_W+98,ly+1.5);
@@ -1007,7 +986,7 @@ function drawSCurve(canvasId, rows, planColor, actColor) {
     ctx.lineWidth=p===0||p===100?1:0.5;
     ctx.setLineDash(p===0||p===100?[]:[2,3]);
     ctx.beginPath();ctx.moveTo(px1,gy);ctx.lineTo(px2,gy);ctx.stroke();
-    ctx.fillStyle='#868e96';ctx.font='16px Sarabun';
+    ctx.fillStyle='#868e96';ctx.font='16px Tahoma';
     ctx.textAlign='right';ctx.fillText(p+'%',px1-3,gy+3);
   }
   ctx.setLineDash([]);
@@ -1020,7 +999,7 @@ function drawSCurve(canvasId, rows, planColor, actColor) {
     const gx=px1+(dayDiff(projStart,m)/totalDays)*pw;
     ctx.strokeStyle='rgba(206,212,218,0.8)';ctx.lineWidth=0.5;ctx.setLineDash([2,3]);
     ctx.beginPath();ctx.moveTo(gx,py1);ctx.lineTo(gx,py2);ctx.stroke();ctx.setLineDash([]);
-    ctx.fillStyle='#64748b';ctx.font='16px Sarabun';ctx.textAlign='center';
+    ctx.fillStyle='#64748b';ctx.font='16px Tahoma';ctx.textAlign='center';
     ctx.fillText(m.toLocaleString('default',{month:'short'}),gx,py2+14);
   });
 
@@ -1061,7 +1040,7 @@ function drawSCurve(canvasId, rows, planColor, actColor) {
 
   // Legend
   ctx.fillStyle=planColor;ctx.fillRect(px1+3,py2-16,14,4);
-  ctx.fillStyle='#64748b';ctx.font='16px Sarabun';ctx.textAlign='left';ctx.fillText('Plan',px1+20,py2-13);
+  ctx.fillStyle='#64748b';ctx.font='16px Tahoma';ctx.textAlign='left';ctx.fillText('Plan',px1+20,py2-13);
   ctx.strokeStyle=actColor;ctx.lineWidth=1.8;ctx.setLineDash([4,2]);
   ctx.beginPath();ctx.moveTo(px1+48,py2-14);ctx.lineTo(px1+62,py2-14);ctx.stroke();ctx.setLineDash([]);
   ctx.fillStyle='#64748b';ctx.fillText('Actual',px1+65,py2-13);
@@ -1117,7 +1096,7 @@ function drawSCurveCombined(canvasId, rows) {
     ctx.lineWidth=p===0||p===100?1:0.5;
     ctx.setLineDash(p===0||p===100?[]:[2,3]);
     ctx.beginPath();ctx.moveTo(px1,gy);ctx.lineTo(px2,gy);ctx.stroke();
-    ctx.fillStyle='#868e96';ctx.font='16px Sarabun';
+    ctx.fillStyle='#868e96';ctx.font='16px Tahoma';
     ctx.textAlign='right';ctx.fillText(p+'%',px1-3,gy+3);
   }
   ctx.setLineDash([]);
@@ -1130,7 +1109,7 @@ function drawSCurveCombined(canvasId, rows) {
     const gx=px1+(dayDiff(projStart,m)/totalDays)*pw;
     ctx.strokeStyle='rgba(206,212,218,0.8)';ctx.lineWidth=0.5;ctx.setLineDash([2,3]);
     ctx.beginPath();ctx.moveTo(gx,py1);ctx.lineTo(gx,py2);ctx.stroke();ctx.setLineDash([]);
-    ctx.fillStyle='#868e96';ctx.font='16px Sarabun';ctx.textAlign='center';
+    ctx.fillStyle='#868e96';ctx.font='16px Tahoma';ctx.textAlign='center';
     ctx.fillText(m.toLocaleString('default',{month:'short'}),gx,py2+14);
   });
 
@@ -1171,7 +1150,7 @@ function drawSCurveCombined(canvasId, rows) {
 
   // Legend
   ctx.fillStyle='#1971c2';ctx.fillRect(px1+4,py2-18,16,4);
-  ctx.fillStyle='#94a3b8';ctx.font='16px Sarabun';ctx.textAlign='left';
+  ctx.fillStyle='#94a3b8';ctx.font='16px Tahoma';ctx.textAlign='left';
   ctx.fillText('Plan',px1+23,py2-15);
   ctx.strokeStyle='#eab308';ctx.lineWidth=2;ctx.setLineDash([5,3]);
   ctx.beginPath();ctx.moveTo(px1+52,py2-16);ctx.lineTo(px1+68,py2-16);ctx.stroke();ctx.setLineDash([]);
