@@ -7,35 +7,28 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
-<style>
-  /* Fallback: if Google Fonts fails, use system Thai font */
-  @font-face {
-    font-family: 'Sarabun';
-    font-style: normal;
-    font-weight: 400;
-    src: local('Sarabun'), local('Sarabun-Regular'),
-         url('https://fonts.gstatic.com/s/sarabun/v13/DtVmJx26TKEr37c9YK5sulol.woff2') format('woff2');
-    unicode-range: U+0E00-U+0E7F, U+0020-U+007E;
-  }
-  @font-face {
-    font-family: 'Sarabun';
-    font-style: normal;
-    font-weight: 600;
-    src: local('Sarabun SemiBold'), local('Sarabun-SemiBold'),
-         url('https://fonts.gstatic.com/s/sarabun/v13/DtVhJx26TKEr37c9YNpo-us.woff2') format('woff2');
-    unicode-range: U+0E00-U+0E7F, U+0020-U+007E;
-  }
-  @font-face {
-    font-family: 'Sarabun';
-    font-style: normal;
-    font-weight: 700;
-    src: local('Sarabun Bold'), local('Sarabun-Bold'),
-         url('https://fonts.gstatic.com/s/sarabun/v13/DtVhJx26TKEr37c9YL5r-us.woff2') format('woff2');
-    unicode-range: U+0E00-U+0E7F, U+0020-U+007E;
-  }
-</style>
+
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
+/* @font-face for Thai - direct from gstatic */
+@font-face {
+  font-family: 'Sarabun';
+  font-weight: 400;
+  src: local('Sarabun'),
+       url('https://fonts.gstatic.com/s/sarabun/v13/DtVmJx26TKEr37c9YK5sulol.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Sarabun';
+  font-weight: 600;
+  src: local('Sarabun SemiBold'),
+       url('https://fonts.gstatic.com/s/sarabun/v13/DtVhJx26TKEr37c9YNpo-us.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Sarabun';
+  font-weight: 700;
+  src: local('Sarabun Bold'),
+       url('https://fonts.gstatic.com/s/sarabun/v13/DtVhJx26TKEr37c9YL5r-us.woff2') format('woff2');
+}
 :root {
   --bg:#ffffff; --surface:#f8f9fa; --surface2:#f1f3f5; --surface3:#e9ecef;
   --border:#ced4da; --border2:#dee2e6;
