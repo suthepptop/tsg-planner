@@ -72,7 +72,7 @@ body {background:#fff;color:#222}
 .scb canvas {display:block;width:100%}
 
 /* GANTT */
-.gs {background:#fff;border-bottom:1px solid #ddd;overflow-x:auto}
+.gs {background:#fff;border-bottom:1px solid #ddd;overflow-x:hidden}
 .gs canvas {display:block}
 
 /* TABLE */
@@ -144,52 +144,36 @@ body:not(.ed) .ci {pointer-events:none}
 .ok {color:#2a8a2a;font-weight:700}
 .wn {color:#c00;font-weight:700}
 
-/* =======================================================
-   PRINT MODE FOR 100% WIDTH A4 CONTINUOUS PDF EXPORT 
-======================================================= */
+/* PRINT MODE FOR 100% WIDTH A4 CONTINUOUS PDF EXPORT */
 .print-mode {
   width: 1000px !important;
   max-width: 1000px !important;
   min-width: 1000px !important;
   margin: 0 !important;
-  padding: 20px !important; /* Safety padding inside the document */
+  padding: 20px !important; 
   background: #fff !important;
   height: auto !important;
   overflow: visible !important;
-  position: absolute !important; /* Detach from viewport to avoid clipping */
+  position: absolute !important; 
   top: 0 !important;
   left: 0 !important;
   z-index: 9999 !important;
 }
-/* Ensure 100% width and no scrolling for sections */
 .print-mode .scs { padding: 0 0 20px 0 !important; border-bottom: none !important; display: block; }
 .print-mode .scb { width: 100% !important; min-width: 100% !important; border: none !important; padding: 0 !important; box-shadow: none !important; }
 .print-mode .gs { overflow: visible !important; width: 100% !important; min-width: 100% !important; border-bottom: none !important; margin-bottom: 20px !important; }
 .print-mode .ts { overflow: visible !important; width: 100% !important; min-width: 100% !important; }
 .print-mode .tw { overflow: visible !important; width: 100% !important; min-width: 100% !important; }
 .print-mode table { width: 100% !important; min-width: 100% !important; table-layout: fixed !important; border-collapse: collapse !important; }
-
-/* Perfect percentage distribution for Table to fit 100% width beautifully */
 .print-mode .col-no    { width: 4% !important; text-align: center; }
 .print-mode .col-item  { width: 8% !important; }
 .print-mode .col-desc  { width: 34% !important; }
 .print-mode .col-date  { width: 11% !important; text-align: center; }
 .print-mode .col-pct   { width: 5% !important; text-align: center; }
-
-/* Clean styling for Print */
 .print-mode th { font-size: 11px !important; padding: 6px 4px !important; white-space: normal; background: #e8edf2 !important; }
 .print-mode td { padding: 4px !important; border: 1px solid #ddd !important; }
-.print-mode .ci { 
-  font-size: 11px !important; 
-  padding: 0 !important; 
-  background: transparent !important; 
-  border: none !important; 
-  color: #000 !important; 
-  width: 100% !important; 
-  height: auto !important;
-  min-width: 0 !important;
-}
-.print-mode .wtb { display: none !important; } /* Hide the bottom weight bar during print */
+.print-mode .ci { font-size: 11px !important; padding: 0 !important; background: transparent !important; border: none !important; color: #000 !important; width: 100% !important; height: auto !important; min-width: 0 !important; }
+.print-mode .wtb { display: none !important; } 
 
 /* MODAL */
 .mo {display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center}
@@ -204,15 +188,45 @@ body:not(.ed) .ci {pointer-events:none}
 #toast {position:fixed;bottom:18px;right:18px;background:#fff;border:1px solid #ccc;border-radius:5px;padding:7px 14px;font-size:12px;color:#222;box-shadow:0 2px 10px rgba(0,0,0,.12);opacity:0;transition:opacity .3s;pointer-events:none;z-index:999}
 #toast.on {opacity:1}
 
+/* =======================================================
+   MOBILE BROWSER OPTIMIZATIONS (Max Width 768px) 
+======================================================= */
 @media(max-width:768px){
   #hpg.on {flex-direction:column!important;height:auto!important;overflow-y:auto}
   .hsb {width:100%!important;border-right:none;border-bottom:1px solid #ddd}
   .pb {width:100%!important}
-  .hpg-r {padding:10px}
-  .hcb {width:95%;min-width:unset}
-  .scb {width:95%;min-width:unset}
+  .hpg-r {padding:10px; width: 100%; overflow-x: hidden;}
+  .hcb {width:100%; min-width:unset; padding: 5px;}
+  
+  .scs {padding: 10px 5px;}
+  .scb {width:100%; min-width:unset; padding: 5px;}
   #bar h1 {font-size:10px}
+  
+  /* OVERRIDE TABLE FOR MOBILE 100% WIDTH */
+  .ts { width: 100%; overflow-x: hidden; }
+  .tw { width: 100%; overflow-x: hidden; }
+  table { min-width: 100% !important; width: 100% !important; table-layout: fixed; }
+  
+  /* Compress columns */
+  .col-no { width: 6% !important; }
+  .col-item { width: 12% !important; }
+  .col-desc { width: 28% !important; }
+  .col-date { width: 14% !important; }
+  .col-pct { width: 6% !important; }
+  
+  th { font-size: 8px !important; padding: 4px 1px !important; word-wrap: break-word; letter-spacing: -0.2px; }
+  td { padding: 1px !important; height: 26px !important; }
+  .ci { font-size: 9px !important; padding: 0 !important; height: 24px !important; letter-spacing: -0.2px;}
+  
+  /* Hide the native date picker icons to save precious horizontal space */
+  input[type="date"]::-webkit-inner-spin-button,
+  input[type="date"]::-webkit-calendar-picker-indicator { display: none; -webkit-appearance: none; margin: 0; }
+  
+  .wtb { font-size: 10px; flex-wrap: wrap; }
+  .rwc input { width: 35px; font-size: 10px; padding: 2px; }
+  .btnsm { padding: 2px 5px; font-size: 10px; }
 }
+
 @media(max-width:480px){
   #bar h1 {display:none}
   #uinfo {display:none}
@@ -377,43 +391,34 @@ function exportPDF() {
   const element = document.getElementById('ppg');
   const toolbar = document.getElementById('planToolbar');
   
-  // 1. Prepare for Print Mode
   toolbar.style.display = 'none';
   element.classList.add('print-mode');
   
-  // 2. Force graphs to redraw at the new explicitly defined 1000px width
   renderGantt();
   renderSC();
   
-  // 3. Allow time for DOM to settle and Canvas to draw
   setTimeout(() => {
-    // Measure full scroll height
-    const w = element.offsetWidth; // Will be exactly 1000px due to CSS
+    const w = element.offsetWidth; 
     const h = element.offsetHeight;
     
-    // A4 width is ~210mm.
     const mmWidth = 210;
-    // Mathematically calculate the exact proportional height needed for a single page
     const mmHeight = (h / w) * mmWidth;
     
     const opt = {
-      margin:       0, // No external margins; we added padding inside .print-mode
+      margin:       0, 
       filename:     `TSG_${plan}_plan.pdf`,
       image:        { type: 'jpeg', quality: 1.0 },
       html2canvas:  { scale: 2, useCORS: true, windowWidth: w, width: w, height: h, scrollY: 0 },
-      // The secret to continuous, unbroken PDF: set jsPDF format height dynamically
       jsPDF:        { unit: 'mm', format: [mmWidth, mmHeight], orientation: 'portrait' } 
     };
     
     html2pdf().set(opt).from(element).save().then(() => {
-      // Restore view
       toolbar.style.display = 'flex'; 
       element.classList.remove('print-mode');
       renderGantt();
       renderSC();
       toast('✓ PDF Exported Successfully');
     }).catch((err) => {
-      // Ensure we restore view even if it fails
       toolbar.style.display = 'flex'; 
       element.classList.remove('print-mode');
       renderGantt();
@@ -670,7 +675,7 @@ function setupPaste(){
   document.addEventListener('paste',window._pf);
 }
 
-// ── GANTT (DYNAMIC MULTI-LINE TEXT WRAPPING) ──
+// ── GANTT (DYNAMIC MULTI-LINE TEXT WRAPPING + MOBILE RESPONSIVE) ──
 function renderGantt(){
   const cv=$('cGantt'),sec=$('gsec');
   if(!cv||!plan)return;
@@ -678,10 +683,20 @@ function renderGantt(){
   const{start:ps,end:pe,days:td}=getRange(rows);
   const today=new Date();
   
-  // If in print mode, sec will be 1000px wide
-  const W=Math.max(sec.getBoundingClientRect().width||sec.offsetWidth||900,600);
-  const LW = Math.floor(W * 0.35); 
-  const HH=34, LH=26;
+  // Mobile responsive detection
+  const isMob = window.innerWidth <= 768;
+  const secW = sec.getBoundingClientRect().width || sec.offsetWidth || window.innerWidth;
+  
+  // If mobile, use exact container width. If PC, ensure at least 600px
+  const W = isMob ? secW : Math.max(secW, 600);
+  
+  // Apportion width depending on device size
+  const LW = Math.floor(W * (isMob ? 0.30 : 0.35)); 
+  
+  // Scale down row heights slightly on mobile
+  const HH = isMob ? 28 : 34;
+  const LH = isMob ? 20 : 26;
+  const baseRH = isMob ? 30 : 38;
   
   const tmpCtx = cv.getContext('2d');
   const maxW = LW - 10;
@@ -711,9 +726,9 @@ function renderGantt(){
   const rowData = rows.map((r, i) => {
       const lbl = (r.itemNo ? r.itemNo + ' ' : '') + (r.desc || '');
       const isDesc = !!r.desc;
-      tmpCtx.font = (isDesc ? '13px ' : 'italic 12px ') + FN;
+      tmpCtx.font = (isDesc ? (isMob?'10px ':'13px ') : (isMob?'italic 9px ':'italic 12px ')) + FN;
       const lines = getLines(tmpCtx, lbl || ('row '+r.no), maxW);
-      const rh = Math.max(38, lines.length * 18 + 12);
+      const rh = Math.max(baseRH, lines.length * (isMob?14:18) + 12);
       return { r, lines, rh, isDesc };
   });
 
@@ -733,12 +748,12 @@ function renderGantt(){
   ms.forEach((m,i)=>{
     const x1=Math.max(LW,dx(m)),x2=Math.min(W,dx(new Date(m.getFullYear(),m.getMonth()+1,1)));
     ctx.fillStyle=i%2?'#1050a0':'#1560a8';ctx.fillRect(x1,0,x2-x1,HH);
-    ctx.fillStyle='#fff';ctx.font='bold 13px '+FN;ctx.textAlign='center';
-    ctx.fillText(m.toLocaleString('default',{month:'short'})+"'"+String(m.getFullYear()).slice(2),(x1+x2)/2,HH-10);
+    ctx.fillStyle='#fff';ctx.font='bold '+(isMob?'10px ':'13px ')+FN;ctx.textAlign='center';
+    ctx.fillText(m.toLocaleString('default',{month:'short'})+"'"+String(m.getFullYear()).slice(2),(x1+x2)/2,HH - (isMob?8:10));
     if(x1>LW){ctx.strokeStyle='#e0e0e0';ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(x1,HH);ctx.lineTo(x1,H-LH);ctx.stroke();}
   });
   ctx.fillStyle='#1560a8';ctx.fillRect(0,0,LW,HH);
-  ctx.fillStyle='#fff';ctx.font='bold 13px '+FN;ctx.textAlign='center';ctx.fillText('Item / Description',LW/2,HH-10);
+  ctx.fillStyle='#fff';ctx.font='bold '+(isMob?'10px ':'13px ')+FN;ctx.textAlign='center';ctx.fillText('Item / Description',LW/2,HH - (isMob?8:10));
   ctx.strokeStyle='#999';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(LW,0);ctx.lineTo(LW,H);ctx.stroke();
 
   // Draw dynamically wrapped rows
@@ -751,40 +766,41 @@ function renderGantt(){
     
     // Draw Text lines
     ctx.fillStyle=rd.isDesc?'#111':'#aaa';
-    ctx.font=(rd.isDesc?'13px ':'italic 12px ')+FN;
+    ctx.font=(rd.isDesc ? (isMob?'10px ':'13px ') : (isMob?'italic 9px ':'italic 12px ')) + FN;
     ctx.textAlign='left';
     rd.lines.forEach((line, li) => {
-        const textStartY = y + (RH - (rd.lines.length * 18)) / 2 + 13;
-        ctx.fillText(line, 5, textStartY + li * 18);
+        const lh = isMob ? 14 : 18;
+        const textStartY = y + (RH - (rd.lines.length * lh)) / 2 + (isMob?10:13);
+        ctx.fillText(line, 5, textStartY + li * lh);
     });
     
     // Draw Bars
     const s=pd(r.ps),e=pd(r.pe);
     if(s && e){
         const bx=dx(s),ex=dx(e),bw=Math.max(ex-bx,3);
-        const pH=14, pY=y+(RH - 26)/2; 
+        const pH=isMob?10:14, pY=y+(RH - (isMob?20:26))/2; 
         ctx.fillStyle='#1560a8';
         ctx.beginPath();if(ctx.roundRect)ctx.roundRect(bx,pY,bw,pH,3);else ctx.rect(bx,pY,bw,pH);ctx.fill();
-        if(bw>26){ctx.fillStyle='#fff';ctx.font='bold 10px '+FN;ctx.textAlign='center';ctx.fillText(dd(s,e)+1+'d',bx+bw/2,pY+10);}
-        const mY=pY+11;
-        ctx.fillStyle='#666';ctx.font='10px '+FN;
+        if(bw>26){ctx.fillStyle='#fff';ctx.font='bold '+(isMob?'8px ':'10px ')+FN;ctx.textAlign='center';ctx.fillText(dd(s,e)+1+'d',bx+bw/2,pY+(isMob?8:10));}
+        const mY=pY+(isMob?8:11);
+        ctx.fillStyle='#666';ctx.font=(isMob?'8px ':'10px ')+FN;
         ctx.textAlign='right';ctx.fillText(fd(r.ps),bx-3,mY);
         ctx.textAlign='left';ctx.fillText(fd(r.pe),bx+bw+3,mY);
         
         const as=pd(r.as||r.ps),ae=pd(r.ae||r.pe);
         if(as && ae){
             const ax=dx(as),aex=dx(ae),aw=Math.max(aex-ax,3);
-            const aH=10, aY=pY+pH+2;
+            const aH=isMob?8:10, aY=pY+pH+2;
             ctx.fillStyle='#FFD700';
             ctx.beginPath();if(ctx.roundRect)ctx.roundRect(ax,aY,aw,aH,3);else ctx.rect(ax,aY,aw,aH);ctx.fill();
             const pct=+r.pct||0;
             if(pct>0){
                 const rx=ax+(pct/100)*aw, mAY=aY+aH/2;
-                ctx.strokeStyle='#000';ctx.lineWidth=3;ctx.lineCap='round';
+                ctx.strokeStyle='#000';ctx.lineWidth=isMob?2:3;ctx.lineCap='round';
                 ctx.beginPath();ctx.moveTo(ax,mAY);ctx.lineTo(rx,mAY);ctx.stroke();
                 ctx.lineCap='butt';ctx.lineWidth=1;
-                ctx.fillStyle='#000';ctx.font='bold 10px '+FN;ctx.textAlign='right';
-                ctx.fillText(pct+'%',ax-3,aY+8);
+                ctx.fillStyle='#000';ctx.font='bold '+(isMob?'8px ':'10px ')+FN;ctx.textAlign='right';
+                ctx.fillText(pct+'%',ax-3,aY+(isMob?7:8));
             }
         }
     }
@@ -795,18 +811,18 @@ function renderGantt(){
   {const tc=today<ps?ps:today>pe?pe:today,tx=dx(tc);
   ctx.strokeStyle='#c00';ctx.lineWidth=2;ctx.setLineDash([5,3]);
   ctx.beginPath();ctx.moveTo(tx,HH);ctx.lineTo(tx,H-LH);ctx.stroke();ctx.setLineDash([]);
-  ctx.fillStyle='#c00';ctx.font='bold 11px '+FN;ctx.textAlign='center';ctx.fillText('TODAY',tx,HH+13);}
+  ctx.fillStyle='#c00';ctx.font='bold '+(isMob?'9px ':'11px ')+FN;ctx.textAlign='center';ctx.fillText('TODAY',tx,HH+(isMob?10:13));}
 
   // Legend
   ctx.fillStyle='#f4f6f8';ctx.fillRect(0,H-LH,W,LH);
   ctx.strokeStyle='#ddd';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,H-LH);ctx.lineTo(W,H-LH);ctx.stroke();
-  const ly=H-LH+9;
+  const ly=H-LH+(isMob?7:9);
   ctx.fillStyle='#1560a8';ctx.fillRect(LW+8,ly-5,22,9);
-  ctx.fillStyle='#333';ctx.font='11px '+FN;ctx.textAlign='left';ctx.fillText('Plan',LW+34,ly+2);
-  ctx.fillStyle='#FFD700';ctx.fillRect(LW+74,ly-5,22,9);ctx.strokeStyle='#aaa';ctx.lineWidth=.5;ctx.strokeRect(LW+74,ly-5,22,9);
-  ctx.fillStyle='#333';ctx.fillText('Actual',LW+100,ly+2);
-  ctx.strokeStyle='#000';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(LW+76,ly);ctx.lineTo(LW+94,ly);ctx.stroke();
-  ctx.lineWidth=1;ctx.fillStyle='#333';ctx.fillText('(black=Act%)',LW+148,ly+2);
+  ctx.fillStyle='#333';ctx.font=(isMob?'9px ':'11px ')+FN;ctx.textAlign='left';ctx.fillText('Plan',LW+34,ly+(isMob?3:2));
+  ctx.fillStyle='#FFD700';ctx.fillRect(LW+(isMob?60:74),ly-5,22,9);ctx.strokeStyle='#aaa';ctx.lineWidth=.5;ctx.strokeRect(LW+(isMob?60:74),ly-5,22,9);
+  ctx.fillStyle='#333';ctx.fillText('Actual',LW+(isMob?86:100),ly+(isMob?3:2));
+  ctx.strokeStyle='#000';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(LW+(isMob?62:76),ly);ctx.lineTo(LW+(isMob?80:94),ly);ctx.stroke();
+  ctx.lineWidth=1;ctx.fillStyle='#333';ctx.fillText('(black=Act%)',LW+(isMob?124:148),ly+(isMob?3:2));
 }
 
 // ── S-CURVE ──
@@ -837,7 +853,6 @@ function buildC(rows){
 
 function drawSC(cvId,rows,pc,ac){
   const cv=$(cvId);if(!cv)return;
-  // If in print mode, scb width is 1000px
   const W=cv.parentElement.getBoundingClientRect().width||cv.parentElement.offsetWidth||400;
   const H=parseInt(cv.getAttribute('height'))||200;
   if(W<10)return;
