@@ -4,7 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>TSG Project Planner — Energy Services Co., Ltd.</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600;700&family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Sarabun:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 :root {
@@ -17,9 +19,11 @@
   --orange:#e8590c; --red:#c92a2a;
   --plan-l1:#1971c2; --plan-l2:#339af0; --plan-l3:#e8590c;
   --actual-l1:#2f9e44; --actual-l2:#51cf66; --actual-l3:#69db7c;
-  --font:'Sarabun','IBM Plex Sans',system-ui,sans-serif;
-  --mono:'IBM Plex Mono',monospace;
+  --font:'Sarabun',sans-serif;
+  --mono:'IBM Plex Mono','Sarabun',monospace;
 }
+*{font-family:'Sarabun',sans-serif;}
+input,select,textarea,button{font-family:'Sarabun',sans-serif;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
 
@@ -132,26 +136,26 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   border-top:1px solid var(--border);
 }
 .table-wrap{overflow-x:auto;}
-table{width:100%;border-collapse:collapse;font-size:11px;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
 thead th{
-  padding:2px 4px;font-size:9px;font-weight:700;color:#495057;
-  letter-spacing:0.04em;text-transform:uppercase;
+  padding:5px 6px;font-size:11px;font-weight:700;color:#495057;
+  letter-spacing:0.02em;text-transform:uppercase;
   background:#e9ecef;border:1px solid #ced4da;
   white-space:nowrap;position:sticky;top:0;z-index:10;
-  font-family:var(--font);
+  font-family:'Sarabun',sans-serif;
 }
 tbody tr{border-bottom:1px solid #dee2e6;}
 tbody tr:hover{background:#f1f8ff;}
 tbody tr:nth-child(even){background:#f8f9fa;}
 tbody tr:nth-child(even):hover{background:#f1f8ff;}
-td{padding:1px 3px;vertical-align:middle;border-right:1px solid #dee2e6;}
+td{padding:4px 5px;vertical-align:middle;border-right:1px solid #dee2e6;height:28px;}
 td:first-child{border-left:1px solid #dee2e6;}
 
 /* Editable cells - Excel like */
 .cell-input{
   width:100%;background:transparent;border:none;
-  color:var(--text);font-size:10.5px;font-family:var(--font);
-  padding:1px 2px;transition:all 0.1s;
+  color:var(--text);font-size:12px;font-family:'Sarabun',sans-serif;
+  padding:2px 3px;transition:all 0.1s;
 }
 .cell-input:focus{outline:2px solid #1971c2;outline-offset:-1px;background:#fff;}
 .cell-input[readonly]{color:var(--text3);cursor:default;}
@@ -336,15 +340,15 @@ body:not(.editable) .cell-input{
         <table id="dataTable">
           <thead>
             <tr>
-              <th style="width:28px">No.</th>
-              <th style="width:52px">Item No.</th>
-              <th>Description</th>
-              <th style="width:76px">Plan Start</th>
-              <th style="width:76px">Plan Finish</th>
-              <th style="width:36px">Wt%</th>
-              <th style="width:76px">Act Start</th>
-              <th style="width:76px">Act Finish</th>
-              <th style="width:36px">Act%</th>
+              <th style="width:32px">No.</th>
+              <th style="width:60px">Item No.</th>
+              <th style="width:220px">Description</th>
+              <th style="width:80px">Plan Start</th>
+              <th style="width:80px">Plan Finish</th>
+              <th style="width:42px">Wt%</th>
+              <th style="width:80px">Act Start</th>
+              <th style="width:80px">Act Finish</th>
+              <th style="width:42px">Act%</th>
             </tr>
           </thead>
           <tbody id="dataBody"></tbody>
@@ -523,7 +527,7 @@ function goToPlan(plan) {
   document.getElementById('rowCountInput').value = rows.length;
   showPage('planPage');
   renderTable();
-  document.fonts.ready.then(()=>{
+  waitFonts().then(()=>{
     renderGantt();
     renderSCurves();
   });
@@ -750,15 +754,21 @@ function getProjectRange(rows) {
 // ════════════════════════════════════════
 // GANTT CANVAS
 // ════════════════════════════════════════
+async function waitFonts() {
+  await document.fonts.load("400 12px Sarabun");
+  await document.fonts.load("600 12px Sarabun");
+  await document.fonts.load("700 12px Sarabun");
+}
+
 function renderGantt() {
   const wrap = document.getElementById('ganttWrap');
   const canvas = document.getElementById('ganttCanvas');
   if(!wrap||!canvas) return;
   const W=wrap.clientWidth||800;
-  const HDR_H_est=26, LEG_H_est=20;
+  const HDR_H_est=30, LEG_H_est=24;
   const rows2=appData[currentPlan]?.rows||[];
   const N2=Math.max(rows2.length,1);
-  const rowH_est=24;
+  const rowH_est=30;
   const H=HDR_H_est + N2*rowH_est + LEG_H_est + 4;
   canvas.width=W; canvas.height=H;
   canvas.style.width='100%';
@@ -774,9 +784,9 @@ function renderGantt() {
   const {start:pStart, end:pEnd, days:totalDays} = getProjectRange(rows);
   const today = new Date();
 
-  const LABEL_W=60, HDR_H=26, LEG_H=20;
+  const LABEL_W=240, HDR_H=30, LEG_H=24;
   const N=rows.length;
-  const rowH=Math.max(18,(H-HDR_H-LEG_H)/N);
+  const rowH=30;
   const barW=W-LABEL_W;
   const dx=d=>LABEL_W+(d/totalDays)*barW;
   const dxDate=d=>dx(dayDiff(pStart,d));
@@ -798,7 +808,7 @@ function renderGantt() {
     ctx.fillStyle=i%2===0?'#1971c2':'#1864ab';
     ctx.fillRect(x1,0,x2-x1,HDR_H);
     ctx.fillStyle='#ffffff';
-    ctx.font='600 9.5px Sarabun, IBM Plex Sans';
+    ctx.font='600 9.5px Sarabun';
     ctx.textAlign='center';
     ctx.fillText(m.toLocaleString('default',{month:'short'})+"'"+String(m.getFullYear()).slice(2),(x1+x2)/2,17);
   });
@@ -807,9 +817,9 @@ function renderGantt() {
   ctx.fillStyle='#1971c2';
   ctx.fillRect(0,0,LABEL_W,HDR_H);
   ctx.fillStyle='#ffffff';
-  ctx.font='600 9px Sarabun, IBM Plex Sans';
+  ctx.font='700 11px Sarabun';
   ctx.textAlign='center';
-  ctx.fillText('DESCRIPTION',LABEL_W/2,17);
+  ctx.fillText('DESCRIPTION',LABEL_W/2,19);
 
   // divider
   ctx.strokeStyle='#adb5bd'; ctx.lineWidth=1; ctx.setLineDash([]);
@@ -830,7 +840,7 @@ function renderGantt() {
     ctx.strokeStyle='#ef4444';ctx.lineWidth=1.5;ctx.setLineDash([4,3]);
     ctx.beginPath();ctx.moveTo(tx,HDR_H);ctx.lineTo(tx,H-LEG_H);ctx.stroke();
     ctx.setLineDash([]);
-    ctx.fillStyle='#ef4444';ctx.font='700 8px Sarabun, IBM Plex Sans';ctx.textAlign='center';
+    ctx.fillStyle='#ef4444';ctx.font='700 8px Sarabun';ctx.textAlign='center';
     ctx.fillText('TODAY',tx,HDR_H-3);
   }
   ctx.setLineDash([]);
@@ -847,7 +857,7 @@ function renderGantt() {
 
     // item no + description in gantt
     ctx.fillStyle=r.desc?'#212529':'#adb5bd';
-    ctx.font=`${r.desc?'600':'400'} 9px Sarabun,IBM Plex Sans`;
+    ctx.font=`${r.desc?'600':'400'} 11px Sarabun`;
     ctx.textAlign='left';
     const ganttLbl=(r.itemNo?(r.itemNo+' '):'')+(r.desc||('row '+r.no));
     ctx.fillText(ganttLbl.substring(0,28), 5, y+rh*0.68);
@@ -865,7 +875,7 @@ function renderGantt() {
 
     // dates outside bar
     const midY=planY+planH/2+3.5;
-    ctx.fillStyle='#868e96';ctx.font='600 7.5px IBM Plex Mono';
+    ctx.fillStyle='#868e96';ctx.font='600 9px Sarabun';
     ctx.textAlign='right'; ctx.fillText(fmtDate(ps),bx-2,midY);
     ctx.textAlign='left';  ctx.fillText(fmtDate(pe),bx+bw+2,midY);
 
@@ -894,7 +904,7 @@ function renderGantt() {
       ctx.beginPath();ctx.moveTo(ax,actMidY);ctx.lineTo(redW,actMidY);ctx.stroke();
       ctx.lineCap='butt';
       // % label above bar
-      ctx.fillStyle='#ef4444';ctx.font='700 7.5px IBM Plex Mono';
+      ctx.fillStyle='#ef4444';ctx.font='700 10px Sarabun';
       ctx.textAlign='center';ctx.fillText(actPct+'%',ax+(actPct/100)*aew/2,actY-2);
     }
   });
@@ -905,7 +915,7 @@ function renderGantt() {
   ctx.beginPath();ctx.moveTo(0,H-LEG_H);ctx.lineTo(W,H-LEG_H);ctx.stroke();
   const ly=H-LEG_H+7;
   ctx.fillStyle='#3b82f6';ctx.fillRect(LABEL_W+10,ly-4,20,7);
-  ctx.fillStyle='#64748b';ctx.font='9px Sarabun, IBM Plex Sans';ctx.textAlign='left';
+  ctx.fillStyle='#64748b';ctx.font='9px Sarabun';ctx.textAlign='left';
   ctx.fillText('Plan',LABEL_W+34,ly+1.5);
   ctx.fillStyle='#22c55e';ctx.fillRect(LABEL_W+74,ly-4,20,7);
   ctx.fillText('Actual (% complete)',LABEL_W+98,ly+1.5);
@@ -985,7 +995,7 @@ function drawSCurve(canvasId, rows, planColor, actColor) {
     const gx=px1+(dayDiff(projStart,m)/totalDays)*pw;
     ctx.strokeStyle='rgba(206,212,218,0.8)';ctx.lineWidth=0.5;ctx.setLineDash([2,3]);
     ctx.beginPath();ctx.moveTo(gx,py1);ctx.lineTo(gx,py2);ctx.stroke();ctx.setLineDash([]);
-    ctx.fillStyle='#64748b';ctx.font='8px Sarabun, IBM Plex Sans';ctx.textAlign='center';
+    ctx.fillStyle='#64748b';ctx.font='8px Sarabun';ctx.textAlign='center';
     ctx.fillText(m.toLocaleString('default',{month:'short'}),gx,py2+14);
   });
 
@@ -1026,7 +1036,7 @@ function drawSCurve(canvasId, rows, planColor, actColor) {
 
   // Legend
   ctx.fillStyle=planColor;ctx.fillRect(px1+3,py2-16,14,4);
-  ctx.fillStyle='#64748b';ctx.font='8px Sarabun, IBM Plex Sans';ctx.textAlign='left';ctx.fillText('Plan',px1+20,py2-13);
+  ctx.fillStyle='#64748b';ctx.font='8px Sarabun';ctx.textAlign='left';ctx.fillText('Plan',px1+20,py2-13);
   ctx.strokeStyle=actColor;ctx.lineWidth=1.8;ctx.setLineDash([4,2]);
   ctx.beginPath();ctx.moveTo(px1+48,py2-14);ctx.lineTo(px1+62,py2-14);ctx.stroke();ctx.setLineDash([]);
   ctx.fillStyle='#64748b';ctx.fillText('Actual',px1+65,py2-13);
@@ -1095,7 +1105,7 @@ function drawSCurveCombined(canvasId, rows) {
     const gx=px1+(dayDiff(projStart,m)/totalDays)*pw;
     ctx.strokeStyle='rgba(206,212,218,0.8)';ctx.lineWidth=0.5;ctx.setLineDash([2,3]);
     ctx.beginPath();ctx.moveTo(gx,py1);ctx.lineTo(gx,py2);ctx.stroke();ctx.setLineDash([]);
-    ctx.fillStyle='#868e96';ctx.font='8px Sarabun,IBM Plex Sans';ctx.textAlign='center';
+    ctx.fillStyle='#868e96';ctx.font='8px Sarabun';ctx.textAlign='center';
     ctx.fillText(m.toLocaleString('default',{month:'short'}),gx,py2+14);
   });
 
@@ -1136,7 +1146,7 @@ function drawSCurveCombined(canvasId, rows) {
 
   // Legend
   ctx.fillStyle='#1971c2';ctx.fillRect(px1+4,py2-18,16,4);
-  ctx.fillStyle='#94a3b8';ctx.font='8px Sarabun,IBM Plex Sans';ctx.textAlign='left';
+  ctx.fillStyle='#94a3b8';ctx.font='8px Sarabun';ctx.textAlign='left';
   ctx.fillText('Plan',px1+23,py2-15);
   ctx.strokeStyle='#eab308';ctx.lineWidth=2;ctx.setLineDash([5,3]);
   ctx.beginPath();ctx.moveTo(px1+52,py2-16);ctx.lineTo(px1+68,py2-16);ctx.stroke();ctx.setLineDash([]);
@@ -1170,7 +1180,7 @@ function resizeHomeCharts() {
 // RESIZE
 // ════════════════════════════════════════
 async function resizeAll() {
-  await document.fonts.ready;
+  await waitFonts();
   const activePage=document.querySelector('.page.active');
   if(!activePage) return;
   if(activePage.id==='homePage') {
@@ -1193,7 +1203,7 @@ window.addEventListener('orientationchange',()=>{setTimeout(resizeAll,200);});
 // ════════════════════════════════════════
 function renderAll() {
   initDefaultData();
-  document.fonts.ready.then(()=>{
+  waitFonts().then(()=>{
     renderHomeCharts();
   });
 }
