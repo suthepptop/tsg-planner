@@ -252,6 +252,7 @@ body:not(.editable) .cell-input{
       <input type="number" id="rowCountInput" min="1" max="200" value="16">
       <button class="btn btn-sm" onclick="applyRowCount()">Apply</button>
     </div>
+    <button class="btn btn-sm btn-danger" id="resetBtn" onclick="resetTable()" style="display:none">✕ Reset</button>
     <button class="btn btn-sm btn-primary" id="saveBtn" onclick="saveData()" style="display:none">💾 Save</button>
   </div>
   <div class="plan-body">
@@ -286,13 +287,9 @@ body:not(.editable) .cell-input{
         <canvas id="ganttCanvas"></canvas>
       </div>
       <div class="scurve-wrap">
-        <div class="sc-half" id="scHalf1">
-          <div class="sc-label" id="scLabel1">S-CURVE PLAN</div>
+        <div class="sc-half" id="scHalf1" style="flex:1">
+          <div class="sc-label" id="scLabel1">S-CURVE</div>
           <canvas id="scCanvas1"></canvas>
-        </div>
-        <div class="sc-half" id="scHalf2">
-          <div class="sc-label" id="scLabel2">S-CURVE ACTUAL</div>
-          <canvas id="scCanvas2"></canvas>
         </div>
       </div>
     </div>
@@ -365,6 +362,7 @@ function handleCredential(response) {
   if(isEditor) {
     document.body.classList.add('editable');
     document.getElementById('saveBtn').style.display = 'inline-block';
+    document.getElementById('resetBtn').style.display = 'inline-block';
     document.getElementById('rowInputWrap').style.display = 'flex';
     // Re-render table to enable inputs and setup paste
     if(currentPlan) { renderTable(); renderGantt(); renderSCurves(); }
@@ -458,6 +456,7 @@ function goToPlan(plan) {
   document.getElementById('scLabel2').textContent  = plan==='material' ? 'MATERIAL — ACTUAL' : 'INSTALL — ACTUAL';
   if(isEditor) {
     document.getElementById('saveBtn').style.display = 'inline-block';
+    document.getElementById('resetBtn').style.display = 'inline-block';
     document.getElementById('rowInputWrap').style.display = 'flex';
   }
   const rows = appData[plan].rows;
@@ -478,6 +477,15 @@ function goHome() {
 // ════════════════════════════════════════
 // ROW MANAGEMENT
 // ════════════════════════════════════════
+function resetTable() {
+  if(!isEditor) return;
+  if(!confirm('Reset all rows? This cannot be undone until you save.')) return;
+  const n=parseInt(document.getElementById('rowCountInput').value)||16;
+  appData[currentPlan].rows=Array.from({length:n},(_,i)=>({no:i+1,itemNo:'',desc:'',start:'',finish:'',wt:0,actPct:0,actStart:'',actFinish:''}));
+  renderTable(); renderGantt(); renderSCurves();
+  toast('✓ Table reset');
+}
+
 function applyRowCount() {
   if(!isEditor) return;
   const n = parseInt(document.getElementById('rowCountInput').value)||16;
@@ -503,8 +511,8 @@ function renderTable() {
       <td><input class="cell-input mono num" value="${r.no}" ${ro?'readonly':''} onchange="upd(${i},'no',this.value)" style="width:26px"></td>
       <td><input class="cell-input mono" value="${r.itemNo||''}" ${ro?'readonly':''} onchange="upd(${i},'itemNo',this.value)" style="width:50px"></td>
       <td><input class="cell-input" value="${r.desc||''}" ${ro?'readonly':''} onchange="upd(${i},'desc',this.value)"></td>
-      <td><input class="cell-input mono" value="${r.start||''}" ${ro?'readonly':''} onchange="updDate(${i},'start',this.value)" placeholder="dd/mm/yyyy" style="width:68px"></td>
-      <td><input class="cell-input mono" value="${r.finish||''}" ${ro?'readonly':''} onchange="updDate(${i},'finish',this.value)" placeholder="dd/mm/yyyy" style="width:68px"></td>
+      <td><input class="cell-input mono" type="date" value="${toInputDate(r.start)}" ${ro?'readonly':''} onchange="updDate(${i},'start',fromInputDate(this.value))" style="width:76px"></td>
+      <td><input class="cell-input mono" type="date" value="${toInputDate(r.finish)}" ${ro?'readonly':''} onchange="updDate(${i},'finish',fromInputDate(this.value))" style="width:76px"></td>
       <td><input class="cell-input mono num" value="${r.wt||0}" ${ro?'readonly':''} onchange="upd(${i},'wt',+this.value)" style="width:36px"></td>
       <td><input class="cell-input mono" type="date" value="${toInputDate(r.actStart||r.start)}" ${ro?'readonly':''} onchange="updActDate(${i},'actStart',this.value)" style="width:76px"></td>
       <td><input class="cell-input mono" type="date" value="${toInputDate(r.actFinish||r.finish)}" ${ro?'readonly':''} onchange="updActDate(${i},'actFinish',this.value)" style="width:76px"></td>
@@ -796,24 +804,26 @@ function renderGantt() {
       ctx.textAlign='center';ctx.fillText(dur+'d',bx+bw/2,planY+planH*0.76);
     }
 
-    // Actual bar — full width actStart to actFinish
+    // Actual bar — full width actStart to actFinish, dark yellow
     const as=parseDate(r.actStart||r.start), ae=parseDate(r.actFinish||r.finish);
     if(!as||!ae) return;
     const ax=dxDate(as), aex=dxDate(ae), aew=Math.max(aex-ax,2);
     const actH=rh*0.30, actY=y+rh*0.56;
-    ctx.fillStyle='#22c55e';
+    const actMidY=actY+actH/2;
+    ctx.fillStyle='#b8860b';
     ctx.beginPath();
     if(ctx.roundRect) ctx.roundRect(ax,actY,aew,actH,2); else ctx.rect(ax,actY,aew,actH);
     ctx.fill();
-    // Red % line inside bar
+    // Red horizontal thick line at mid-height from left to Act% width
     const actPct=(+r.actPct||0);
     if(actPct>0 && actPct<=100){
-      const redX=ax+(actPct/100)*aew;
-      ctx.strokeStyle='#ef4444';ctx.lineWidth=1.5;
-      ctx.beginPath();ctx.moveTo(redX,actY-1);ctx.lineTo(redX,actY+actH+1);ctx.stroke();
-      // % label above red line
+      const redW=ax+(actPct/100)*aew;
+      ctx.strokeStyle='#ef4444';ctx.lineWidth=3;ctx.lineCap='round';
+      ctx.beginPath();ctx.moveTo(ax,actMidY);ctx.lineTo(redW,actMidY);ctx.stroke();
+      ctx.lineCap='butt';
+      // % label above bar
       ctx.fillStyle='#ef4444';ctx.font='700 7.5px IBM Plex Mono';
-      ctx.textAlign='center';ctx.fillText(actPct+'%',redX,actY-3);
+      ctx.textAlign='center';ctx.fillText(actPct+'%',ax+(actPct/100)*aew/2,actY-2);
     }
   });
 
@@ -948,12 +958,119 @@ function drawSCurve(canvasId, rows, planColor, actColor) {
   ctx.fillStyle='#64748b';ctx.fillText('Actual',px1+65,py2-13);
 }
 
+function drawSCurveCombined(canvasId, rows) {
+  const canvas=document.getElementById(canvasId);
+  if(!canvas) return;
+  const wrap=canvas.parentElement;
+  const W=wrap.clientWidth, H=wrap.clientHeight;
+  if(!W||!H) return;
+  canvas.width=W; canvas.height=H;
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#0f1117'; ctx.fillRect(0,0,W,H);
+
+  const PL=38,PR=14,PT=28,PB=28;
+  const pw=W-PL-PR, ph=H-PT-PB;
+  const px1=PL,py1=PT,px2=PL+pw,py2=PT+ph;
+
+  const {start:projStart,end:projEnd,days:totalDays}=getProjectRange(rows);
+  const today=new Date();
+  const totalW=rows.reduce((s,r)=>s+(+r.wt||0),0);
+
+  // Build plan cumulative
+  const plan=new Array(totalDays).fill(0);
+  const act=new Array(totalDays).fill(0);
+  if(totalW>0){
+    rows.forEach(r=>{
+      const w=(+r.wt||0)/totalW; if(!w) return;
+      const ps=parseDate(r.start),pe=parseDate(r.finish);
+      if(!ps||!pe) return;
+      const sd=Math.max(0,dayDiff(projStart,ps));
+      const ed=Math.min(totalDays-1,dayDiff(projStart,pe));
+      const span=ed-sd+1; if(span<=0) return;
+      for(let d=sd;d<=ed;d++) plan[d]+=w/span;
+      // actual
+      const as2=parseDate(r.actStart||r.start), ae2=parseDate(r.actFinish||r.finish);
+      const pct=(+r.actPct||0)/100; if(pct<=0) return;
+      const asd=Math.max(0,dayDiff(projStart,as2));
+      const aed=Math.min(totalDays-1,dayDiff(projStart,ae2));
+      const aspan=aed-asd+1; if(aspan<=0) return;
+      for(let d=asd;d<=aed;d++) act[d]+=w*pct/aspan;
+    });
+    for(let d=1;d<totalDays;d++){plan[d]+=plan[d-1];act[d]+=act[d-1];}
+  }
+
+  // Y grid
+  for(let p=0;p<=100;p+=20){
+    const gy=py2-(p/100)*ph;
+    ctx.strokeStyle=p===0||p===100?'#2a3444':'rgba(42,52,68,0.5)';
+    ctx.lineWidth=p===0||p===100?1:0.5;
+    ctx.setLineDash(p===0||p===100?[]:[2,3]);
+    ctx.beginPath();ctx.moveTo(px1,gy);ctx.lineTo(px2,gy);ctx.stroke();
+    ctx.fillStyle='#64748b';ctx.font='8px IBM Plex Mono';
+    ctx.textAlign='right';ctx.fillText(p+'%',px1-3,gy+3);
+  }
+  ctx.setLineDash([]);
+
+  // X months
+  const months=[];
+  let mc=new Date(projStart.getFullYear(),projStart.getMonth(),1);
+  while(mc<=projEnd){months.push(new Date(mc));mc=new Date(mc.getFullYear(),mc.getMonth()+1,1);}
+  months.forEach(m=>{
+    const gx=px1+(dayDiff(projStart,m)/totalDays)*pw;
+    ctx.strokeStyle='rgba(42,52,68,0.6)';ctx.lineWidth=0.5;ctx.setLineDash([2,3]);
+    ctx.beginPath();ctx.moveTo(gx,py1);ctx.lineTo(gx,py2);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='#64748b';ctx.font='8px Sarabun,IBM Plex Sans';ctx.textAlign='center';
+    ctx.fillText(m.toLocaleString('default',{month:'short'}),gx,py2+14);
+  });
+
+  // Axes
+  ctx.strokeStyle='#2a3444';ctx.lineWidth=1;ctx.setLineDash([]);
+  ctx.beginPath();ctx.moveTo(px1,py1);ctx.lineTo(px1,py2);ctx.lineTo(px2,py2);ctx.stroke();
+
+  const step=Math.max(1,Math.floor(totalDays/300));
+  const planPts=[],actPts=[];
+  for(let d=0;d<totalDays;d+=step){
+    planPts.push([px1+(d/totalDays)*pw, py2-plan[d]*ph]);
+    actPts.push([px1+(d/totalDays)*pw,  py2-act[d]*ph]);
+  }
+
+  const drawLine=(pts,color,dash)=>{
+    if(!pts.length) return;
+    ctx.strokeStyle=color;ctx.lineWidth=2;ctx.setLineDash(dash||[]);
+    ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);
+    pts.forEach(([x,y])=>ctx.lineTo(x,y));
+    ctx.stroke();ctx.setLineDash([]);
+  };
+
+  // Area fill
+  ctx.beginPath();ctx.moveTo(planPts[0][0],py2);
+  planPts.forEach(([x,y])=>ctx.lineTo(x,y));
+  ctx.lineTo(planPts[planPts.length-1][0],py2);ctx.closePath();
+  ctx.fillStyle='#e2e8f020';ctx.fill();
+
+  drawLine(planPts,'#e2e8f0');
+  drawLine(actPts,'#eab308',[5,3]);
+
+  // Today
+  if(today>=projStart&&today<=projEnd){
+    const tx=px1+(dayDiff(projStart,today)/totalDays)*pw;
+    ctx.strokeStyle='#ef4444';ctx.lineWidth=1;ctx.setLineDash([3,3]);
+    ctx.beginPath();ctx.moveTo(tx,py1);ctx.lineTo(tx,py2);ctx.stroke();ctx.setLineDash([]);
+  }
+
+  // Legend
+  ctx.fillStyle='#e2e8f0';ctx.fillRect(px1+4,py2-18,16,4);
+  ctx.fillStyle='#94a3b8';ctx.font='8px IBM Plex Sans';ctx.textAlign='left';
+  ctx.fillText('Plan',px1+23,py2-15);
+  ctx.strokeStyle='#eab308';ctx.lineWidth=2;ctx.setLineDash([5,3]);
+  ctx.beginPath();ctx.moveTo(px1+52,py2-16);ctx.lineTo(px1+68,py2-16);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#94a3b8';ctx.fillText('Actual',px1+71,py2-15);
+}
+
 function renderSCurves() {
   if(!currentPlan) return;
   const rows=appData[currentPlan].rows;
-  // Top half: plan curve, bottom half: actual progress curve (same data, different view label)
-  drawSCurve('scCanvas1',rows,'#e2e8f0','#3b82f6');
-  drawSCurve('scCanvas2',rows,'#eab308','#22c55e');
+  drawSCurveCombined('scCanvas1', rows);
 }
 
 // ════════════════════════════════════════
