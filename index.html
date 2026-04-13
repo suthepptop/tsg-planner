@@ -2,1223 +2,636 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>TSG Project Planner — Energy Services Co., Ltd.</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSG Project Planner</title>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: Tahoma, sans-serif; }
+body { background: #fff; color: #222; }
 
-:root {
-  --bg:#ffffff; --surface:#f8f9fa; --surface2:#f1f3f5; --surface3:#e9ecef;
-  --border:#ced4da; --border2:#dee2e6;
-  --text:#212529; --text2:#495057; --text3:#868e96;
-  --accent:#1971c2; --accent2:#1864ab;
-  --green:#2f9e44; --green2:#2b8a3e;
-  --yellow:#e67700; --yellow2:#d9480f;
-  --orange:#e8590c; --red:#c92a2a;
-  --plan-l1:#1971c2; --plan-l2:#339af0; --plan-l3:#e8590c;
-  --actual-l1:#2f9e44; --actual-l2:#51cf66; --actual-l3:#69db7c;
-  --font:'Tahoma',sans-serif;
-  --mono:'Tahoma',monospace;
+#topbar {
+  position: sticky; top: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px; height: 44px;
+  background: #1560a8; border-bottom: 2px solid #0f4a8a;
 }
-*{font-family:'Tahoma',sans-serif;}
-input,select,textarea,button{font-family:'Tahoma',sans-serif;}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+#topbar h1 { font-size: 14px; font-weight: bold; color: #fff; }
+#topbar .right { display: flex; align-items: center; gap: 10px; }
+#userInfo { font-size: 12px; color: rgba(255,255,255,0.85); }
 
-/* ── TOPBAR ── */
-#topbar{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:6px 16px;background:#1971c2;border-bottom:1px solid #1864ab;
-  position:sticky;top:0;z-index:200;height:40px;
-}
-#topbar h1{font-size:14px;font-weight:700;color:#fff;letter-spacing:0.04em;}
-#topbar .right{display:flex;align-items:center;gap:10px;}
-#userInfo{font-size:13px;color:rgba(255,255,255,0.8);font-family:var(--mono);}
-.btn{
-  padding:6px 14px;border-radius:4px;border:1px solid var(--border);
-  background:#fff;color:var(--text);font-size:13px;font-family:var(--font);
-  cursor:pointer;transition:all 0.15s;white-space:nowrap;
-}
-.btn:hover{background:var(--surface2);}
-.btn-primary{background:#1971c2;border-color:#1971c2;color:#fff;}
-.btn-primary:hover{background:#1864ab;}
-.btn-danger{background:#fff;border-color:#c92a2a;color:#c92a2a;}
-.btn-danger:hover{background:#fff5f5;}
-.btn-sm{padding:3px 8px;font-size:10px;}
+.btn { padding: 5px 14px; border-radius: 4px; border: 1px solid #aaa; background: #fff; color: #222; font-size: 13px; font-family: Tahoma, sans-serif; cursor: pointer; }
+.btn:hover { background: #f0f0f0; }
+.btn-primary { background: #1560a8; border-color: #1560a8; color: #fff; }
+.btn-primary:hover { background: #0f4a8a; }
+.btn-danger { background: #fff; border-color: #c00; color: #c00; }
+.btn-danger:hover { background: #fff0f0; }
+.btn-sm { padding: 3px 10px; font-size: 12px; }
 
-/* ── PAGES ── */
-.page{display:none;}
-.page.active{display:block;}
-#homePage.active{display:flex;}
+.page { display: none; }
+.page.active { display: block; }
+#homePage.active { display: flex; height: calc(100vh - 44px); }
 
-/* ══════════════════════════════
-   HOME PAGE
-══════════════════════════════ */
-#homePage{flex-direction:row!important;}
-.home-left{
-  width:200px;min-width:200px;
-  background:var(--surface);border-right:1px solid var(--border);
-  display:flex;flex-direction:column;align-items:stretch;justify-content:center;
-  gap:10px;padding:20px 14px;
-}
-.home-left h2{font-size:11px;color:var(--text3);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;}
-.plan-btn{
-  width:100%;padding:12px 12px;border-radius:6px;border:1px solid var(--border);
-  background:var(--surface2);cursor:pointer;transition:all 0.2s;
-  text-align:left;font-family:var(--font);
-}
-.plan-btn:hover{border-color:var(--accent);background:var(--surface3);}
-.plan-btn .pb-icon{font-size:16px;margin-bottom:3px;}
-.plan-btn .pb-title{font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px;}
-.plan-btn .pb-sub{font-size:9px;color:var(--text3);}
-.plan-btn.mat .pb-icon{color:#1971c2;}
-.plan-btn.inst .pb-icon{color:#e67700;}
+.home-left { width: 200px; min-width: 200px; background: #f4f6f8; border-right: 1px solid #ddd; display: flex; flex-direction: column; align-items: stretch; justify-content: center; gap: 12px; padding: 20px 14px; }
+.home-left h2 { font-size: 11px; color: #888; font-weight: bold; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+.plan-btn { width: 100%; padding: 12px 10px; border-radius: 6px; border: 1px solid #ccc; background: #fff; cursor: pointer; text-align: left; transition: all 0.15s; }
+.plan-btn:hover { border-color: #1560a8; background: #eef4ff; }
+.plan-btn .pb-icon { font-size: 18px; margin-bottom: 4px; }
+.plan-btn .pb-title { font-size: 13px; font-weight: bold; color: #222; margin-bottom: 2px; }
+.plan-btn .pb-sub { font-size: 10px; color: #888; }
 
-.home-right{
-  flex:1;display:flex;flex-direction:column;
-  padding:16px;gap:12px;overflow-y:auto;background:#f8f9fa;
-  align-items:center;
-}
-.home-chart-wrap{height:240px;width:50%;min-width:360px;position:relative;}
-.home-chart-title{
-  position:absolute;top:8px;left:50%;transform:translateX(-50%);
-  font-size:10px;font-weight:600;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;
-  pointer-events:none;
-}
-.home-chart-wrap canvas{display:block;width:100%;height:100%;}
+.home-right { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 20px; gap: 16px; background: #f9f9f9; overflow-y: auto; }
+.home-chart-box { width: 50%; min-width: 360px; background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 8px; }
+.home-chart-box h3 { text-align: center; font-size: 12px; color: #555; font-weight: bold; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+.home-chart-box canvas { display: block; width: 100%; }
 
-/* ══════════════════════════════
-   PLAN PAGE
-══════════════════════════════ */
-#planPage{overflow-y:auto;}
-.plan-topbar{
-  display:flex;align-items:center;gap:8px;padding:6px 12px;
-  background:#f1f3f5;border-bottom:1px solid var(--border);
-  flex-wrap:wrap;
-  position:sticky;top:40px;z-index:100;
-}
-.plan-title{font-size:14px;font-weight:700;color:var(--text);letter-spacing:0.04em;}
-.plan-topbar .spacer{flex:1;}
-.row-input-wrap{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);}
-.row-input-wrap input{
-  width:52px;padding:3px 6px;border-radius:4px;border:1px solid var(--border);
-  background:var(--surface2);color:var(--text);font-size:11px;font-family:var(--mono);
-  text-align:center;
-}
-.row-input-wrap input:focus{outline:none;border-color:var(--accent);}
+.plan-topbar { position: sticky; top: 44px; z-index: 100; display: flex; align-items: center; gap: 8px; padding: 6px 14px; background: #f0f2f5; border-bottom: 1px solid #ddd; flex-wrap: wrap; }
+.plan-title { font-size: 15px; font-weight: bold; color: #1560a8; }
+.spacer { flex: 1; }
+.row-ctrl { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #666; }
+.row-ctrl input { width: 52px; padding: 3px 6px; border: 1px solid #ccc; border-radius: 3px; font-size: 12px; text-align: center; font-family: Tahoma, sans-serif; }
 
-.plan-body{display:block;padding-bottom:40px;}
+.sc-section { display: flex; justify-content: center; padding: 16px 0 12px; background: #fff; border-bottom: 1px solid #ddd; }
+.sc-box { width: 50%; min-width: 380px; background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 8px; }
+.sc-box h3 { text-align: center; font-size: 12px; font-weight: bold; color: #555; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+.sc-box canvas { display: block; width: 100%; }
 
-/* S-curve section - top, centered 50% */
-.scurve-section{
-  height:320px;
-  padding:16px 0 10px;
-  background:#fff;
-  border-bottom:1px solid var(--border);
-  display:flex;justify-content:center;
-}
-.scurve-inner{
-  width:50%;min-width:400px;
-  position:relative;
-}
+.gantt-section { background: #fff; border-bottom: 1px solid #ddd; overflow-x: auto; }
+.gantt-section canvas { display: block; }
 
-/* Gantt section - middle, auto height */
-.gantt-section{
-  border-bottom:1px solid var(--border);
-  background:#fff;
-  overflow-x:auto;
-}
+.table-section { background: #fff; }
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; font-size: 13px; width: 100%; }
+thead th { padding: 6px 8px; background: #e8edf2; border: 1px solid #bbb; font-size: 12px; font-weight: bold; color: #333; white-space: nowrap; position: sticky; top: 0; z-index: 5; text-align: left; }
+tbody tr:nth-child(even) { background: #f7f9fb; }
+tbody tr:hover { background: #eef4ff; }
+td { border: 1px solid #ddd; padding: 3px 5px; height: 32px; vertical-align: middle; }
 
-/* Table section - bottom */
-.table-side{
-  background:#fff;
-  border-top:1px solid var(--border);
-}
-.table-wrap{overflow-x:auto;}
-table{width:100%;border-collapse:collapse;font-size:14px;}
-thead th{
-  padding:6px 8px;font-size:13px;font-weight:700;color:#495057;
-  letter-spacing:0.02em;text-transform:uppercase;
-  background:#e9ecef;border:1px solid #ced4da;
-  white-space:nowrap;position:sticky;top:0;z-index:10;
-  font-family:'Tahoma',sans-serif;
-}
-tbody tr{border-bottom:1px solid #dee2e6;}
-tbody tr:hover{background:#f1f8ff;}
-tbody tr:nth-child(even){background:#f8f9fa;}
-tbody tr:nth-child(even):hover{background:#f1f8ff;}
-td{padding:5px 6px;vertical-align:middle;border-right:1px solid #dee2e6;height:34px;}
-td:first-child{border-left:1px solid #dee2e6;}
+.ci { width: 100%; border: none; background: transparent; font-size: 13px; font-family: Tahoma, sans-serif; color: #222; padding: 2px 3px; }
+.ci:focus { outline: 2px solid #1560a8; outline-offset: -1px; background: #fff; }
+.ci[readonly] { color: #888; cursor: default; }
+.ci.r { text-align: right; }
+body.editor .ci:not([readonly]) { background: #fffef0; cursor: text; pointer-events: all; }
+body:not(.editor) .ci { pointer-events: none; }
 
-/* Editable cells - Excel like */
-.cell-input{
-  width:100%;background:transparent;border:none;
-  color:var(--text);font-size:14px;font-family:'Tahoma',sans-serif;
-  padding:3px 4px;transition:all 0.1s;
-}
-.cell-input:focus{outline:2px solid #1971c2;outline-offset:-1px;background:#fff;}
-.cell-input[readonly]{color:var(--text3);cursor:default;}
-.cell-input.mono{font-family:var(--mono);font-size:10px;}
-.cell-input.num{text-align:right;}
-body.editable .cell-input:not([readonly]){
-  background:#fff;color:#212529;cursor:text;pointer-events:all;
-}
-body:not(.editable) .cell-input{
-  pointer-events:none;background:transparent;color:#495057;cursor:default;
-}
+.weight-bar { padding: 5px 14px; background: #f4f6f8; border-top: 1px solid #ddd; font-size: 12px; color: #555; display: flex; gap: 20px; }
+.ok { color: #2a8a2a; font-weight: bold; }
+.warn { color: #c00; font-weight: bold; }
 
-/* Weight sum */
-.weight-bar{
-  padding:4px 12px;border-top:1px solid var(--border);
-  display:flex;gap:16px;font-size:13px;font-family:var(--mono);color:var(--text2);
-  background:#f8f9fa;position:sticky;bottom:0;
-}
-.wok{color:var(--green)!important;} .wwarn{color:var(--red)!important;}
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 500; align-items: center; justify-content: center; }
+.modal-overlay.show { display: flex; }
+.modal { background: #fff; border-radius: 8px; padding: 24px 28px; min-width: 340px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+.modal h2 { font-size: 15px; margin-bottom: 8px; }
+.modal p { font-size: 12px; color: #666; margin-bottom: 16px; line-height: 1.6; }
+.modal label { font-size: 11px; color: #666; display: block; margin-bottom: 3px; }
+.modal input { width: 100%; padding: 7px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 12px; margin-bottom: 12px; font-family: Tahoma, sans-serif; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
 
-/* Gantt wrap */
-.gantt-wrap{width:100%;height:100%;overflow:hidden;position:relative;}
-.gantt-wrap canvas{display:block;}
-/* Scurve wrap */
-.scurve-wrap{width:100%;height:100%;display:flex;flex-direction:column;}
-.sc-half{flex:1;position:relative;overflow:hidden;}
-.sc-half canvas{display:block;}
-.sc-label{
-  position:absolute;top:6px;left:50%;transform:translateX(-50%);
-  font-size:13px;font-weight:600;color:#495057;letter-spacing:0.04em;
-  text-transform:uppercase;pointer-events:none;white-space:nowrap;
-}
+#toast { position: fixed; bottom: 20px; right: 20px; background: #fff; border: 1px solid #ccc; border-radius: 6px; padding: 8px 16px; font-size: 12px; color: #222; box-shadow: 0 2px 10px rgba(0,0,0,0.12); opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 999; }
+#toast.show { opacity: 1; }
 
-/* ── MODAL ── */
-.modal-overlay{
-  display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);
-  z-index:500;align-items:center;justify-content:center;
-}
-.modal-overlay.show{display:flex;}
-.modal{
-  background:#ffffff;border:1px solid #ced4da;border-radius:8px;
-  padding:24px 28px;min-width:340px;max-width:480px;
-  box-shadow:0 4px 24px rgba(0,0,0,0.12);
-}
-.modal h2{font-size:14px;font-weight:700;margin-bottom:6px;}
-.modal p{font-size:11px;color:var(--text3);margin-bottom:18px;line-height:1.6;}
-.modal input{
-  width:100%;padding:6px 10px;border-radius:4px;border:1px solid #ced4da;
-  background:#fff;color:#212529;font-size:11px;font-family:var(--mono);
-  margin-bottom:10px;
-}
-.modal input:focus{outline:none;border-color:var(--accent);}
-.modal .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:8px;}
-.modal label{font-size:10px;color:var(--text3);display:block;margin-bottom:3px;}
-
-/* ── TOAST ── */
-#toast{
-  position:fixed;bottom:20px;right:20px;background:#fff;
-  border:1px solid #ced4da;border-radius:6px;padding:8px 16px;
-  font-size:11px;color:#212529;z-index:999;opacity:0;
-  box-shadow:0 2px 12px rgba(0,0,0,0.1);
-  transition:opacity 0.3s;pointer-events:none;
-}
-#toast.show{opacity:1;}
-
-/* ══════════════════════════════
-   MOBILE RESPONSIVE
-══════════════════════════════ */
 @media (max-width: 768px) {
-  #topbar h1 { font-size:10px; }
-  #userInfo { display:none; }
-
-  /* Home page — vertical stack */
-  #homePage { flex-direction:column !important; height:auto !important; }
-  .home-left {
-    width:100% !important; min-width:unset !important;
-    flex-direction:row !important; flex-wrap:wrap;
-    border-right:none !important; border-bottom:1px solid #dee2e6;
-    padding:10px 12px !important; gap:8px !important;
-    justify-content:flex-start !important;
-  }
-  .home-left h2 { width:100%; margin-bottom:0; }
-  .plan-btn { width:calc(50% - 4px) !important; padding:10px 8px !important; }
-  .home-right { padding:8px; gap:8px; }
-  .home-chart-wrap { height:180px !important; }
-
-  /* S-curve: full width on mobile */
-  .scurve-inner { width:95% !important; min-width:unset !important; }
-
-  /* Table horizontal scroll */
-  .table-wrap { overflow-x:auto; }
-  table { min-width:580px; }
-
-  /* Plan topbar */
-  .plan-topbar { gap:6px; padding:6px 10px; top:40px; }
-  .plan-title { font-size:11px; }
-  .row-input-wrap { font-size:10px; }
-
-  /* Bigger tap targets */
-  .btn { padding:7px 12px; font-size:11px; }
-  .cell-input { font-size:12px; padding:3px 4px; }
-  input[type="date"] { font-size:11px; }
-}
-
-@media (max-width: 480px) {
-  .plan-btn { width:100% !important; }
-  #topbar h1 { font-size:9px; letter-spacing:0; }
-  .scurve-inner { width:98% !important; }
+  #homePage.active { flex-direction: column; height: auto; }
+  .home-left { width: 100% !important; flex-direction: row; flex-wrap: wrap; border-right: none; border-bottom: 1px solid #ddd; padding: 10px 12px; gap: 8px; }
+  .plan-btn { width: calc(50% - 4px) !important; }
+  .home-chart-box { width: 95%; min-width: unset; }
+  .sc-box { width: 95%; min-width: unset; }
+  table { min-width: 600px; }
 }
 </style>
 </head>
 <body>
 
-<!-- TOPBAR -->
 <div id="topbar">
   <h1>TSG PROJECT PLANNER — Energy Services Co., Ltd.</h1>
   <div class="right">
-    <span id="userInfo">Not signed in</span>
-    <div id="googleBtn"></div>
-    <button class="btn btn-sm" id="signOutBtn" style="display:none" onclick="signOut()">Sign Out</button>
+    <span id="userInfo"></span>
+    <div id="gBtn"></div>
+    <button class="btn btn-sm" id="signOutBtn" style="display:none;color:#fff;background:transparent;border-color:rgba(255,255,255,0.5)" onclick="signOut()">Sign Out</button>
   </div>
 </div>
 
-<!-- HOME PAGE -->
 <div class="page active" id="homePage">
   <div class="home-left">
     <h2>Select Plan</h2>
-    <button class="plan-btn mat" onclick="goToPlan('material')">
+    <button class="plan-btn" onclick="goToPlan('material')">
       <div class="pb-icon">📦</div>
-      <div class="pb-title">Material Plan Progress</div>
-      <div class="pb-sub">Track material procurement & delivery</div>
+      <div class="pb-title">Material Plan</div>
+      <div class="pb-sub">Procurement &amp; delivery</div>
     </button>
-    <button class="plan-btn inst" onclick="goToPlan('installation')">
+    <button class="plan-btn" onclick="goToPlan('installation')">
       <div class="pb-icon">🔧</div>
-      <div class="pb-title">Installation Plan Progress</div>
-      <div class="pb-sub">Track installation & commissioning</div>
+      <div class="pb-title">Installation Plan</div>
+      <div class="pb-sub">Installation &amp; commissioning</div>
     </button>
   </div>
   <div class="home-right">
-    <div class="home-chart-wrap" id="homeMatWrap">
-      <div class="home-chart-title" style="color:#e2e8f0">MATERIAL S-CURVE</div>
-      <canvas id="homeMatCanvas"></canvas>
+    <div class="home-chart-box">
+      <h3>Material S-Curve</h3>
+      <canvas id="homeMatCanvas" height="200"></canvas>
     </div>
-    <div class="home-chart-wrap" id="homeInstWrap">
-      <div class="home-chart-title" style="color:var(--yellow)">INSTALLATION S-CURVE</div>
-      <canvas id="homeInstCanvas"></canvas>
+    <div class="home-chart-box">
+      <h3>Installation S-Curve</h3>
+      <canvas id="homeInstCanvas" height="200"></canvas>
     </div>
   </div>
 </div>
 
-<!-- PLAN PAGE -->
 <div class="page" id="planPage">
   <div class="plan-topbar">
     <button class="btn btn-sm" onclick="goHome()">← Home</button>
-    <span class="plan-title" id="planTitle">—</span>
+    <span class="plan-title" id="planTitle"></span>
     <div class="spacer"></div>
-    <div class="row-input-wrap" id="rowInputWrap">
-      <span>Rows:</span>
-      <input type="number" id="rowCountInput" min="1" max="200" value="16">
-      <button class="btn btn-sm" onclick="applyRowCount()">Apply</button>
+    <div class="row-ctrl" id="rowCtrl" style="display:none">
+      Rows: <input type="number" id="rowCount" min="1" max="300" value="16">
+      <button class="btn btn-sm" onclick="applyRows()">Apply</button>
     </div>
-    <button class="btn btn-sm btn-danger" id="resetBtn" onclick="resetTable()" style="display:none">✕ Reset</button>
-    <button class="btn btn-sm btn-primary" id="saveBtn" onclick="saveData()" style="display:none">💾 Save</button>
+    <button class="btn btn-sm btn-danger" id="resetBtn" style="display:none" onclick="resetRows()">✕ Reset</button>
+    <button class="btn btn-sm btn-primary" id="saveBtn" style="display:none" onclick="saveData()">💾 Save</button>
   </div>
-  <div class="plan-body">
-    <!-- S-CURVE TOP -->
-    <div class="scurve-section">
-      <div class="scurve-inner" id="scHalf1">
-        <div class="sc-label" id="scLabel1">S-CURVE</div>
-        <canvas id="scCanvas1"></canvas>
-      </div>
-    </div>
-    <!-- GANTT MIDDLE -->
-    <div class="gantt-section">
-      <div class="gantt-wrap" id="ganttWrap">
-        <canvas id="ganttCanvas"></canvas>
-      </div>
-    </div>
-    <!-- TABLE BOTTOM -->
-    <div class="table-side">
-      <div class="table-wrap">
-        <table id="dataTable">
-          <thead>
-            <tr>
-              <th style="width:32px">No.</th>
-              <th style="width:60px">Item No.</th>
-              <th style="width:220px">Description</th>
-              <th style="width:80px">Plan Start</th>
-              <th style="width:80px">Plan Finish</th>
-              <th style="width:42px">Wt%</th>
-              <th style="width:80px">Act Start</th>
-              <th style="width:80px">Act Finish</th>
-              <th style="width:42px">Act%</th>
-            </tr>
-          </thead>
-          <tbody id="dataBody"></tbody>
-        </table>
-      </div>
-      <div class="weight-bar">
-        Weight: <span id="wtSum" class="wwarn">0%</span>
-        &nbsp;|&nbsp; Act loaded: <span id="actCount">0</span> rows
-      </div>
-    </div>
-  </div></div>
 
-<!-- PAT MODAL -->
-<div class="modal-overlay" id="patModal">
-  <div class="modal">
-    <h2>GitHub Access Token</h2>
-    <p>Enter your GitHub Personal Access Token (PAT) to enable saving.<br>
-    This is stored in your browser session only — never in the file.</p>
-    <label>Personal Access Token</label>
-    <input type="password" id="patInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
-    <div class="modal-actions">
-      <button class="btn" onclick="closePatModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="savePAT()">Save & Continue</button>
+  <div class="sc-section">
+    <div class="sc-box">
+      <h3 id="scTitle">S-Curve</h3>
+      <canvas id="scCanvas" height="260"></canvas>
+    </div>
+  </div>
+
+  <div class="gantt-section" id="ganttSection">
+    <canvas id="ganttCanvas"></canvas>
+  </div>
+
+  <div class="table-section">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:36px">No.</th>
+            <th style="width:72px">Item No.</th>
+            <th style="width:220px">Description</th>
+            <th style="width:92px">Plan Start</th>
+            <th style="width:92px">Plan Finish</th>
+            <th style="width:44px">Wt%</th>
+            <th style="width:92px">Act Start</th>
+            <th style="width:92px">Act Finish</th>
+            <th style="width:44px">Act%</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="weight-bar">
+      Weight total: <span id="wtSum" class="warn">0%</span>
+      &nbsp;|&nbsp; Rows with actual: <span id="actCnt">0</span>
     </div>
   </div>
 </div>
 
-<!-- TOAST -->
+<div class="modal-overlay" id="patModal">
+  <div class="modal">
+    <h2>GitHub Access Token</h2>
+    <p>Enter your GitHub Personal Access Token (PAT).<br>Stored in browser session only — never saved to file.</p>
+    <label>Personal Access Token</label>
+    <input type="password" id="patInput" placeholder="ghp_xxxxxxxxxxxx">
+    <div class="modal-actions">
+      <button class="btn" onclick="closePAT()">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmPAT()">Save &amp; Continue</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
-// ════════════════════════════════════════
-// CONFIG
-// ════════════════════════════════════════
 const GOOGLE_CLIENT_ID = '695932302309-p1rccufdkq9itb5paam78j1ll1ejb1uu.apps.googleusercontent.com';
-const EDITOR_EMAIL     = 'suthepp.top@gmail.com';
-const GITHUB_REPO      = 'suthepptop/tsg-planner';
-const DATA_FILE        = 'data.json';
-const GITHUB_API       = `https://api.github.com/repos/${GITHUB_REPO}/contents/${DATA_FILE}`;
+const EDITOR_EMAIL = 'suthepp.top@gmail.com';
+const GITHUB_REPO = 'suthepptop/tsg-planner';
+const GITHUB_API = `https://api.github.com/repos/${GITHUB_REPO}/contents/data.json`;
 
-// ════════════════════════════════════════
-// STATE
-// ════════════════════════════════════════
-let currentUser  = null;
-let isEditor     = false;
-let currentPlan  = null; // 'material' | 'installation'
-let dataFileSha  = null; // github file sha for update
-let appData = {
-  material:     { rows: [] },
-  installation: { rows: [] }
+let isEditor = false, currentPlan = null, fileSha = null;
+let appData = { material:{rows:[]}, installation:{rows:[]} };
+
+// ── HELPERS ──
+const parseDate = s => {
+  if (!s) return null; s = s.trim();
+  const m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  if (m) { const d = new Date(+m[3],+m[2]-1,+m[1]); return isNaN(d)?null:d; }
+  return null;
 };
+const toInput = s => { if(!s)return''; const m=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/); return m?`${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`:''; };
+const fromInput = s => { if(!s)return''; const[y,m,d]=s.split('-'); return`${d}/${m}/${y}`; };
+const normDate = s => {
+  if(!s)return''; s=s.trim();
+  if(/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}$/.test(s)){const sep=s.includes('/')?'/':'-';const[d,m,y]=s.split(sep);return`${d.padStart(2,'0')}/${m.padStart(2,'0')}/${y}`;}
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)){const[y,m,d]=s.split('-');return`${d}/${m}/${y}`;}
+  if(/^\d{5}$/.test(s)){const d=new Date((+s-25569)*86400000);return`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;}
+  return s;
+};
+const normNum = v => { v=String(v).trim().replace('%',''); let n=parseFloat(v)||0; if(n>0&&n<1)n*=100; return Math.round(n*100)/100; };
+const dayDiff = (a,b) => Math.round((b-a)/86400000);
+const fmtD = s => { const d=parseDate(s); return d?`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`:''; };
 
-// ════════════════════════════════════════
-// GOOGLE AUTH
-// ════════════════════════════════════════
+function getRange(rows) {
+  let mn=null,mx=null;
+  rows.forEach(r=>{const s=parseDate(r.ps),e=parseDate(r.pe);if(s&&(!mn||s<mn))mn=s;if(e&&(!mx||e>mx))mx=e;});
+  if(!mn)mn=new Date('2026-02-16'); if(!mx)mx=new Date('2026-07-15');
+  return {start:mn,end:mx,days:dayDiff(mn,mx)+1};
+}
+
+function toast(msg,err=false){const e=document.getElementById('toast');e.textContent=msg;e.style.borderColor=err?'#c00':'#ccc';e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2800);}
+
+// ── GOOGLE AUTH ──
 window.onload = () => {
-  google.accounts.id.initialize({
-    client_id: GOOGLE_CLIENT_ID,
-    callback: handleCredential,
-  });
-  google.accounts.id.renderButton(
-    document.getElementById('googleBtn'),
-    { theme:'filled_black', size:'small', text:'signin_with', shape:'rectangular' }
-  );
-  loadDataFromGitHub();
-  setTimeout(resizeAll, 300);
+  google.accounts.id.initialize({client_id:GOOGLE_CLIENT_ID,callback:handleLogin});
+  google.accounts.id.renderButton(document.getElementById('gBtn'),{theme:'filled_blue',size:'small',text:'signin_with',shape:'rectangular'});
+  loadData();
 };
 
-function handleCredential(response) {
-  const payload = parseJwt(response.credential);
-  currentUser = payload;
-  isEditor = payload.email === EDITOR_EMAIL;
-  document.getElementById('userInfo').textContent = payload.email;
-  document.getElementById('googleBtn').style.display = 'none';
+function handleLogin(resp) {
+  const p = JSON.parse(atob(resp.credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+  isEditor = p.email === EDITOR_EMAIL;
+  document.getElementById('userInfo').textContent = p.email;
+  document.getElementById('gBtn').style.display = 'none';
   document.getElementById('signOutBtn').style.display = 'inline-block';
-  if(isEditor) {
-    document.body.classList.add('editable');
+  if (isEditor) {
+    document.body.classList.add('editor');
     document.getElementById('saveBtn').style.display = 'inline-block';
     document.getElementById('resetBtn').style.display = 'inline-block';
-    document.getElementById('rowInputWrap').style.display = 'flex';
-    // Re-render table to enable inputs and setup paste
-    if(currentPlan) { renderTable(); renderGantt(); renderSCurves(); }
+    document.getElementById('rowCtrl').style.display = 'flex';
     setupPaste();
   }
-  toast(isEditor ? '✓ Signed in as editor — cells now editable' : '✓ Signed in as viewer');
+  if (currentPlan) renderTable();
+  toast(isEditor ? '✓ Signed in as editor' : '✓ Signed in — view only');
 }
 
 function signOut() {
   google.accounts.id.disableAutoSelect();
-  currentUser = null; isEditor = false;
-  document.body.classList.remove('editable');
-  document.getElementById('userInfo').textContent = 'Not signed in';
-  document.getElementById('googleBtn').style.display = 'block';
+  isEditor = false;
+  document.body.classList.remove('editor');
+  document.getElementById('userInfo').textContent = '';
+  document.getElementById('gBtn').style.display = 'block';
   document.getElementById('signOutBtn').style.display = 'none';
   document.getElementById('saveBtn').style.display = 'none';
-  renderTable();
+  document.getElementById('resetBtn').style.display = 'none';
+  document.getElementById('rowCtrl').style.display = 'none';
+  if (currentPlan) renderTable();
 }
 
-function parseJwt(token) {
-  return JSON.parse(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
-}
-
-// ════════════════════════════════════════
-// GITHUB DATA
-// ════════════════════════════════════════
-async function loadDataFromGitHub() {
+// ── GITHUB ──
+async function loadData() {
   try {
-    const res = await fetch(GITHUB_API + '?t=' + Date.now());
-    if(!res.ok) { initDefaultData(); renderAll(); return; }
-    const json = await res.json();
-    dataFileSha = json.sha;
-    const decoded = JSON.parse(atob(json.content.replace(/\n/g,'')));
-    if(decoded.material)     appData.material     = decoded.material;
-    if(decoded.installation) appData.installation = decoded.installation;
-    toast('✓ Data loaded from GitHub');
-  } catch(e) {
-    initDefaultData();
-  }
+    const r = await fetch(GITHUB_API+'?t='+Date.now());
+    if (!r.ok){initRows();renderAll();return;}
+    const j = await r.json();
+    fileSha = j.sha;
+    const d = JSON.parse(atob(j.content.replace(/\n/g,'')));
+    if(d.material)appData.material=d.material;
+    if(d.installation)appData.installation=d.installation;
+    toast('✓ Data loaded');
+  } catch(e){initRows();}
   renderAll();
 }
 
-function initDefaultData() {
-  const makeRows = (n) => Array.from({length:n},(_,i)=>({no:i+1,itemNo:'',desc:'',start:'',finish:'',wt:0,actPct:0,actStart:'',actFinish:''}));
-  appData.material.rows     = appData.material.rows.length     ? appData.material.rows     : makeRows(16);
-  appData.installation.rows = appData.installation.rows.length ? appData.installation.rows : makeRows(16);
+function initRows() {
+  const mk=n=>Array.from({length:n},(_,i)=>({no:i+1,itemNo:'',desc:'',ps:'',pe:'',wt:0,as:'',ae:'',pct:0}));
+  if(!appData.material.rows.length)appData.material.rows=mk(16);
+  if(!appData.installation.rows.length)appData.installation.rows=mk(16);
 }
 
 async function saveData() {
-  let pat = sessionStorage.getItem('ghPAT');
-  if(!pat) { openPatModal(); return; }
-  const content = btoa(unescape(encodeURIComponent(JSON.stringify(appData, null, 2))));
-  const body = { message:`Update ${currentPlan} plan data`, content, ...(dataFileSha?{sha:dataFileSha}:{}) };
+  let pat=sessionStorage.getItem('ghPAT');
+  if(!pat){document.getElementById('patModal').classList.add('show');return;}
+  const content=btoa(unescape(encodeURIComponent(JSON.stringify(appData,null,2))));
+  const body={message:`Update ${currentPlan} data`,content,...(fileSha?{sha:fileSha}:{})};
   try {
-    const res = await fetch(GITHUB_API, {
-      method: dataFileSha ? 'PUT' : 'PUT',
-      headers: { Authorization:`token ${pat}`, 'Content-Type':'application/json' },
-      body: JSON.stringify(body)
-    });
-    if(!res.ok) { const e=await res.json(); toast('✗ Save failed: '+e.message, true); return; }
-    const json = await res.json();
-    dataFileSha = json.content.sha;
-    toast('✓ Saved to GitHub');
-  } catch(e) { toast('✗ Network error', true); }
+    const r=await fetch(GITHUB_API,{method:'PUT',headers:{Authorization:`token ${pat}`,'Content-Type':'application/json'},body:JSON.stringify(body)});
+    if(!r.ok){const e=await r.json();toast('✗ '+e.message,true);return;}
+    const j=await r.json();fileSha=j.content.sha;toast('✓ Saved to GitHub');
+  } catch(e){toast('✗ Network error',true);}
 }
 
-// PAT modal
-function openPatModal() { document.getElementById('patModal').classList.add('show'); }
-function closePatModal() { document.getElementById('patModal').classList.remove('show'); }
-function savePAT() {
-  const val = document.getElementById('patInput').value.trim();
-  if(!val) return;
-  sessionStorage.setItem('ghPAT', val);
-  closePatModal();
-  saveData();
-}
+function closePAT(){document.getElementById('patModal').classList.remove('show');}
+function confirmPAT(){const v=document.getElementById('patInput').value.trim();if(!v)return;sessionStorage.setItem('ghPAT',v);closePAT();saveData();}
 
-// ════════════════════════════════════════
-// NAVIGATION
-// ════════════════════════════════════════
-function showPage(id) {
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  setTimeout(resizeAll, 50);
-}
+// ── NAVIGATION ──
+function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');}
 
 function goToPlan(plan) {
   currentPlan = plan;
-  document.getElementById('planTitle').textContent = plan==='material' ? '📦 Material Plan' : '🔧 Installation Plan';
-  document.getElementById('scLabel1').textContent  = plan==='material' ? 'MATERIAL S-CURVE' : 'INSTALL S-CURVE';
-  if(isEditor) {
-    document.getElementById('saveBtn').style.display = 'inline-block';
-    document.getElementById('resetBtn').style.display = 'inline-block';
-    document.getElementById('rowInputWrap').style.display = 'flex';
+  document.getElementById('planTitle').textContent = plan==='material'?'📦 Material Plan':'🔧 Installation Plan';
+  document.getElementById('scTitle').textContent = plan==='material'?'Material S-Curve':'Installation S-Curve';
+  document.getElementById('rowCount').value = appData[plan].rows.length;
+  if(isEditor){
+    document.getElementById('saveBtn').style.display='inline-block';
+    document.getElementById('resetBtn').style.display='inline-block';
+    document.getElementById('rowCtrl').style.display='flex';
+    setupPaste();
   }
-  const rows = appData[plan].rows;
-  document.getElementById('rowCountInput').value = rows.length;
   showPage('planPage');
   renderTable();
-  waitFonts().then(()=>{
-    renderGantt();
-    renderSCurves();
-  });
-  if(isEditor) setupPaste();
+  setTimeout(()=>{renderGantt();renderSC();},100);
 }
 
-function goHome() {
-  currentPlan = null;
+function goHome(){
+  currentPlan=null;
   showPage('homePage');
-  renderHomeCharts();
+  setTimeout(renderHomeCharts,100);
 }
 
-// ════════════════════════════════════════
-// ROW MANAGEMENT
-// ════════════════════════════════════════
-function resetTable() {
-  if(!isEditor) return;
-  if(!confirm('Reset all rows? This cannot be undone until you save.')) return;
-  const n=parseInt(document.getElementById('rowCountInput').value)||16;
-  appData[currentPlan].rows=Array.from({length:n},(_,i)=>({no:i+1,itemNo:'',desc:'',start:'',finish:'',wt:0,actPct:0,actStart:'',actFinish:''}));
-  renderTable(); renderGantt(); renderSCurves();
-  toast('✓ Table reset');
+// ── ROWS ──
+function applyRows(){
+  if(!isEditor)return;
+  const n=parseInt(document.getElementById('rowCount').value)||16;
+  const rows=appData[currentPlan].rows;
+  while(rows.length<n)rows.push({no:rows.length+1,itemNo:'',desc:'',ps:'',pe:'',wt:0,as:'',ae:'',pct:0});
+  if(rows.length>n)rows.splice(n);
+  renderTable();renderGantt();renderSC();
 }
 
-function applyRowCount() {
-  if(!isEditor) return;
-  const n = parseInt(document.getElementById('rowCountInput').value)||16;
-  const rows = appData[currentPlan].rows;
-  while(rows.length < n) rows.push({no:rows.length+1,itemNo:'',desc:'',start:'',finish:'',wt:0,actPct:0,actStart:'',actFinish:''});
-  if(rows.length > n) rows.splice(n);
-  renderTable(); renderGantt(); renderSCurves();
+function resetRows(){
+  if(!isEditor||!confirm('Reset all rows?'))return;
+  const n=parseInt(document.getElementById('rowCount').value)||16;
+  appData[currentPlan].rows=Array.from({length:n},(_,i)=>({no:i+1,itemNo:'',desc:'',ps:'',pe:'',wt:0,as:'',ae:'',pct:0}));
+  renderTable();renderGantt();renderSC();toast('✓ Table reset');
 }
 
-// ════════════════════════════════════════
-// TABLE RENDER + PASTE SUPPORT
-// ════════════════════════════════════════
-function renderTable() {
-  if(!currentPlan) return;
-  const rows = appData[currentPlan].rows;
-  const tbody = document.getElementById('dataBody');
-  tbody.innerHTML = '';
-  const ro = !isEditor;
-
-  rows.forEach((r,i) => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td><input class="cell-input mono num" value="${r.no}" ${ro?'readonly':''} onchange="upd(${i},'no',this.value)" style="width:26px"></td>
-      <td><input class="cell-input mono" value="${r.itemNo||''}" ${ro?'readonly':''} onchange="upd(${i},'itemNo',this.value)" style="width:50px"></td>
-      <td><input class="cell-input" value="${r.desc||''}" ${ro?'readonly':''} onchange="upd(${i},'desc',this.value)"></td>
-      <td><input class="cell-input mono" type="date" value="${toInputDate(r.start)}" ${ro?'readonly':''} onchange="updDate(${i},'start',fromInputDate(this.value))" style="width:76px"></td>
-      <td><input class="cell-input mono" type="date" value="${toInputDate(r.finish)}" ${ro?'readonly':''} onchange="updDate(${i},'finish',fromInputDate(this.value))" style="width:76px"></td>
-      <td><input class="cell-input mono num" value="${r.wt||0}" ${ro?'readonly':''} onchange="upd(${i},'wt',+this.value)" style="width:36px"></td>
-      <td><input class="cell-input mono" type="date" value="${toInputDate(r.actStart||r.start)}" ${ro?'readonly':''} onchange="updActDate(${i},'actStart',this.value)" style="width:76px"></td>
-      <td><input class="cell-input mono" type="date" value="${toInputDate(r.actFinish||r.finish)}" ${ro?'readonly':''} onchange="updActDate(${i},'actFinish',this.value)" style="width:76px"></td>
-      <td><input class="cell-input mono num" value="${r.actPct||0}" ${ro?'readonly':''} onchange="upd(${i},'actPct',+this.value)" style="width:36px"></td>`;
+// ── TABLE ──
+function renderTable(){
+  if(!currentPlan)return;
+  const rows=appData[currentPlan].rows;
+  const ro=!isEditor;
+  const tbody=document.getElementById('tbody');
+  tbody.innerHTML='';
+  rows.forEach((r,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td><input class="ci r" value="${r.no}" ${ro?'readonly':''} onchange="upd(${i},'no',+this.value)" style="width:32px"></td>
+      <td><input class="ci" value="${r.itemNo||''}" ${ro?'readonly':''} onchange="upd(${i},'itemNo',this.value)" style="width:68px"></td>
+      <td><input class="ci" value="${r.desc||''}" ${ro?'readonly':''} onchange="upd(${i},'desc',this.value)" style="width:216px"></td>
+      <td><input class="ci" type="date" value="${toInput(r.ps)}" ${ro?'readonly':''} onchange="updDate(${i},'ps',fromInput(this.value))" style="width:88px"></td>
+      <td><input class="ci" type="date" value="${toInput(r.pe)}" ${ro?'readonly':''} onchange="updDate(${i},'pe',fromInput(this.value))" style="width:88px"></td>
+      <td><input class="ci r" value="${r.wt||0}" ${ro?'readonly':''} onchange="upd(${i},'wt',normNum(this.value))" style="width:40px"></td>
+      <td><input class="ci" type="date" value="${toInput(r.as||r.ps)}" ${ro?'readonly':''} onchange="upd(${i},'as',fromInput(this.value))" style="width:88px"></td>
+      <td><input class="ci" type="date" value="${toInput(r.ae||r.pe)}" ${ro?'readonly':''} onchange="upd(${i},'ae',fromInput(this.value))" style="width:88px"></td>
+      <td><input class="ci r" value="${r.pct||0}" ${ro?'readonly':''} onchange="upd(${i},'pct',normNum(this.value))" style="width:40px"></td>`;
     tbody.appendChild(tr);
   });
-
-  // Enable paste on table
-  if(isEditor) setupPaste();
-  updateWeightSum();
+  updateWt();
 }
 
-function upd(i, key, val) {
-  appData[currentPlan].rows[i][key] = val;
-  updateWeightSum(); renderGantt(); renderSCurves();
+function upd(i,k,v){appData[currentPlan].rows[i][k]=v;updateWt();renderGantt();renderSC();}
+function updDate(i,k,v){
+  appData[currentPlan].rows[i][k]=v;
+  const r=appData[currentPlan].rows[i];
+  if(k==='ps'&&!r.as)r.as=v;
+  if(k==='pe'&&!r.ae)r.ae=v;
+  updateWt();renderGantt();renderSC();renderTable();
+}
+function updateWt(){
+  if(!currentPlan)return;
+  const rows=appData[currentPlan].rows;
+  const sum=rows.reduce((s,r)=>s+(+r.wt||0),0);
+  const cnt=rows.filter(r=>r.pct>0).length;
+  const el=document.getElementById('wtSum');
+  el.textContent=sum.toFixed(1)+'%';
+  el.className=Math.abs(sum-100)<0.5?'ok':'warn';
+  document.getElementById('actCnt').textContent=cnt;
 }
 
-function updDate(i, key, val) {
-  appData[currentPlan].rows[i][key] = val;
-  const r = appData[currentPlan].rows[i];
-  if(key==='start'  && !r.actStart)  r.actStart  = val;
-  if(key==='finish' && !r.actFinish) r.actFinish = val;
-  updateWeightSum(); renderGantt(); renderSCurves();
-  renderTable(); // refresh date inputs
-}
-
-function updActDate(i, key, val) {
-  // val comes as yyyy-mm-dd from date input
-  appData[currentPlan].rows[i][key] = fromInputDate(val);
-  renderGantt(); renderSCurves();
-}
-
-function updateWeightSum() {
-  if(!currentPlan) return;
-  const rows = appData[currentPlan].rows;
-  const sum = rows.reduce((s,r)=>s+(+r.wt||0),0);
-  const actRows = rows.filter(r=>r.actPct>0).length;
-  const el = document.getElementById('wtSum');
-  el.textContent = sum.toFixed(1)+'%';
-  el.className = Math.abs(sum-100)<0.5 ? 'wok' : 'wwarn';
-  document.getElementById('actCount').textContent = actRows;
-}
-
-// ── PASTE FROM EXCEL ──
-function setupPaste() {
-  if(window._pasteFn) document.removeEventListener('paste', window._pasteFn);
-  window._pasteFn = function(e) {
-    if(!isEditor || !currentPlan) return;
-    const tbody = document.getElementById('dataBody');
-    if(!tbody) return;
-    const active = document.activeElement;
-    const allInputs = Array.from(tbody.querySelectorAll('input'));
-    const startIdx = allInputs.indexOf(active);
-    if(startIdx < 0) return;
+// ── PASTE ──
+function setupPaste(){
+  if(window._pasteFn)document.removeEventListener('paste',window._pasteFn);
+  window._pasteFn=function(e){
+    if(!isEditor||!currentPlan)return;
+    const tbody=document.getElementById('tbody');if(!tbody)return;
+    const active=document.activeElement;
+    const inputs=Array.from(tbody.querySelectorAll('input'));
+    const startIdx=inputs.indexOf(active);if(startIdx<0)return;
     e.preventDefault();
-    const text = (e.clipboardData || window.clipboardData).getData('text');
-    if(!text) return;
-    const pasteRows = text.trim().split(/\r?\n/).map(r => r.split('\t'));
-    const colsPerRow = 7;
-    const startRow = Math.floor(startIdx / colsPerRow);
-    const startCol = startIdx % colsPerRow;
-    const cols = ['no','itemNo','desc','start','finish','wt','actPct'];
-    const dataRows = appData[currentPlan].rows;
-    const needed = startRow + pasteRows.length;
-    while(dataRows.length < needed) {
-      dataRows.push({no:dataRows.length+1,itemNo:'',desc:'',start:'',finish:'',wt:0,actPct:0,actStart:'',actFinish:''});
-    }
-    pasteRows.forEach((pasteRow, ri) => {
-      const rowIdx = startRow + ri;
-      pasteRow.forEach((val, ci) => {
-        const colIdx = startCol + ci;
-        if(colIdx >= cols.length) return;
-        const key = cols[colIdx];
-        let v = val.trim();
-        if(key==='start' || key==='finish') v = normaliseDate(v);
-        dataRows[rowIdx][key] = (key==='wt'||key==='actPct') ? normaliseNum(v) : (key==='no' ? (+v||0) : v);
-        if(key==='start')  dataRows[rowIdx].actStart  = dataRows[rowIdx].actStart  || v;
-        if(key==='finish') dataRows[rowIdx].actFinish = dataRows[rowIdx].actFinish || v;
+    const text=(e.clipboardData||window.clipboardData).getData('text');if(!text)return;
+    const pasteRows=text.trim().split(/\r?\n/).map(r=>r.split('\t'));
+    const cols=['no','itemNo','desc','ps','pe','wt','as','ae','pct'];
+    const colsPerRow=9;
+    const startRow=Math.floor(startIdx/colsPerRow);
+    const startCol=startIdx%colsPerRow;
+    const dataRows=appData[currentPlan].rows;
+    const needed=startRow+pasteRows.length;
+    while(dataRows.length<needed)dataRows.push({no:dataRows.length+1,itemNo:'',desc:'',ps:'',pe:'',wt:0,as:'',ae:'',pct:0});
+    pasteRows.forEach((pr,ri)=>{
+      const rowIdx=startRow+ri;
+      pr.forEach((val,ci)=>{
+        const colIdx=startCol+ci;if(colIdx>=cols.length)return;
+        const k=cols[colIdx];let v=val.trim();
+        if(k==='ps'||k==='pe'||k==='as'||k==='ae')v=normDate(v);
+        else if(k==='wt'||k==='pct'||k==='no')v=normNum(v);
+        dataRows[rowIdx][k]=v;
+        if(k==='ps'&&!dataRows[rowIdx].as)dataRows[rowIdx].as=v;
+        if(k==='pe'&&!dataRows[rowIdx].ae)dataRows[rowIdx].ae=v;
       });
     });
-    document.getElementById('rowCountInput').value = dataRows.length;
-    renderTable(); renderGantt(); renderSCurves();
-    toast('✓ Pasted ' + pasteRows.length + ' rows');
+    document.getElementById('rowCount').value=dataRows.length;
+    renderTable();renderGantt();renderSC();
+    toast('✓ Pasted '+pasteRows.length+' rows');
   };
-  document.addEventListener('paste', window._pasteFn);
+  document.addEventListener('paste',window._pasteFn);
 }
 
-function normaliseDate(s) {
-  if(!s) return '';
-  s = s.trim();
-  // dd/mm/yyyy or d/m/yyyy
-  if(/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) {
-    const [d,m,y] = s.split('/');
-    return `${d.padStart(2,'0')}/${m.padStart(2,'0')}/${y}`;
-  }
-  // dd-mm-yyyy (Excel sometimes pastes with dashes)
-  if(/^\d{1,2}-\d{1,2}-\d{4}$/.test(s)) {
-    const [d,m,y] = s.split('-');
-    return `${d.padStart(2,'0')}/${m.padStart(2,'0')}/${y}`;
-  }
-  // yyyy-mm-dd
-  if(/^\d{4}-\d{2}-\d{2}$/.test(s)) {
-    const [y,m,d] = s.split('-');
-    return `${d}/${m}/${y}`;
-  }
-  // Excel serial number (5 digits)
-  if(/^\d{5}$/.test(s)) {
-    const dt = excelSerialToDate(+s);
-    return `${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}`;
-  }
-  return s;
-}
-
-function normaliseNum(v) {
-  // strip % sign and convert to number e.g. "5%" -> 5, "0.05" -> 5 if <1
-  v = String(v).trim().replace('%','');
-  let n = parseFloat(v)||0;
-  // if Excel stored as decimal fraction e.g. 0.05 = 5%
-  if(n > 0 && n <= 1 && !String(v).includes('.') === false && n !== Math.round(n)) n = n * 100;
-  return Math.round(n * 100) / 100;
-}
-function excelSerialToDate(serial) {
-  return new Date((serial - 25569) * 86400000);
-}
-
-// ════════════════════════════════════════
-// DATE HELPERS
-// ════════════════════════════════════════
-function toInputDate(s) {
-  // convert dd/mm/yyyy or dd-mm-yyyy to yyyy-mm-dd for input[type=date]
-  if(!s) return '';
-  const m = s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
-  if(!m) return '';
-  return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
-}
-
-function fromInputDate(s) {
-  // convert yyyy-mm-dd to dd/mm/yyyy
-  if(!s) return '';
-  const [y,m,d] = s.split('-');
-  return `${d}/${m}/${y}`;
-}
-
-function parseDate(s) {
-  if(!s) return null;
-  s = s.trim();
-  // dd/mm/yyyy
-  let m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
-  if(m) {
-    const dt = new Date(+m[3], +m[2]-1, +m[1]);
-    if(!isNaN(dt.getTime())) return dt;
-  }
-  return null;
-}
-function fmtDate(d) {
-  if(!d) return '';
-  return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
-}
-function dayDiff(a,b) { return Math.round((b-a)/86400000); }
-
-function getProjectRange(rows) {
-  let mn=null, mx=null;
-  rows.forEach(r=>{
-    const s=parseDate(r.start), e=parseDate(r.finish);
-    if(s&&(!mn||s<mn)) mn=s;
-    if(e&&(!mx||e>mx)) mx=e;
-  });
-  if(!mn) mn=new Date('2026-02-16');
-  if(!mx) mx=new Date('2026-07-15');
-  return {start:mn, end:mx, days:dayDiff(mn,mx)+1};
-}
-
-// ════════════════════════════════════════
-// GANTT CANVAS
-// ════════════════════════════════════════
-async async function waitFonts() {
-  // Tahoma is a system font - just wait for document fonts ready
-  try { await document.fonts.ready; } catch(e){}
-  // Small delay to ensure layout is complete
-  await new Promise(r => setTimeout(r, 50));
-}
-
-function renderGantt() {
-  const wrap = document.getElementById('ganttWrap');
-  const canvas = document.getElementById('ganttCanvas');
-  if(!wrap||!canvas) return;
-  const W=wrap.clientWidth||800;
-  const HDR_H_est=36, LEG_H_est=28;
-  const rows2=appData[currentPlan]?.rows||[];
-  const N2=Math.max(rows2.length,1);
-  const rowH_est=40;
-  const H=HDR_H_est + N2*rowH_est + LEG_H_est + 4;
-  canvas.width=W; canvas.height=H;
-  canvas.style.width='100%';
-  canvas.style.height=H+'px';
-  // update gantt section height
-  const sec=document.querySelector('.gantt-section');
-  if(sec) sec.style.height=H+'px';
-  const ctx=canvas.getContext('2d');
-  ctx.clearRect(0,0,W,H);
-
-  if(!currentPlan) return;
-  const rows = appData[currentPlan].rows;
-  const {start:pStart, end:pEnd, days:totalDays} = getProjectRange(rows);
-  const today = new Date();
-
-  const LABEL_W=260, HDR_H=36, LEG_H=28;
+// ── GANTT ──
+function renderGantt(){
+  const canvas=document.getElementById('ganttCanvas');
+  const section=document.getElementById('ganttSection');
+  if(!canvas||!currentPlan)return;
+  const rows=appData[currentPlan].rows;
+  const {start:pStart,end:pEnd,days:totalDays}=getRange(rows);
+  const today=new Date();
+  const LABEL_W=270,HDR_H=34,ROW_H=38,LEG_H=26;
   const N=rows.length;
-  const rowH=40;
+  const W=Math.max(section.clientWidth||900,600);
+  const H=HDR_H+N*ROW_H+LEG_H;
+  canvas.width=W;canvas.height=H;
+  canvas.style.width=W+'px';canvas.style.height=H+'px';
+  const ctx=canvas.getContext('2d');
   const barW=W-LABEL_W;
-  const dx=d=>LABEL_W+(d/totalDays)*barW;
-  const dxDate=d=>dx(dayDiff(pStart,d));
+  const gx=d=>LABEL_W+(d/totalDays)*barW;
+  const dx=d=>gx(dayDiff(pStart,d));
 
-  // BG white
-  ctx.fillStyle='#ffffff';
-  ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
 
-  // Month bands + header
+  // Month headers + bands
   const months=[];
   let mc=new Date(pStart.getFullYear(),pStart.getMonth(),1);
   while(mc<=pEnd){months.push(new Date(mc));mc=new Date(mc.getFullYear(),mc.getMonth()+1,1);}
-
   months.forEach((m,i)=>{
-    const x1=Math.max(LABEL_W,dxDate(m));
-    const x2=Math.min(W,dxDate(new Date(m.getFullYear(),m.getMonth()+1,1)));
-    ctx.fillStyle=i%2===0?'rgba(255,255,255,0.02)':'transparent';
-    ctx.fillRect(x1,HDR_H,x2-x1,H-HDR_H-LEG_H);
-    ctx.fillStyle=i%2===0?'#1971c2':'#1864ab';
+    const x1=Math.max(LABEL_W,dx(m));
+    const x2=Math.min(W,dx(new Date(m.getFullYear(),m.getMonth()+1,1)));
+    ctx.fillStyle=i%2===0?'#1560a8':'#1050a0';
     ctx.fillRect(x1,0,x2-x1,HDR_H);
-    ctx.fillStyle='#ffffff';
-    ctx.font='600 19px Tahoma';
-    ctx.textAlign='center';
-    ctx.fillText(m.toLocaleString('default',{month:'short'})+"'"+String(m.getFullYear()).slice(2),(x1+x2)/2,17);
+    ctx.fillStyle='#fff';ctx.font='bold 13px Tahoma';ctx.textAlign='center';
+    ctx.fillText(m.toLocaleString('default',{month:'short'})+"'"+String(m.getFullYear()).slice(2),(x1+x2)/2,HDR_H-10);
+    if(x1>LABEL_W){ctx.strokeStyle='#e0e0e0';ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(x1,HDR_H);ctx.lineTo(x1,H-LEG_H);ctx.stroke();}
   });
 
   // Label header
-  ctx.fillStyle='#1971c2';
-  ctx.fillRect(0,0,LABEL_W,HDR_H);
-  ctx.fillStyle='#ffffff';
-  ctx.font='700 22px Tahoma';
-  ctx.textAlign='center';
-  ctx.fillText('DESCRIPTION',LABEL_W/2,19);
-
-  // divider
-  ctx.strokeStyle='#adb5bd'; ctx.lineWidth=1; ctx.setLineDash([]);
-  ctx.beginPath();ctx.moveTo(LABEL_W,0);ctx.lineTo(LABEL_W,H);ctx.stroke();
-
-  // month lines
-  months.forEach(m=>{
-    const x=dxDate(m);
-    if(x>LABEL_W){
-      ctx.strokeStyle='#2a3444';ctx.lineWidth=0.5;
-      ctx.beginPath();ctx.moveTo(x,HDR_H);ctx.lineTo(x,H-LEG_H);ctx.stroke();
-    }
-  });
+  ctx.fillStyle='#1560a8';ctx.fillRect(0,0,LABEL_W,HDR_H);
+  ctx.fillStyle='#fff';ctx.font='bold 13px Tahoma';ctx.textAlign='center';
+  ctx.fillText('Item / Description',LABEL_W/2,HDR_H-10);
+  ctx.strokeStyle='#999';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(LABEL_W,0);ctx.lineTo(LABEL_W,H);ctx.stroke();
 
   // Today
   if(today>=pStart&&today<=pEnd){
-    const tx=dxDate(today);
-    ctx.strokeStyle='#ef4444';ctx.lineWidth=1.5;ctx.setLineDash([4,3]);
-    ctx.beginPath();ctx.moveTo(tx,HDR_H);ctx.lineTo(tx,H-LEG_H);ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.fillStyle='#ef4444';ctx.font='700 16px Tahoma';ctx.textAlign='center';
-    ctx.fillText('TODAY',tx,HDR_H-3);
+    const tx=dx(today);
+    ctx.strokeStyle='#cc0000';ctx.lineWidth=1.5;ctx.setLineDash([5,3]);
+    ctx.beginPath();ctx.moveTo(tx,HDR_H);ctx.lineTo(tx,H-LEG_H);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='#cc0000';ctx.font='bold 11px Tahoma';ctx.textAlign='center';
+    ctx.fillText('TODAY',tx,HDR_H-2);
   }
-  ctx.setLineDash([]);
 
   // Rows
   rows.forEach((r,i)=>{
-    const y=HDR_H+i*rowH; const rh=rowH-1.5;
+    const y=HDR_H+i*ROW_H;
+    ctx.fillStyle=i%2===0?'#f7f9fb':'#fff';ctx.fillRect(0,y,W,ROW_H);
+    ctx.strokeStyle='#e5e5e5';ctx.lineWidth=0.5;
+    ctx.beginPath();ctx.moveTo(0,y+ROW_H);ctx.lineTo(W,y+ROW_H);ctx.stroke();
 
-    // row bg
-    ctx.fillStyle=i%2===0?'#f8f9fa':'#ffffff';
-    ctx.fillRect(0,y,W,rh);
-    ctx.strokeStyle='#dee2e6';ctx.lineWidth=0.5;
-    ctx.beginPath();ctx.moveTo(0,y+rh);ctx.lineTo(W,y+rh);ctx.stroke();
-
-    // item no + description in gantt
-    ctx.fillStyle=r.desc?'#212529':'#adb5bd';
-    ctx.font=`${r.desc?'700':'400'} 22px Tahoma`;
+    const lbl=((r.itemNo?r.itemNo+' ':'')+(r.desc||'')).substring(0,34);
+    ctx.fillStyle=r.desc?'#111':'#aaa';
+    ctx.font=r.desc?'13px Tahoma':'italic 12px Tahoma';
     ctx.textAlign='left';
-    const ganttLbl=(r.itemNo?(r.itemNo+' '):'')+(r.desc||('row '+r.no));
-    ctx.fillText(ganttLbl.substring(0,28), 5, y+rh*0.68);
+    ctx.fillText(lbl||('row '+r.no),6,y+ROW_H*0.65);
 
-    const ps=parseDate(r.start), pe=parseDate(r.finish);
-    if(!ps||!pe) return;
+    const ps=parseDate(r.ps),pe=parseDate(r.pe);if(!ps||!pe)return;
 
-    // Plan bar (upper)
-    const bx=dxDate(ps), ex=dxDate(pe), bw=Math.max(ex-bx,2);
-    const planH=rh*0.40, planY=y+rh*0.05;
-    ctx.fillStyle='#1971c2';
-    ctx.beginPath();
-    if(ctx.roundRect) ctx.roundRect(bx,planY,bw,planH,2); else ctx.rect(bx,planY,bw,planH);
-    ctx.fill();
+    // Plan bar
+    const bx=dx(ps),ex=dx(pe),bw=Math.max(ex-bx,3);
+    const planH=ROW_H*0.38,planY=y+ROW_H*0.08;
+    ctx.fillStyle='#1560a8';
+    ctx.beginPath();if(ctx.roundRect)ctx.roundRect(bx,planY,bw,planH,3);else ctx.rect(bx,planY,bw,planH);ctx.fill();
+    if(bw>28){ctx.fillStyle='#fff';ctx.font='bold 11px Tahoma';ctx.textAlign='center';ctx.fillText(dayDiff(ps,pe)+1+'d',bx+bw/2,planY+planH*0.75);}
+    const midY=planY+planH/2+4;
+    ctx.fillStyle='#666';ctx.font='10px Tahoma';
+    ctx.textAlign='right';ctx.fillText(fmtD(r.ps),bx-3,midY);
+    ctx.textAlign='left';ctx.fillText(fmtD(r.pe),bx+bw+3,midY);
 
-    // dates outside bar
-    const midY=planY+planH/2+3.5;
-    ctx.fillStyle='#868e96';ctx.font='600 18px Tahoma';
-    ctx.textAlign='right'; ctx.fillText(fmtDate(ps),bx-2,midY);
-    ctx.textAlign='left';  ctx.fillText(fmtDate(pe),bx+bw+2,midY);
-
-    // dur inside
-    if(bw>22){
-      const dur=dayDiff(ps,pe)+1;
-      ctx.fillStyle='rgba(255,255,255,0.8)';ctx.font='600 14px Tahoma';
-      ctx.textAlign='center';ctx.fillText(dur+'d',bx+bw/2,planY+planH*0.76);
-    }
-
-    // Actual bar — full width actStart to actFinish, dark yellow
-    const as=parseDate(r.actStart||r.start), ae=parseDate(r.actFinish||r.finish);
-    if(!as||!ae) return;
-    const ax=dxDate(as), aex=dxDate(ae), aew=Math.max(aex-ax,2);
-    const actH=rh*0.34, actY=y+rh*0.54;
-    const actMidY=actY+actH/2;
+    // Actual bar
+    const as=parseDate(r.as||r.ps),ae=parseDate(r.ae||r.pe);if(!as||!ae)return;
+    const ax=dx(as),aex=dx(ae),aw=Math.max(aex-ax,3);
+    const actH=ROW_H*0.32,actY=y+ROW_H*0.55;
     ctx.fillStyle='#b8860b';
-    ctx.beginPath();
-    if(ctx.roundRect) ctx.roundRect(ax,actY,aew,actH,2); else ctx.rect(ax,actY,aew,actH);
-    ctx.fill();
-    // Red horizontal thick line at mid-height from left to Act% width
-    const actPct=(+r.actPct||0);
-    if(actPct>0 && actPct<=100){
-      const redW=ax+(actPct/100)*aew;
-      ctx.strokeStyle='#ef4444';ctx.lineWidth=3;ctx.lineCap='round';
-      ctx.beginPath();ctx.moveTo(ax,actMidY);ctx.lineTo(redW,actMidY);ctx.stroke();
-      ctx.lineCap='butt';
-      // % label above bar
-      ctx.fillStyle='#ef4444';ctx.font='700 20px Tahoma';
-      ctx.textAlign='center';ctx.fillText(actPct+'%',ax+(actPct/100)*aew/2,actY-2);
+    ctx.beginPath();if(ctx.roundRect)ctx.roundRect(ax,actY,aw,actH,3);else ctx.rect(ax,actY,aw,actH);ctx.fill();
+
+    // Red horizontal line at Act%
+    const pct=+r.pct||0;
+    if(pct>0){
+      const redX=ax+(pct/100)*aw;
+      const midActY=actY+actH/2;
+      ctx.strokeStyle='#cc0000';ctx.lineWidth=3;ctx.lineCap='round';
+      ctx.beginPath();ctx.moveTo(ax,midActY);ctx.lineTo(redX,midActY);ctx.stroke();
+      ctx.lineCap='butt';ctx.lineWidth=1;
+      ctx.fillStyle='#cc0000';ctx.font='bold 10px Tahoma';ctx.textAlign='center';
+      ctx.fillText(pct+'%',ax+(pct/100)*aw/2,actY-2);
     }
   });
 
   // Legend
-  ctx.fillStyle='#f1f3f5';ctx.fillRect(0,H-LEG_H,W,LEG_H);
-  ctx.strokeStyle='#dee2e6';ctx.lineWidth=0.5;
-  ctx.beginPath();ctx.moveTo(0,H-LEG_H);ctx.lineTo(W,H-LEG_H);ctx.stroke();
-  const ly=H-LEG_H+7;
-  ctx.fillStyle='#3b82f6';ctx.fillRect(LABEL_W+10,ly-4,20,7);
-  ctx.fillStyle='#64748b';ctx.font='18px Tahoma';ctx.textAlign='left';
-  ctx.fillText('Plan',LABEL_W+34,ly+1.5);
-  ctx.fillStyle='#22c55e';ctx.fillRect(LABEL_W+74,ly-4,20,7);
-  ctx.fillText('Actual (% complete)',LABEL_W+98,ly+1.5);
+  ctx.fillStyle='#f4f6f8';ctx.fillRect(0,H-LEG_H,W,LEG_H);
+  ctx.strokeStyle='#ddd';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,H-LEG_H);ctx.lineTo(W,H-LEG_H);ctx.stroke();
+  const ly=H-LEG_H+9;
+  ctx.fillStyle='#1560a8';ctx.fillRect(LABEL_W+10,ly-5,24,9);
+  ctx.fillStyle='#333';ctx.font='11px Tahoma';ctx.textAlign='left';ctx.fillText('Plan',LABEL_W+38,ly+2);
+  ctx.fillStyle='#b8860b';ctx.fillRect(LABEL_W+80,ly-5,24,9);
+  ctx.fillText('Actual',LABEL_W+108,ly+2);
+  ctx.strokeStyle='#cc0000';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(LABEL_W+82,ly);ctx.lineTo(LABEL_W+102,ly);ctx.stroke();
+  ctx.fillStyle='#333';ctx.lineWidth=1;ctx.fillText('(red = Act%)',LABEL_W+160,ly+2);
 }
 
-// ════════════════════════════════════════
-// S-CURVE
-// ════════════════════════════════════════
-function buildSCurve(rows) {
-  const {start:pStart, days:totalDays} = getProjectRange(rows);
-  const totalW = rows.reduce((s,r)=>s+(+r.wt||0),0);
-  const plan=new Array(totalDays).fill(0);
-  const act=new Array(totalDays).fill(0);
-  if(!totalW) return {plan,act,totalDays,pStart};
-
-  rows.forEach(r=>{
-    const w=(+r.wt||0)/totalW;
-    if(!w) return;
-    const ps=parseDate(r.start), pe=parseDate(r.finish);
-    if(!ps||!pe) return;
-    const sd=Math.max(0,dayDiff(pStart,ps));
-    const ed=Math.min(totalDays-1,dayDiff(pStart,pe));
-    const span=ed-sd+1; if(span<=0) return;
-    const daily=w/span;
-    for(let d=sd;d<=ed;d++) plan[d]+=daily;
-
-    const pct=(+r.actPct||0)/100;
-    if(pct<=0) return;
-    const actDur=dayDiff(ps,pe)*pct;
-    const aeDate=new Date(ps.getTime()+actDur*86400000);
-    const aed=Math.min(totalDays-1,dayDiff(pStart,aeDate));
-    const aspan=aed-sd+1; if(aspan<=0) return;
-    for(let d=sd;d<=aed;d++) act[d]+=w*pct/aspan;
-  });
-
-  for(let d=1;d<totalDays;d++){plan[d]+=plan[d-1];act[d]+=act[d-1];}
-  return {plan,act,totalDays,pStart};
-}
-
-function drawSCurve(canvasId, rows, planColor, actColor) {
-  const canvas=document.getElementById(canvasId);
-  if(!canvas) return;
-  const wrap=canvas.parentElement;
-  const W=Math.max(wrap.clientWidth||400,300);
-  const H=220;
-  canvas.width=W; canvas.height=H;
-  canvas.style.width='100%';
-  canvas.style.height=H+'px';
-  const ctx=canvas.getContext('2d');
-  ctx.fillStyle='#ffffff';ctx.fillRect(0,0,W,H);
-
-  const PL=36,PR=12,PT=24,PB=26;
-  const pw=W-PL-PR, ph=H-PT-PB;
-  const px1=PL,py1=PT,px2=PL+pw,py2=PT+ph;
-
-  const {plan,act,totalDays,pStart}=buildSCurve(rows);
-  const {start:projStart,end:projEnd}=getProjectRange(rows);
-  const today=new Date();
-
-  // Y grid
-  for(let p=0;p<=100;p+=20){
-    const gy=py2-(p/100)*ph;
-    ctx.strokeStyle=p===0||p===100?'#ced4da':'rgba(206,212,218,0.6)';
-    ctx.lineWidth=p===0||p===100?1:0.5;
-    ctx.setLineDash(p===0||p===100?[]:[2,3]);
-    ctx.beginPath();ctx.moveTo(px1,gy);ctx.lineTo(px2,gy);ctx.stroke();
-    ctx.fillStyle='#868e96';ctx.font='16px Tahoma';
-    ctx.textAlign='right';ctx.fillText(p+'%',px1-3,gy+3);
-  }
-  ctx.setLineDash([]);
-
-  // X months
-  const months=[];
-  let mc=new Date(projStart.getFullYear(),projStart.getMonth(),1);
-  while(mc<=projEnd){months.push(new Date(mc));mc=new Date(mc.getFullYear(),mc.getMonth()+1,1);}
-  months.forEach((m,i)=>{
-    const gx=px1+(dayDiff(projStart,m)/totalDays)*pw;
-    ctx.strokeStyle='rgba(206,212,218,0.8)';ctx.lineWidth=0.5;ctx.setLineDash([2,3]);
-    ctx.beginPath();ctx.moveTo(gx,py1);ctx.lineTo(gx,py2);ctx.stroke();ctx.setLineDash([]);
-    ctx.fillStyle='#64748b';ctx.font='16px Tahoma';ctx.textAlign='center';
-    ctx.fillText(m.toLocaleString('default',{month:'short'}),gx,py2+14);
-  });
-
-  // Axes
-  ctx.strokeStyle='#495057';ctx.lineWidth=1;ctx.setLineDash([]);
-  ctx.beginPath();ctx.moveTo(px1,py1);ctx.lineTo(px1,py2);ctx.lineTo(px2,py2);ctx.stroke();
-
-  const step=Math.max(1,Math.floor(totalDays/300));
-  const planPts=[],actPts=[];
-  for(let d=0;d<totalDays;d+=step){
-    planPts.push([px1+(d/totalDays)*pw, py2-plan[d]*ph]);
-    actPts.push([px1+(d/totalDays)*pw,  py2-act[d]*ph]);
-  }
-
-  const drawLine=(pts,color,dash)=>{
-    if(!pts.length) return;
-    ctx.strokeStyle=color;ctx.lineWidth=1.8;ctx.setLineDash(dash||[]);
-    ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);
-    pts.forEach(([x,y])=>ctx.lineTo(x,y));
-    ctx.stroke();ctx.setLineDash([]);
-  };
-
-  // fill
-  ctx.beginPath();ctx.moveTo(planPts[0][0],py2);
-  planPts.forEach(([x,y])=>ctx.lineTo(x,y));
-  ctx.lineTo(planPts[planPts.length-1][0],py2);ctx.closePath();
-  ctx.fillStyle=planColor+'20';ctx.fill();
-
-  drawLine(planPts,planColor);
-  drawLine(actPts,actColor,[5,3]);
-
-  // Today
-  if(today>=projStart&&today<=projEnd){
-    const tx=px1+(dayDiff(projStart,today)/totalDays)*pw;
-    ctx.strokeStyle='#ef4444';ctx.lineWidth=1;ctx.setLineDash([3,3]);
-    ctx.beginPath();ctx.moveTo(tx,py1);ctx.lineTo(tx,py2);ctx.stroke();ctx.setLineDash([]);
-  }
-
-  // Legend
-  ctx.fillStyle=planColor;ctx.fillRect(px1+3,py2-16,14,4);
-  ctx.fillStyle='#64748b';ctx.font='16px Tahoma';ctx.textAlign='left';ctx.fillText('Plan',px1+20,py2-13);
-  ctx.strokeStyle=actColor;ctx.lineWidth=1.8;ctx.setLineDash([4,2]);
-  ctx.beginPath();ctx.moveTo(px1+48,py2-14);ctx.lineTo(px1+62,py2-14);ctx.stroke();ctx.setLineDash([]);
-  ctx.fillStyle='#64748b';ctx.fillText('Actual',px1+65,py2-13);
-}
-
-function drawSCurveCombined(canvasId, rows) {
-  const canvas=document.getElementById(canvasId);
-  if(!canvas) return;
-  const wrap=canvas.parentElement;
-  const W=Math.max(wrap.clientWidth||400,300);
-  const H=280;
-  canvas.width=W; canvas.height=H;
-  canvas.style.width='100%';
-  canvas.style.height=H+'px';
-  const ctx=canvas.getContext('2d');
-  ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,W,H);
-
-  const PL=38,PR=14,PT=28,PB=28;
-  const pw=W-PL-PR, ph=H-PT-PB;
-  const px1=PL,py1=PT,px2=PL+pw,py2=PT+ph;
-
-  const {start:projStart,end:projEnd,days:totalDays}=getProjectRange(rows);
-  const today=new Date();
+// ── S-CURVE ──
+function buildCurves(rows){
+  const{start:pStart,days:totalDays}=getRange(rows);
   const totalW=rows.reduce((s,r)=>s+(+r.wt||0),0);
-
-  // Build plan cumulative
-  const plan=new Array(totalDays).fill(0);
-  const act=new Array(totalDays).fill(0);
+  const plan=new Array(totalDays).fill(0),act=new Array(totalDays).fill(0);
   if(totalW>0){
     rows.forEach(r=>{
-      const w=(+r.wt||0)/totalW; if(!w) return;
-      const ps=parseDate(r.start),pe=parseDate(r.finish);
-      if(!ps||!pe) return;
-      const sd=Math.max(0,dayDiff(projStart,ps));
-      const ed=Math.min(totalDays-1,dayDiff(projStart,pe));
-      const span=ed-sd+1; if(span<=0) return;
-      for(let d=sd;d<=ed;d++) plan[d]+=w/span;
-      // actual
-      const as2=parseDate(r.actStart||r.start), ae2=parseDate(r.actFinish||r.finish);
-      const pct=(+r.actPct||0)/100; if(pct<=0) return;
-      const asd=Math.max(0,dayDiff(projStart,as2));
-      const aed=Math.min(totalDays-1,dayDiff(projStart,ae2));
-      const aspan=aed-asd+1; if(aspan<=0) return;
-      for(let d=asd;d<=aed;d++) act[d]+=w*pct/aspan;
+      const w=(+r.wt||0)/totalW;if(!w)return;
+      const ps=parseDate(r.ps),pe=parseDate(r.pe);if(!ps||!pe)return;
+      const sd=Math.max(0,dayDiff(pStart,ps)),ed=Math.min(totalDays-1,dayDiff(pStart,pe));
+      const span=ed-sd+1;if(span<=0)return;
+      for(let d=sd;d<=ed;d++)plan[d]+=w/span;
+      const pct=(+r.pct||0)/100;if(!pct)return;
+      const as=parseDate(r.as||r.ps),ae=parseDate(r.ae||r.pe);if(!as||!ae)return;
+      const asd=Math.max(0,dayDiff(pStart,as)),aed=Math.min(totalDays-1,dayDiff(pStart,ae));
+      const aspan=aed-asd+1;if(aspan<=0)return;
+      for(let d=asd;d<=aed;d++)act[d]+=w*pct/aspan;
     });
     for(let d=1;d<totalDays;d++){plan[d]+=plan[d-1];act[d]+=act[d-1];}
   }
+  return{plan,act,totalDays,pStart};
+}
 
-  // Y grid
-  for(let p=0;p<=100;p+=20){
+function drawSCurve(canvasId,rows,planColor,actColor){
+  const canvas=document.getElementById(canvasId);if(!canvas)return;
+  const W=canvas.parentElement.clientWidth||400;
+  const H=parseInt(canvas.getAttribute('height'))||200;
+  canvas.width=W;canvas.height=H;
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
+  const PL=42,PR=14,PT=20,PB=28;
+  const pw=W-PL-PR,ph=H-PT-PB;
+  const px1=PL,py1=PT,px2=PL+pw,py2=PT+ph;
+  const{plan,act,totalDays,pStart}=buildCurves(rows);
+  const{start:projStart,end:projEnd}=getRange(rows);
+  const today=new Date();
+
+  [0,20,40,60,80,100].forEach(p=>{
     const gy=py2-(p/100)*ph;
-    ctx.strokeStyle=p===0||p===100?'#ced4da':'rgba(206,212,218,0.6)';
-    ctx.lineWidth=p===0||p===100?1:0.5;
-    ctx.setLineDash(p===0||p===100?[]:[2,3]);
+    ctx.strokeStyle=p===0||p===100?'#bbb':'#e8e8e8';ctx.lineWidth=p===0||p===100?1:0.5;
+    ctx.setLineDash(p===0||p===100?[]:[3,3]);
     ctx.beginPath();ctx.moveTo(px1,gy);ctx.lineTo(px2,gy);ctx.stroke();
-    ctx.fillStyle='#868e96';ctx.font='16px Tahoma';
-    ctx.textAlign='right';ctx.fillText(p+'%',px1-3,gy+3);
-  }
+    ctx.fillStyle='#888';ctx.font='10px Tahoma';ctx.textAlign='right';ctx.fillText(p+'%',px1-4,gy+3.5);
+  });
   ctx.setLineDash([]);
 
-  // X months
-  const months=[];
-  let mc=new Date(projStart.getFullYear(),projStart.getMonth(),1);
+  const months=[];let mc=new Date(projStart.getFullYear(),projStart.getMonth(),1);
   while(mc<=projEnd){months.push(new Date(mc));mc=new Date(mc.getFullYear(),mc.getMonth()+1,1);}
   months.forEach(m=>{
     const gx=px1+(dayDiff(projStart,m)/totalDays)*pw;
-    ctx.strokeStyle='rgba(206,212,218,0.8)';ctx.lineWidth=0.5;ctx.setLineDash([2,3]);
+    ctx.strokeStyle='#e8e8e8';ctx.lineWidth=0.5;ctx.setLineDash([2,3]);
     ctx.beginPath();ctx.moveTo(gx,py1);ctx.lineTo(gx,py2);ctx.stroke();ctx.setLineDash([]);
-    ctx.fillStyle='#868e96';ctx.font='16px Tahoma';ctx.textAlign='center';
+    ctx.fillStyle='#888';ctx.font='10px Tahoma';ctx.textAlign='center';
     ctx.fillText(m.toLocaleString('default',{month:'short'}),gx,py2+14);
   });
 
-  // Axes
-  ctx.strokeStyle='#495057';ctx.lineWidth=1;ctx.setLineDash([]);
+  ctx.strokeStyle='#888';ctx.lineWidth=1;
   ctx.beginPath();ctx.moveTo(px1,py1);ctx.lineTo(px1,py2);ctx.lineTo(px2,py2);ctx.stroke();
 
   const step=Math.max(1,Math.floor(totalDays/300));
-  const planPts=[],actPts=[];
-  for(let d=0;d<totalDays;d+=step){
-    planPts.push([px1+(d/totalDays)*pw, py2-plan[d]*ph]);
-    actPts.push([px1+(d/totalDays)*pw,  py2-act[d]*ph]);
-  }
+  const pp=[],ap=[];
+  for(let d=0;d<totalDays;d+=step){pp.push([px1+(d/totalDays)*pw,py2-plan[d]*ph]);ap.push([px1+(d/totalDays)*pw,py2-act[d]*ph]);}
 
-  const drawLine=(pts,color,dash)=>{
-    if(!pts.length) return;
-    ctx.strokeStyle=color;ctx.lineWidth=2;ctx.setLineDash(dash||[]);
-    ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);
-    pts.forEach(([x,y])=>ctx.lineTo(x,y));
-    ctx.stroke();ctx.setLineDash([]);
-  };
+  ctx.beginPath();ctx.moveTo(pp[0][0],py2);pp.forEach(([x,y])=>ctx.lineTo(x,y));ctx.lineTo(pp[pp.length-1][0],py2);ctx.closePath();
+  ctx.fillStyle=planColor+'22';ctx.fill();
 
-  // Area fill
-  ctx.beginPath();ctx.moveTo(planPts[0][0],py2);
-  planPts.forEach(([x,y])=>ctx.lineTo(x,y));
-  ctx.lineTo(planPts[planPts.length-1][0],py2);ctx.closePath();
-  ctx.fillStyle='rgba(25,113,194,0.08)';ctx.fill();
+  const drawLine=(pts,col,dash)=>{ctx.strokeStyle=col;ctx.lineWidth=2;ctx.setLineDash(dash||[]);ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);pts.forEach(([x,y])=>ctx.lineTo(x,y));ctx.stroke();ctx.setLineDash([]);};
+  drawLine(pp,planColor);drawLine(ap,actColor,[6,3]);
 
-  drawLine(planPts,'#1971c2');
-  drawLine(actPts,'#eab308',[5,3]);
-
-  // Today
   if(today>=projStart&&today<=projEnd){
     const tx=px1+(dayDiff(projStart,today)/totalDays)*pw;
-    ctx.strokeStyle='#ef4444';ctx.lineWidth=1;ctx.setLineDash([3,3]);
+    ctx.strokeStyle='#cc0000';ctx.lineWidth=1;ctx.setLineDash([3,3]);
     ctx.beginPath();ctx.moveTo(tx,py1);ctx.lineTo(tx,py2);ctx.stroke();ctx.setLineDash([]);
   }
 
-  // Legend
-  ctx.fillStyle='#1971c2';ctx.fillRect(px1+4,py2-18,16,4);
-  ctx.fillStyle='#94a3b8';ctx.font='16px Tahoma';ctx.textAlign='left';
-  ctx.fillText('Plan',px1+23,py2-15);
-  ctx.strokeStyle='#eab308';ctx.lineWidth=2;ctx.setLineDash([5,3]);
-  ctx.beginPath();ctx.moveTo(px1+52,py2-16);ctx.lineTo(px1+68,py2-16);ctx.stroke();ctx.setLineDash([]);
-  ctx.fillStyle='#495057';ctx.fillText('Actual',px1+71,py2-15);
+  ctx.fillStyle=planColor;ctx.fillRect(px1+4,py2-14,16,5);
+  ctx.fillStyle='#555';ctx.font='10px Tahoma';ctx.textAlign='left';ctx.fillText('Plan',px1+23,py2-10);
+  ctx.strokeStyle=actColor;ctx.lineWidth=2;ctx.setLineDash([5,3]);
+  ctx.beginPath();ctx.moveTo(px1+55,py2-12);ctx.lineTo(px1+71,py2-12);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#555';ctx.fillText('Actual',px1+74,py2-10);
 }
 
-function renderSCurves() {
-  if(!currentPlan) return;
-  const rows=appData[currentPlan].rows;
-  drawSCurveCombined('scCanvas1', rows);
-}
-
-// ════════════════════════════════════════
-// HOME CHARTS
-// ════════════════════════════════════════
-function renderHomeCharts() {
-  drawSCurve('homeMatCanvas',  appData.material.rows,     '#e2e8f0','#3b82f6');
-  drawSCurve('homeInstCanvas', appData.installation.rows, '#eab308','#22c55e');
-  resizeHomeCharts();
-}
-
-function resizeHomeCharts() {
-  ['homeMatWrap','homeInstWrap'].forEach(id=>{
-    const wrap=document.getElementById(id);
-    const canvas=wrap.querySelector('canvas');
-    if(canvas){canvas.style.width=wrap.clientWidth+'px';canvas.style.height=wrap.clientHeight+'px';}
-  });
-}
-
-// ════════════════════════════════════════
-// RESIZE
-// ════════════════════════════════════════
-async function resizeAll() {
-  await waitFonts();
-  const activePage=document.querySelector('.page.active');
-  if(!activePage) return;
-  if(activePage.id==='homePage') {
-    renderHomeCharts();
-    return;
-  }
-  if(activePage.id==='planPage') {
-    renderGantt();
-    renderSCurves();
-  }
-}
+function renderSC(){if(!currentPlan)return;drawSCurve('scCanvas',appData[currentPlan].rows,currentPlan==='material'?'#1560a8':'#d97706','#2a8a2a');}
+function renderHomeCharts(){drawSCurve('homeMatCanvas',appData.material.rows,'#1560a8','#2a8a2a');drawSCurve('homeInstCanvas',appData.installation.rows,'#d97706','#2a8a2a');}
+function renderAll(){initRows();setTimeout(renderHomeCharts,150);}
 
 let _rt;
-window.addEventListener('resize',()=>{clearTimeout(_rt);_rt=setTimeout(resizeAll,80);});
-// Also trigger resize on orientation change for mobile
-window.addEventListener('orientationchange',()=>{setTimeout(resizeAll,200);});
-
-// ════════════════════════════════════════
-// RENDER ALL (after data load)
-// ════════════════════════════════════════
-function renderAll() {
-  initDefaultData();
-  waitFonts().then(()=>{
-    renderHomeCharts();
-  });
-}
-
-// ════════════════════════════════════════
-// TOAST
-// ════════════════════════════════════════
-function toast(msg, err=false) {
-  const el=document.getElementById('toast');
-  el.textContent=msg;
-  el.style.borderColor=err?'#ef4444':'#2a3444';
-  el.classList.add('show');
-  setTimeout(()=>el.classList.remove('show'),2800);
-}
+window.addEventListener('resize',()=>{clearTimeout(_rt);_rt=setTimeout(()=>{renderGantt();renderSC();renderHomeCharts();},100);});
+window.addEventListener('orientationchange',()=>setTimeout(()=>{renderGantt();renderSC();},300));
 </script>
 </body>
 </html>
