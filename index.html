@@ -144,22 +144,37 @@ body:not(.ed) .ci {pointer-events:none}
 .ok {color:#2a8a2a;font-weight:700}
 .wn {color:#c00;font-weight:700}
 
-/* PRINT MODE FOR A4 PORTRAIT PDF EXPORT */
+/* PRINT MODE FOR A4 PORTRAIT CONTINUOUS PDF EXPORT */
 .print-mode {
-  width: 1000px !important;
-  max-width: 1000px !important;
+  width: 800px !important;
+  max-width: 800px !important;
   margin: 0 auto;
   background: #fff;
 }
-.print-mode .scs { padding: 20px 0; border-bottom: none; page-break-inside: avoid; }
-.print-mode .scb { width: 85% !important; border: none; padding: 0; min-width: unset; box-shadow: none; }
-.print-mode .gs { overflow-x: hidden !important; border-bottom: none; page-break-inside: avoid; margin-bottom: 20px; }
-.print-mode .ts { page-break-before: auto; }
-.print-mode .tw { overflow-x: hidden !important; }
-.print-mode table { table-layout: fixed; width: 100%; }
-.print-mode tr { page-break-inside: avoid; }
-.print-mode td, .print-mode th { padding: 4px; }
-.print-mode .ci { background: transparent !important; border: none !important; color: #000 !important; font-family: Sarabun, sans-serif; }
+.print-mode .scs { padding: 15px 0; border-bottom: none; }
+.print-mode .scb { width: 100% !important; border: none; padding: 0; min-width: unset; box-shadow: none; }
+.print-mode .gs { overflow-x: hidden !important; width: 100% !important; border-bottom: none; margin-bottom: 20px; }
+.print-mode .tw { overflow-x: hidden !important; width: 100% !important; }
+.print-mode table { width: 100% !important; min-width: 100% !important; table-layout: fixed; border-collapse: collapse; }
+
+/* Strict Proportional Widths for 100% A4 Fit */
+.print-mode .col-no    { width: 4% !important; }
+.print-mode .col-item  { width: 8% !important; }
+.print-mode .col-desc  { width: 32% !important; }
+.print-mode .col-date  { width: 11% !important; }
+.print-mode .col-pct   { width: 6% !important; }
+
+.print-mode th { font-size: 10px !important; padding: 4px 2px !important; white-space: normal; }
+.print-mode td { padding: 2px !important; }
+.print-mode .ci { 
+  font-size: 11px !important; 
+  padding: 2px !important; 
+  background: transparent !important; 
+  border: none !important; 
+  color: #000 !important; 
+  width: 100%; 
+  min-width: 0;
+}
 
 /* MODAL */
 .mo {display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center}
@@ -340,7 +355,7 @@ function exportExcel() {
 
 function exportPDF() {
   if(!plan) return;
-  toast('Generating A4 Portrait PDF...');
+  toast('Generating continuous A4-width PDF...');
   
   const element = document.getElementById('ppg');
   const toolbar = document.getElementById('planToolbar');
@@ -349,37 +364,46 @@ function exportPDF() {
   toolbar.style.display = 'none';
   element.classList.add('print-mode');
   
-  // Re-render charts specifically for the 1000px wide print format
+  // Re-render charts specifically locked to 800px width for 100% A4 fitting
   renderGantt();
   renderSC();
   
-  // Give canvas a split second to re-draw before capturing
   setTimeout(() => {
+    // 800px is the enforced element width. h is the dynamic content height.
+    const w = element.offsetWidth || 800;
+    const h = element.scrollHeight;
+    
+    // A4 width is 210mm. We leave 10mm total horizontal margin (5mm left + 5mm right)
+    const marginMm = 5;
+    const contentWidthMm = 210 - (marginMm * 2);
+    
+    // Calculate required height in mm to keep aspect ratio perfect
+    const contentHeightMm = h * (contentWidthMm / w);
+    const formatHeightMm = contentHeightMm + (marginMm * 2);
+    
     const opt = {
-      margin:       [10, 10, 10, 10], // 10mm margin on all sides
+      margin:       marginMm,
       filename:     `TSG_${plan}_plan.pdf`,
       image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true, windowWidth: 1000 },
-      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }, // Strict A4 Portrait Mode
-      pagebreak:    { mode: ['css', 'legacy'] }
+      html2canvas:  { scale: 2, useCORS: true },
+      // Strict mapping: 210mm width (A4) by dynamic height (Continuous)
+      jsPDF:        { unit: 'mm', format: [210, formatHeightMm], orientation: 'portrait' } 
     };
     
     html2pdf().set(opt).from(element).save().then(() => {
-      // Restore the UI back to normal Interactive Mode
       toolbar.style.display = 'flex'; 
       element.classList.remove('print-mode');
       renderGantt();
       renderSC();
       toast('✓ PDF Exported Successfully');
-    }).catch(() => {
-      // Ensure UI restores even if it fails
+    }).catch((err) => {
       toolbar.style.display = 'flex'; 
       element.classList.remove('print-mode');
       renderGantt();
       renderSC();
       toast('✗ PDF generation failed', true);
     });
-  }, 200);
+  }, 300);
 }
 
 // ── SESSION RESTORE ──
