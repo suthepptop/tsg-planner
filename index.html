@@ -4,9 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TSG Project Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: Tahoma, sans-serif; }
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: Tahoma, 'Leelawadee UI', Thonburi, 'Noto Sans Thai', sans-serif; }
 body { background: #fff; color: #222; }
 
 #topbar {
@@ -19,7 +22,7 @@ body { background: #fff; color: #222; }
 #topbar .right { display: flex; align-items: center; gap: 10px; }
 #userInfo { font-size: 12px; color: rgba(255,255,255,0.85); }
 
-.btn { padding: 5px 14px; border-radius: 4px; border: 1px solid #aaa; background: #fff; color: #222; font-size: 13px; font-family: Tahoma, sans-serif; cursor: pointer; }
+.btn { padding: 5px 14px; border-radius: 4px; border: 1px solid #aaa; background: #fff; color: #222; font-size: 13px; font-family: Tahoma, 'Leelawadee UI', Thonburi, 'Noto Sans Thai', sans-serif; cursor: pointer; }
 .btn:hover { background: #f0f0f0; }
 .btn-primary { background: #1560a8; border-color: #1560a8; color: #fff; }
 .btn-primary:hover { background: #0f4a8a; }
@@ -29,26 +32,68 @@ body { background: #fff; color: #222; }
 
 .page { display: none; }
 .page.active { display: block; }
-#homePage.active { display: flex; height: calc(100vh - 44px); }
+#homePage.active { display: flex; height: calc(100vh - 44px); overflow: hidden; }
 
-.home-left { width: 200px; min-width: 200px; background: #f4f6f8; border-right: 1px solid #ddd; display: flex; flex-direction: column; align-items: stretch; justify-content: center; gap: 12px; padding: 20px 14px; }
-.home-left h2 { font-size: 11px; color: #888; font-weight: bold; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
-.plan-btn { width: 100%; padding: 12px 10px; border-radius: 6px; border: 1px solid #ccc; background: #fff; cursor: pointer; text-align: left; transition: all 0.15s; }
+/* HOME SIDEBAR */
+.home-sidebar {
+  width: 200px; min-width: 200px;
+  background: #f4f6f8; border-right: 1px solid #ddd;
+  display: flex; flex-direction: column;
+  padding: 16px 12px; gap: 10px;
+  overflow-y: auto;
+}
+.home-sidebar-label { font-size: 10px; color: #888; font-weight: bold; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 2px; }
+
+.plan-btn {
+  width: 100%; padding: 10px; border-radius: 6px;
+  border: 1px solid #ddd; background: #fff;
+  cursor: pointer; text-align: left; transition: all 0.15s;
+  display: flex; align-items: center; gap: 10px;
+}
 .plan-btn:hover { border-color: #1560a8; background: #eef4ff; }
-.plan-btn .pb-icon { font-size: 18px; margin-bottom: 4px; }
-.plan-btn .pb-title { font-size: 13px; font-weight: bold; color: #222; margin-bottom: 2px; }
-.plan-btn .pb-sub { font-size: 10px; color: #888; }
+.plan-btn-icon {
+  width: 32px; height: 32px; border-radius: 5px;
+  flex-shrink: 0;
+}
+.mat-icon { background: #e8f0fb; border: 1.5px solid #1560a8; }
+.inst-icon { background: #fef3e2; border: 1.5px solid #d97706; }
+.plan-btn-title { font-size: 12px; font-weight: bold; color: #222; margin-bottom: 2px; }
+.plan-btn-sub { font-size: 9px; color: #888; }
 
-.home-right { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 20px; gap: 16px; background: #f9f9f9; overflow-y: auto; }
-.home-chart-box { width: 50%; min-width: 360px; background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 8px; }
-.home-chart-box h3 { text-align: center; font-size: 12px; color: #555; font-weight: bold; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+.home-progress {
+  margin-top: 4px; border-top: 1px solid #ddd; padding-top: 12px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.home-progress-label { font-size: 10px; color: #888; font-weight: bold; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+.prog-row { display: flex; justify-content: space-between; align-items: center; }
+.prog-name { font-size: 11px; color: #555; }
+.prog-pct { font-size: 11px; font-weight: bold; }
+.mat-pct { color: #1560a8; }
+.inst-pct { color: #d97706; }
+.prog-bar-bg { height: 5px; background: #e0e0e0; border-radius: 3px; margin-top: 3px; }
+.prog-bar-fill { height: 5px; border-radius: 3px; transition: width 0.4s; }
+.mat-fill { background: #1560a8; }
+.inst-fill { background: #d97706; }
+
+/* HOME CHARTS */
+.home-charts {
+  flex: 1; display: flex; flex-direction: column;
+  padding: 16px; gap: 14px;
+  background: #f9f9f9; overflow-y: auto;
+  align-items: center;
+}
+.home-chart-box {
+  width: 70%; min-width: 320px;
+  background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 10px;
+}
+.home-chart-box h3 { text-align: center; font-size: 12px; color: #555; font-weight: bold; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
 .home-chart-box canvas { display: block; width: 100%; }
 
 .plan-topbar { position: sticky; top: 44px; z-index: 100; display: flex; align-items: center; gap: 8px; padding: 6px 14px; background: #f0f2f5; border-bottom: 1px solid #ddd; flex-wrap: wrap; }
 .plan-title { font-size: 15px; font-weight: bold; color: #1560a8; }
 .spacer { flex: 1; }
 .row-ctrl { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #666; }
-.row-ctrl input { width: 52px; padding: 3px 6px; border: 1px solid #ccc; border-radius: 3px; font-size: 12px; text-align: center; font-family: Tahoma, sans-serif; }
+.row-ctrl input { width: 52px; padding: 3px 6px; border: 1px solid #ccc; border-radius: 3px; font-size: 12px; text-align: center; font-family: Tahoma, 'Leelawadee UI', Thonburi, 'Noto Sans Thai', sans-serif; }
 
 .sc-section { display: flex; justify-content: center; padding: 16px 0 12px; background: #fff; border-bottom: 1px solid #ddd; }
 .sc-box { width: 50%; min-width: 380px; background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 8px; }
@@ -66,7 +111,7 @@ tbody tr:nth-child(even) { background: #f7f9fb; }
 tbody tr:hover { background: #eef4ff; }
 td { border: 1px solid #ddd; padding: 3px 5px; height: 32px; vertical-align: middle; }
 
-.ci { width: 100%; border: none; background: transparent; font-size: 13px; font-family: Tahoma, sans-serif; color: #222; padding: 2px 3px; }
+.ci { width: 100%; border: none; background: transparent; font-size: 13px; font-family: Tahoma, 'Leelawadee UI', Thonburi, 'Noto Sans Thai', sans-serif; color: #222; padding: 2px 3px; }
 .ci:focus { outline: 2px solid #1560a8; outline-offset: -1px; background: #fff; }
 .ci[readonly] { color: #888; cursor: default; }
 .ci.r { text-align: right; }
@@ -83,20 +128,18 @@ body:not(.editor) .ci { pointer-events: none; }
 .modal h2 { font-size: 15px; margin-bottom: 8px; }
 .modal p { font-size: 12px; color: #666; margin-bottom: 16px; line-height: 1.6; }
 .modal label { font-size: 11px; color: #666; display: block; margin-bottom: 3px; }
-.modal input { width: 100%; padding: 7px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 12px; margin-bottom: 12px; font-family: Tahoma, sans-serif; }
+.modal input { width: 100%; padding: 7px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 12px; margin-bottom: 12px; font-family: Tahoma, 'Leelawadee UI', Thonburi, 'Noto Sans Thai', sans-serif; }
 .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
 
 #toast { position: fixed; bottom: 20px; right: 20px; background: #fff; border: 1px solid #ccc; border-radius: 6px; padding: 8px 16px; font-size: 12px; color: #222; box-shadow: 0 2px 10px rgba(0,0,0,0.12); opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 999; }
 #toast.show { opacity: 1; }
 
 @media (max-width: 768px) {
-  #homePage.active { flex-direction: column; height: auto; }
   #homePage.active { flex-direction: column !important; height: auto !important; overflow-y: auto; }
-  .home-left { width: 100% !important; flex-direction: column !important; border-right: none; border-bottom: 1px solid #ddd; padding: 12px 16px; gap: 10px; align-items: stretch; justify-content: flex-start; }
-  .home-left h2 { font-size: 13px; }
+  .home-sidebar { width: 100% !important; min-width: unset !important; border-right: none; border-bottom: 1px solid #ddd; padding: 12px 16px; }
   .plan-btn { width: 100% !important; }
-  .home-right { width: 100%; flex: unset; padding: 12px 16px; gap: 12px; align-items: center; }
-  .home-chart-box { width: 95%; min-width: unset; }
+  .home-charts { width: 100%; padding: 12px 16px; }
+  .home-chart-box { width: 95% !important; min-width: unset !important; }
   .sc-box { width: 95%; min-width: unset; }
   table { min-width: 600px; }
 }
@@ -114,20 +157,44 @@ body:not(.editor) .ci { pointer-events: none; }
 </div>
 
 <div class="page active" id="homePage">
-  <div class="home-left">
-    <h2>Select Plan</h2>
-    <button class="plan-btn" onclick="goToPlan('material')">
-      <div class="pb-icon">📦</div>
-      <div class="pb-title">Material Plan</div>
-      <div class="pb-sub">Procurement &amp; delivery</div>
+  <!-- LEFT SIDEBAR -->
+  <div class="home-sidebar">
+    <div class="home-sidebar-label">Select Plan</div>
+
+    <button class="plan-btn mat" onclick="goToPlan('material')">
+      <div class="plan-btn-icon mat-icon"></div>
+      <div class="plan-btn-text">
+        <div class="plan-btn-title">Material Plan</div>
+        <div class="plan-btn-sub">Procurement &amp; delivery</div>
+      </div>
     </button>
-    <button class="plan-btn" onclick="goToPlan('installation')">
-      <div class="pb-icon">🔧</div>
-      <div class="pb-title">Installation Plan</div>
-      <div class="pb-sub">Installation &amp; commissioning</div>
+
+    <button class="plan-btn inst" onclick="goToPlan('installation')">
+      <div class="plan-btn-icon inst-icon"></div>
+      <div class="plan-btn-text">
+        <div class="plan-btn-title">Installation Plan</div>
+        <div class="plan-btn-sub">Installation &amp; commissioning</div>
+      </div>
     </button>
+
+    <!-- Progress summary -->
+    <div class="home-progress">
+      <div class="home-progress-label">Overview</div>
+      <div class="prog-row">
+        <span class="prog-name">Material</span>
+        <span class="prog-pct mat-pct" id="homeMatPct">0%</span>
+      </div>
+      <div class="prog-bar-bg"><div class="prog-bar-fill mat-fill" id="homeMatBar" style="width:0%"></div></div>
+      <div class="prog-row" style="margin-top:8px">
+        <span class="prog-name">Installation</span>
+        <span class="prog-pct inst-pct" id="homeInstPct">0%</span>
+      </div>
+      <div class="prog-bar-bg"><div class="prog-bar-fill inst-fill" id="homeInstBar" style="width:0%"></div></div>
+    </div>
   </div>
-  <div class="home-right">
+
+  <!-- RIGHT: S-CURVES -->
+  <div class="home-charts">
     <div class="home-chart-box">
       <h3>Material S-Curve</h3>
       <canvas id="homeMatCanvas" height="200"></canvas>
@@ -468,14 +535,14 @@ function renderGantt(){
     const x2=Math.min(W,dx(new Date(m.getFullYear(),m.getMonth()+1,1)));
     ctx.fillStyle=i%2===0?'#1560a8':'#1050a0';
     ctx.fillRect(x1,0,x2-x1,HDR_H);
-    ctx.fillStyle='#fff';ctx.font='bold 13px Tahoma';ctx.textAlign='center';
+    ctx.fillStyle='#fff';ctx.font='bold 13px Tahoma, Leelawadee UI, Thonburi'Leelawadee UI', Thonburi, 'Noto Sans Thai''Leelawadee UI', Thonburi';ctx.textAlign='center';
     ctx.fillText(m.toLocaleString('default',{month:'short'})+"'"+String(m.getFullYear()).slice(2),(x1+x2)/2,HDR_H-10);
     if(x1>LABEL_W){ctx.strokeStyle='#e0e0e0';ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(x1,HDR_H);ctx.lineTo(x1,H-LEG_H);ctx.stroke();}
   });
 
   // Label header
   ctx.fillStyle='#1560a8';ctx.fillRect(0,0,LABEL_W,HDR_H);
-  ctx.fillStyle='#fff';ctx.font='bold 13px Tahoma';ctx.textAlign='center';
+  ctx.fillStyle='#fff';ctx.font='bold 13px Tahoma, Leelawadee UI, Thonburi'Leelawadee UI', Thonburi, 'Noto Sans Thai''Leelawadee UI', Thonburi';ctx.textAlign='center';
   ctx.fillText('Item / Description',LABEL_W/2,HDR_H-10);
   ctx.strokeStyle='#999';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(LABEL_W,0);ctx.lineTo(LABEL_W,H);ctx.stroke();
 
@@ -484,7 +551,7 @@ function renderGantt(){
     const tx=dx(today);
     ctx.strokeStyle='#cc0000';ctx.lineWidth=1.5;ctx.setLineDash([5,3]);
     ctx.beginPath();ctx.moveTo(tx,HDR_H);ctx.lineTo(tx,H-LEG_H);ctx.stroke();ctx.setLineDash([]);
-    ctx.fillStyle='#cc0000';ctx.font='bold 11px Tahoma';ctx.textAlign='center';
+    ctx.fillStyle='#cc0000';ctx.font='bold 11px Tahoma, Leelawadee UI, Thonburi'Leelawadee UI', Thonburi, 'Noto Sans Thai''Leelawadee UI', Thonburi';ctx.textAlign='center';
     ctx.fillText('TODAY',tx,HDR_H-2);
   }
 
@@ -497,7 +564,7 @@ function renderGantt(){
 
     const lbl=((r.itemNo?r.itemNo+' ':'')+(r.desc||'')).substring(0,34);
     ctx.fillStyle=r.desc?'#111':'#aaa';
-    ctx.font=r.desc?'13px Tahoma':'italic 12px Tahoma';
+    ctx.font=r.desc?"13px Tahoma, Leelawadee UI, Thonburi":"italic 12px Tahoma, Leelawadee UI, Thonburi";
     ctx.textAlign='left';
     ctx.fillText(lbl||('row '+r.no),6,y+ROW_H*0.65);
 
@@ -508,9 +575,9 @@ function renderGantt(){
     const planH=ROW_H*0.38,planY=y+ROW_H*0.08;
     ctx.fillStyle='#1560a8';
     ctx.beginPath();if(ctx.roundRect)ctx.roundRect(bx,planY,bw,planH,3);else ctx.rect(bx,planY,bw,planH);ctx.fill();
-    if(bw>28){ctx.fillStyle='#fff';ctx.font='bold 11px Tahoma';ctx.textAlign='center';ctx.fillText(dayDiff(ps,pe)+1+'d',bx+bw/2,planY+planH*0.75);}
+    if(bw>28){ctx.fillStyle='#fff';ctx.font='bold 11px Tahoma, Leelawadee UI, Thonburi'Leelawadee UI', Thonburi, 'Noto Sans Thai''Leelawadee UI', Thonburi';ctx.textAlign='center';ctx.fillText(dayDiff(ps,pe)+1+'d',bx+bw/2,planY+planH*0.75);}
     const midY=planY+planH/2+4;
-    ctx.fillStyle='#666';ctx.font='10px Tahoma';
+    ctx.fillStyle='#666';ctx.font='10px Tahoma, Leelawadee UI, Thonburi'Leelawadee UI', Thonburi, 'Noto Sans Thai''Leelawadee UI', Thonburi';
     ctx.textAlign='right';ctx.fillText(fmtD(r.ps),bx-3,midY);
     ctx.textAlign='left';ctx.fillText(fmtD(r.pe),bx+bw+3,midY);
 
@@ -529,7 +596,7 @@ function renderGantt(){
       ctx.strokeStyle='#000000';ctx.lineWidth=3;ctx.lineCap='round';
       ctx.beginPath();ctx.moveTo(ax,midActY);ctx.lineTo(redX,midActY);ctx.stroke();
       ctx.lineCap='butt';ctx.lineWidth=1;
-      ctx.fillStyle='#000';ctx.font='bold 10px Tahoma';ctx.textAlign='right';
+      ctx.fillStyle='#000';ctx.font='bold 10px Tahoma, Leelawadee UI, Thonburi'Leelawadee UI', Thonburi, 'Noto Sans Thai''Leelawadee UI', Thonburi';ctx.textAlign='right';
       ctx.fillText(pct+'%', ax-3, actY+actH*0.75);
     }
   });
@@ -539,7 +606,7 @@ function renderGantt(){
   ctx.strokeStyle='#ddd';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,H-LEG_H);ctx.lineTo(W,H-LEG_H);ctx.stroke();
   const ly=H-LEG_H+9;
   ctx.fillStyle='#1560a8';ctx.fillRect(LABEL_W+10,ly-5,24,9);
-  ctx.fillStyle='#333';ctx.font='11px Tahoma';ctx.textAlign='left';ctx.fillText('Plan',LABEL_W+38,ly+2);
+  ctx.fillStyle='#333';ctx.font='11px Tahoma, Leelawadee UI, Thonburi'Leelawadee UI', Thonburi, 'Noto Sans Thai''Leelawadee UI', Thonburi';ctx.textAlign='left';ctx.fillText('Plan',LABEL_W+38,ly+2);
   ctx.fillStyle='#FFD700';ctx.fillRect(LABEL_W+80,ly-5,24,9);
   ctx.fillText('Actual',LABEL_W+108,ly+2);
   ctx.strokeStyle='#cc0000';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(LABEL_W+82,ly);ctx.lineTo(LABEL_W+102,ly);ctx.stroke();
@@ -560,7 +627,10 @@ function buildCurves(rows){
       for(let d=sd;d<=ed;d++)plan[d]+=w/span;
       const pct=(+r.pct||0)/100;if(!pct)return;
       const as=parseDate(r.as||r.ps),ae=parseDate(r.ae||r.pe);if(!as||!ae)return;
-      const asd=Math.max(0,dayDiff(pStart,as)),aed=Math.min(totalDays-1,dayDiff(pStart,ae));
+      const asd=Math.max(0,dayDiff(pStart,as));
+      // actual line stops at today
+      const todayDay=Math.min(totalDays-1,dayDiff(pStart,new Date()));
+      const aed=Math.min(todayDay,dayDiff(pStart,ae));
       const aspan=aed-asd+1;if(aspan<=0)return;
       for(let d=asd;d<=aed;d++)act[d]+=w*pct/aspan;
     });
@@ -588,7 +658,7 @@ function drawSCurve(canvasId,rows,planColor,actColor){
     ctx.strokeStyle=p===0||p===100?'#bbb':'#e8e8e8';ctx.lineWidth=p===0||p===100?1:0.5;
     ctx.setLineDash(p===0||p===100?[]:[3,3]);
     ctx.beginPath();ctx.moveTo(px1,gy);ctx.lineTo(px2,gy);ctx.stroke();
-    ctx.fillStyle='#888';ctx.font='10px Tahoma';ctx.textAlign='right';ctx.fillText(p+'%',px1-4,gy+3.5);
+    ctx.fillStyle='#888';ctx.font='10px Tahoma, Leelawadee UI, Thonburi'Leelawadee UI', Thonburi, 'Noto Sans Thai''Leelawadee UI', Thonburi';ctx.textAlign='right';ctx.fillText(p+'%',px1-4,gy+3.5);
   });
   ctx.setLineDash([]);
 
@@ -598,7 +668,7 @@ function drawSCurve(canvasId,rows,planColor,actColor){
     const gx=px1+(dayDiff(projStart,m)/totalDays)*pw;
     ctx.strokeStyle='#e8e8e8';ctx.lineWidth=0.5;ctx.setLineDash([2,3]);
     ctx.beginPath();ctx.moveTo(gx,py1);ctx.lineTo(gx,py2);ctx.stroke();ctx.setLineDash([]);
-    ctx.fillStyle='#888';ctx.font='10px Tahoma';ctx.textAlign='center';
+    ctx.fillStyle='#888';ctx.font='10px Tahoma, Leelawadee UI, Thonburi'Leelawadee UI', Thonburi, 'Noto Sans Thai''Leelawadee UI', Thonburi';ctx.textAlign='center';
     ctx.fillText(m.toLocaleString('default',{month:'short'}),gx,py2+14);
   });
 
@@ -622,14 +692,33 @@ function drawSCurve(canvasId,rows,planColor,actColor){
   }
 
   ctx.fillStyle=planColor;ctx.fillRect(px1+4,py2-14,16,5);
-  ctx.fillStyle='#555';ctx.font='10px Tahoma';ctx.textAlign='left';ctx.fillText('Plan',px1+23,py2-10);
+  ctx.fillStyle='#555';ctx.font='10px Tahoma, Leelawadee UI, Thonburi'Leelawadee UI', Thonburi, 'Noto Sans Thai''Leelawadee UI', Thonburi';ctx.textAlign='left';ctx.fillText('Plan',px1+23,py2-10);
   ctx.strokeStyle=actColor;ctx.lineWidth=2;ctx.setLineDash([5,3]);
   ctx.beginPath();ctx.moveTo(px1+55,py2-12);ctx.lineTo(px1+71,py2-12);ctx.stroke();ctx.setLineDash([]);
   ctx.fillStyle='#555';ctx.fillText('Actual',px1+74,py2-10);
 }
 
 function renderSC(){if(!currentPlan)return;drawSCurve('scCanvas',appData[currentPlan].rows,currentPlan==='material'?'#1560a8':'#d97706','#2a8a2a');}
-function renderHomeCharts(){drawSCurve('homeMatCanvas',appData.material.rows,'#1560a8','#2a8a2a');drawSCurve('homeInstCanvas',appData.installation.rows,'#d97706','#2a8a2a');}
+function calcProgress(rows){
+  const totalW=rows.reduce((s,r)=>s+(+r.wt||0),0);
+  if(!totalW)return 0;
+  const done=rows.reduce((s,r)=>s+(+r.wt||0)*(+r.pct||0)/100,0);
+  return Math.round(done/totalW*100);
+}
+function renderHomeCharts(){
+  drawSCurve('homeMatCanvas',appData.material.rows,'#1560a8','#2a8a2a');
+  drawSCurve('homeInstCanvas',appData.installation.rows,'#d97706','#2a8a2a');
+  const mp=calcProgress(appData.material.rows);
+  const ip=calcProgress(appData.installation.rows);
+  const me=document.getElementById('homeMatPct');
+  const ie=document.getElementById('homeInstPct');
+  const mb=document.getElementById('homeMatBar');
+  const ib=document.getElementById('homeInstBar');
+  if(me)me.textContent=mp+'%';
+  if(ie)ie.textContent=ip+'%';
+  if(mb)mb.style.width=mp+'%';
+  if(ib)ib.style.width=ip+'%';
+}
 function renderAll(){initRows();setTimeout(renderHomeCharts,150);}
 
 let _rt;
