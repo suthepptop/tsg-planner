@@ -589,15 +589,20 @@ function normaliseDate(s) {
     const [d,m,y] = s.split('/');
     return `${d.padStart(2,'0')}/${m.padStart(2,'0')}/${y}`;
   }
+  // dd-mm-yyyy (Excel sometimes pastes with dashes)
+  if(/^\d{1,2}-\d{1,2}-\d{4}$/.test(s)) {
+    const [d,m,y] = s.split('-');
+    return `${d.padStart(2,'0')}/${m.padStart(2,'0')}/${y}`;
+  }
   // yyyy-mm-dd
   if(/^\d{4}-\d{2}-\d{2}$/.test(s)) {
     const [y,m,d] = s.split('-');
     return `${d}/${m}/${y}`;
   }
-  // Excel serial number
+  // Excel serial number (5 digits)
   if(/^\d{5}$/.test(s)) {
-    const d = excelSerialToDate(+s);
-    return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+    const dt = excelSerialToDate(+s);
+    return `${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}`;
   }
   return s;
 }
