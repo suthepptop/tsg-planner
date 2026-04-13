@@ -324,12 +324,12 @@ body:not(.ed) .ci {pointer-events:none}
 <div class="mo" id="patMo">
   <div class="md">
     <h2>GitHub Access Token</h2>
-    <p>Enter your PAT to load or save data. Stored in session.</p>
+    <p>Enter your PAT. Stored in session only.</p>
     <label>Token</label>
     <input type="password" id="patIn" placeholder="ghp_...">
     <div class="ma">
       <button class="btn" onclick="document.getElementById('patMo').classList.remove('on')">Cancel</button>
-      <button class="btn btnp" onclick="confirmPAT()">Confirm</button>
+      <button class="btn btnp" onclick="confirmPAT()">Save &amp; Continue</button>
     </div>
   </div>
 </div>
@@ -339,7 +339,7 @@ body:not(.ed) .ci {pointer-events:none}
 const GCI='695932302309-p1rccufdkq9itb5paam78j1ll1ejb1uu.apps.googleusercontent.com';
 const EE='suthepp.top@gmail.com';
 const API='https://api.github.com/repos/suthepptop/tsg-planner/contents/data.json';
-let isEd=false,plan=null,sha=null,patAction='save';
+let isEd=false,plan=null,sha=null;
 let D={material:{rows:[], snap:{}},installation:{rows:[], snap:{}}};
 const $=id=>document.getElementById(id);
 const FN='Sarabun,sans-serif';
@@ -518,20 +518,7 @@ async function loadData() {
 
   try {
     const r = await fetch(API + '?t=' + Date.now(), { headers });
-    
-    if (!r.ok) { 
-        // IF RATE LIMITED BY GITHUB, ASK FOR PAT TO BYPASS
-        if ((r.status === 403 || r.status === 404) && !pat) {
-            patAction = 'load';
-            $('patMo').classList.add('on');
-            toast('GitHub Limit Reached. Enter PAT to load data.', true);
-        } else {
-            initD(); 
-        }
-        renderAll(); 
-        return; 
-    }
-    
+    if (!r.ok) { initD(); renderAll(); return; }
     const j = await r.json(); 
     sha = j.sha; 
     const raw = atob(j.content.replace(/\n/g, ''));
@@ -567,11 +554,7 @@ function initD(){
 
 async function saveData() {
   let pat = sessionStorage.getItem('ghPAT');
-  if (!pat) { 
-      patAction = 'save';
-      $('patMo').classList.add('on'); 
-      return; 
-  }
+  if (!pat) { $('patMo').classList.add('on'); return; }
 
   if (!sha) {
     try {
@@ -612,18 +595,7 @@ async function saveData() {
   }
 }
 
-function confirmPAT(){
-    const v=$('patIn').value.trim();
-    if(!v) return;
-    sessionStorage.setItem('ghPAT',v);
-    $('patMo').classList.remove('on');
-    
-    if (patAction === 'save') {
-        saveData();
-    } else {
-        loadData(); // Load data after authenticating
-    }
-}
+function confirmPAT(){const v=$('patIn').value.trim();if(!v)return;sessionStorage.setItem('ghPAT',v);$('patMo').classList.remove('on');saveData();}
 
 // ── NAV ──
 function showPg(id){document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));$(id).classList.add('on');}
