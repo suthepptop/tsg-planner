@@ -144,37 +144,52 @@ body:not(.ed) .ci {pointer-events:none}
 .ok {color:#2a8a2a;font-weight:700}
 .wn {color:#c00;font-weight:700}
 
-/* PRINT MODE FOR A4 PORTRAIT CONTINUOUS PDF EXPORT */
+/* =======================================================
+   PRINT MODE FOR 100% WIDTH A4 CONTINUOUS PDF EXPORT 
+======================================================= */
 .print-mode {
-  width: 800px !important;
-  max-width: 800px !important;
-  margin: 0 auto;
-  background: #fff;
+  width: 1000px !important;
+  max-width: 1000px !important;
+  min-width: 1000px !important;
+  margin: 0 !important;
+  padding: 20px !important; /* Safety padding inside the document */
+  background: #fff !important;
+  height: auto !important;
+  overflow: visible !important;
+  position: absolute !important; /* Detach from viewport to avoid clipping */
+  top: 0 !important;
+  left: 0 !important;
+  z-index: 9999 !important;
 }
-.print-mode .scs { padding: 15px 0; border-bottom: none; }
-.print-mode .scb { width: 100% !important; border: none; padding: 0; min-width: unset; box-shadow: none; }
-.print-mode .gs { overflow-x: hidden !important; width: 100% !important; border-bottom: none; margin-bottom: 20px; }
-.print-mode .tw { overflow-x: hidden !important; width: 100% !important; }
-.print-mode table { width: 100% !important; min-width: 100% !important; table-layout: fixed; border-collapse: collapse; }
+/* Ensure 100% width and no scrolling for sections */
+.print-mode .scs { padding: 0 0 20px 0 !important; border-bottom: none !important; display: block; }
+.print-mode .scb { width: 100% !important; min-width: 100% !important; border: none !important; padding: 0 !important; box-shadow: none !important; }
+.print-mode .gs { overflow: visible !important; width: 100% !important; min-width: 100% !important; border-bottom: none !important; margin-bottom: 20px !important; }
+.print-mode .ts { overflow: visible !important; width: 100% !important; min-width: 100% !important; }
+.print-mode .tw { overflow: visible !important; width: 100% !important; min-width: 100% !important; }
+.print-mode table { width: 100% !important; min-width: 100% !important; table-layout: fixed !important; border-collapse: collapse !important; }
 
-/* Strict Proportional Widths for 100% A4 Fit */
-.print-mode .col-no    { width: 4% !important; }
+/* Perfect percentage distribution for Table to fit 100% width beautifully */
+.print-mode .col-no    { width: 4% !important; text-align: center; }
 .print-mode .col-item  { width: 8% !important; }
-.print-mode .col-desc  { width: 32% !important; }
-.print-mode .col-date  { width: 11% !important; }
-.print-mode .col-pct   { width: 6% !important; }
+.print-mode .col-desc  { width: 34% !important; }
+.print-mode .col-date  { width: 11% !important; text-align: center; }
+.print-mode .col-pct   { width: 5% !important; text-align: center; }
 
-.print-mode th { font-size: 10px !important; padding: 4px 2px !important; white-space: normal; }
-.print-mode td { padding: 2px !important; }
+/* Clean styling for Print */
+.print-mode th { font-size: 11px !important; padding: 6px 4px !important; white-space: normal; background: #e8edf2 !important; }
+.print-mode td { padding: 4px !important; border: 1px solid #ddd !important; }
 .print-mode .ci { 
   font-size: 11px !important; 
-  padding: 2px !important; 
+  padding: 0 !important; 
   background: transparent !important; 
   border: none !important; 
   color: #000 !important; 
-  width: 100%; 
-  min-width: 0;
+  width: 100% !important; 
+  height: auto !important;
+  min-width: 0 !important;
 }
+.print-mode .wtb { display: none !important; } /* Hide the bottom weight bar during print */
 
 /* MODAL */
 .mo {display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center}
@@ -260,8 +275,10 @@ body:not(.ed) .ci {pointer-events:none}
     <button class="btn btnsm btnd" id="rstBtn" style="display:none" onclick="resetRows()">✕ Reset</button>
     <button class="btn btnsm btnp" id="savBtn" style="display:none" onclick="saveData()">💾 Save</button>
   </div>
+  
   <div class="scs"><div class="scb"><canvas id="cSC" height="260"></canvas></div></div>
   <div class="gs" id="gsec"><canvas id="cGantt"></canvas></div>
+  
   <div class="ts">
     <div class="tw">
       <table>
@@ -355,55 +372,55 @@ function exportExcel() {
 
 function exportPDF() {
   if(!plan) return;
-  toast('Generating continuous A4-width PDF...');
+  toast('Generating continuous 100% A4-width PDF...');
   
   const element = document.getElementById('ppg');
   const toolbar = document.getElementById('planToolbar');
   
-  // Enter print mode formatting
+  // 1. Prepare for Print Mode
   toolbar.style.display = 'none';
   element.classList.add('print-mode');
   
-  // Re-render charts specifically locked to 800px width for 100% A4 fitting
+  // 2. Force graphs to redraw at the new explicitly defined 1000px width
   renderGantt();
   renderSC();
   
+  // 3. Allow time for DOM to settle and Canvas to draw
   setTimeout(() => {
-    // 800px is the enforced element width. h is the dynamic content height.
-    const w = element.offsetWidth || 800;
-    const h = element.scrollHeight;
+    // Measure full scroll height
+    const w = element.offsetWidth; // Will be exactly 1000px due to CSS
+    const h = element.offsetHeight;
     
-    // A4 width is 210mm. We leave 10mm total horizontal margin (5mm left + 5mm right)
-    const marginMm = 5;
-    const contentWidthMm = 210 - (marginMm * 2);
-    
-    // Calculate required height in mm to keep aspect ratio perfect
-    const contentHeightMm = h * (contentWidthMm / w);
-    const formatHeightMm = contentHeightMm + (marginMm * 2);
+    // A4 width is ~210mm.
+    const mmWidth = 210;
+    // Mathematically calculate the exact proportional height needed for a single page
+    const mmHeight = (h / w) * mmWidth;
     
     const opt = {
-      margin:       marginMm,
+      margin:       0, // No external margins; we added padding inside .print-mode
       filename:     `TSG_${plan}_plan.pdf`,
-      image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true },
-      // Strict mapping: 210mm width (A4) by dynamic height (Continuous)
-      jsPDF:        { unit: 'mm', format: [210, formatHeightMm], orientation: 'portrait' } 
+      image:        { type: 'jpeg', quality: 1.0 },
+      html2canvas:  { scale: 2, useCORS: true, windowWidth: w, width: w, height: h, scrollY: 0 },
+      // The secret to continuous, unbroken PDF: set jsPDF format height dynamically
+      jsPDF:        { unit: 'mm', format: [mmWidth, mmHeight], orientation: 'portrait' } 
     };
     
     html2pdf().set(opt).from(element).save().then(() => {
+      // Restore view
       toolbar.style.display = 'flex'; 
       element.classList.remove('print-mode');
       renderGantt();
       renderSC();
       toast('✓ PDF Exported Successfully');
     }).catch((err) => {
+      // Ensure we restore view even if it fails
       toolbar.style.display = 'flex'; 
       element.classList.remove('print-mode');
       renderGantt();
       renderSC();
       toast('✗ PDF generation failed', true);
     });
-  }, 300);
+  }, 500);
 }
 
 // ── SESSION RESTORE ──
@@ -661,6 +678,7 @@ function renderGantt(){
   const{start:ps,end:pe,days:td}=getRange(rows);
   const today=new Date();
   
+  // If in print mode, sec will be 1000px wide
   const W=Math.max(sec.getBoundingClientRect().width||sec.offsetWidth||900,600);
   const LW = Math.floor(W * 0.35); 
   const HH=34, LH=26;
@@ -819,6 +837,7 @@ function buildC(rows){
 
 function drawSC(cvId,rows,pc,ac){
   const cv=$(cvId);if(!cv)return;
+  // If in print mode, scb width is 1000px
   const W=cv.parentElement.getBoundingClientRect().width||cv.parentElement.offsetWidth||400;
   const H=parseInt(cv.getAttribute('height'))||200;
   if(W<10)return;
