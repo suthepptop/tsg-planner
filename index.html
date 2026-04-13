@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no, viewport-fit=cover">
 <meta http-equiv="Cache-Control" content="no-cache">
 <title>TSG Project Planner</title>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -10,10 +10,19 @@
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 
 <style>
+/* ROOT LOCK TO PREVENT HORIZONTAL SCROLL IN LINE BROWSER */
 * {box-sizing:border-box;margin:0;padding:0;font-family:Sarabun,sans-serif}
-body {background:#fff;color:#222}
+html, body {
+  width: 100%; 
+  max-width: 100%; 
+  overflow-x: hidden; 
+  position: relative; 
+  background:#fff;
+  color:#222;
+  overscroll-behavior-x: none; /* Stops swipe-to-go-back blank space */
+}
 
-#bar {position:sticky;top:0;z-index:200;display:flex;align-items:center;gap:8px;padding:0 12px;min-height:44px;background:#1560a8;border-bottom:2px solid #0f4a8a;flex-wrap:wrap}
+#bar {position:sticky;top:0;z-index:200;display:flex;align-items:center;gap:8px;padding:0 12px;min-height:44px;background:#1560a8;border-bottom:2px solid #0f4a8a;flex-wrap:wrap; width: 100%;}
 #bar h1 {font-size:13px;font-weight:700;color:#fff;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #bar .r {display:flex;align-items:center;gap:6px}
 #uinfo {font-size:11px;color:rgba(255,255,255,.85)}
@@ -30,9 +39,9 @@ body {background:#fff;color:#222}
 .btnd {border-color:#c00;color:#c00}
 .btnsm {padding:3px 9px;font-size:11px}
 
-.pg {display:none}
+.pg {display:none; width: 100%; max-width: 100%;}
 .pg.on {display:block}
-#hpg.on {display:flex;height:calc(100vh - 44px);overflow:hidden}
+#hpg.on {display:flex;height:calc(100vh - 44px);overflow:hidden; width: 100%;}
 
 /* HOME */
 .hsb {width:190px;min-width:190px;background:#f4f6f8;border-right:1px solid #ddd;display:flex;flex-direction:column;padding:14px 12px;gap:10px;overflow-y:auto}
@@ -45,8 +54,8 @@ body {background:#fff;color:#222}
 .pbt {font-size:12px;font-weight:700;color:#222;margin-bottom:1px}
 .pbs {font-size:9px;color:#888}
 
-.hpg-r {flex:1;display:flex;flex-direction:column;padding:14px;gap:12px;background:#f9f9f9;overflow-y:auto;align-items:center}
-.hcb {width:65%;min-width:300px;background:#fff;border:1px solid #ddd;border-radius:6px;padding:10px}
+.hpg-r {flex:1;display:flex;flex-direction:column;padding:14px;gap:12px;background:#f9f9f9;overflow-y:auto;align-items:center; max-width: 100%;}
+.hcb {width:65%;min-width:300px;background:#fff;border:1px solid #ddd;border-radius:6px;padding:10px; max-width: 100%;}
 .hcb canvas {display:block;width:100%}
 
 .prbox {margin-top:4px;border-top:1px solid #ddd;padding-top:10px;display:flex;flex-direction:column;gap:3px}
@@ -60,24 +69,24 @@ body {background:#fff;color:#222}
 .prfi {height:5px;background:#d97706;border-radius:3px;transition:width .4s}
 
 /* PLAN PAGE */
-.ptb {position:sticky;top:44px;z-index:100;display:flex;align-items:center;gap:7px;padding:6px 13px;background:#f0f2f5;border-bottom:1px solid #ddd;flex-wrap:wrap}
+.ptb {position:sticky;top:44px;z-index:100;display:flex;align-items:center;gap:7px;padding:6px 13px;background:#f0f2f5;border-bottom:1px solid #ddd;flex-wrap:wrap; width: 100%;}
 .ptit {font-size:14px;font-weight:700;color:#1560a8}
 .sp {flex:1}
 .rwc {display:flex;align-items:center;gap:5px;font-size:12px;color:#666}
 .rwc input {width:50px;padding:3px 5px;border:1px solid #ccc;border-radius:3px;font-size:12px;text-align:center;font-family:Sarabun,sans-serif}
 
 /* S-CURVE */
-.scs {display:flex;justify-content:center;padding:13px 0 9px;background:#fff;border-bottom:1px solid #ddd}
-.scb {width:50%;min-width:360px;background:#fff;border:1px solid #ddd;border-radius:6px;padding:8px}
+.scs {display:flex;justify-content:center;padding:13px 0 9px;background:#fff;border-bottom:1px solid #ddd; width: 100%;}
+.scb {width:50%;min-width:360px;background:#fff;border:1px solid #ddd;border-radius:6px;padding:8px; max-width: 100%;}
 .scb canvas {display:block;width:100%}
 
 /* GANTT */
-.gs {background:#fff;border-bottom:1px solid #ddd;overflow-x:hidden}
-.gs canvas {display:block}
+.gs {background:#fff;border-bottom:1px solid #ddd;overflow-x:hidden; width: 100%; max-width: 100%;}
+.gs canvas {display:block; max-width: 100%;}
 
 /* TABLE */
-.ts {background:#fff}
-.tw {overflow-x:auto}
+.ts {background:#fff; width: 100%; max-width: 100%;}
+.tw {overflow-x:auto; width: 100%; max-width: 100%;}
 
 table {
   border-collapse: collapse;
@@ -140,7 +149,7 @@ body.ed .ci:not([readonly]) {
 }
 body:not(.ed) .ci {pointer-events:none}
 
-.wtb {padding:5px 13px;background:#f4f6f8;border-top:1px solid #ddd;font-size:12px;color:#555;display:flex;gap:18px}
+.wtb {padding:5px 13px;background:#f4f6f8;border-top:1px solid #ddd;font-size:12px;color:#555;display:flex;gap:18px; width: 100%;}
 .ok {color:#2a8a2a;font-weight:700}
 .wn {color:#c00;font-weight:700}
 
@@ -192,20 +201,20 @@ body:not(.ed) .ci {pointer-events:none}
    MOBILE BROWSER OPTIMIZATIONS (Max Width 768px) 
 ======================================================= */
 @media(max-width:768px){
-  #hpg.on {flex-direction:column!important;height:auto!important;overflow-y:auto}
+  #hpg.on {flex-direction:column!important;height:auto!important;overflow-y:auto; width: 100%;}
   .hsb {width:100%!important;border-right:none;border-bottom:1px solid #ddd}
   .pb {width:100%!important}
-  .hpg-r {padding:10px; width: 100%; overflow-x: hidden;}
-  .hcb {width:100%; min-width:unset; padding: 5px;}
+  .hpg-r {padding:10px; width: 100%; max-width: 100%; overflow-x: hidden;}
+  .hcb {width:100%; max-width: 100%; min-width:unset; padding: 5px;}
   
-  .scs {padding: 10px 5px;}
-  .scb {width:100%; min-width:unset; padding: 5px;}
+  .scs {padding: 10px 5px; width: 100%; max-width: 100%;}
+  .scb {width:100%; max-width: 100%; min-width:unset; padding: 5px;}
   #bar h1 {font-size:10px}
   
-  /* OVERRIDE TABLE FOR MOBILE 100% WIDTH */
-  .ts { width: 100%; overflow-x: hidden; }
-  .tw { width: 100%; overflow-x: hidden; }
-  table { min-width: 100% !important; width: 100% !important; table-layout: fixed; }
+  /* STRICT 100% WIDTH FOR MOBILE CONTAINERS */
+  .ts { width: 100%; max-width: 100%; overflow-x: hidden; }
+  .tw { width: 100%; max-width: 100%; overflow-x: hidden; }
+  table { min-width: 100% !important; width: 100% !important; max-width: 100% !important; table-layout: fixed; }
   
   /* Compress columns */
   .col-no { width: 6% !important; }
@@ -683,17 +692,11 @@ function renderGantt(){
   const{start:ps,end:pe,days:td}=getRange(rows);
   const today=new Date();
   
-  // Mobile responsive detection
   const isMob = window.innerWidth <= 768;
   const secW = sec.getBoundingClientRect().width || sec.offsetWidth || window.innerWidth;
-  
-  // If mobile, use exact container width. If PC, ensure at least 600px
   const W = isMob ? secW : Math.max(secW, 600);
-  
-  // Apportion width depending on device size
   const LW = Math.floor(W * (isMob ? 0.30 : 0.35)); 
   
-  // Scale down row heights slightly on mobile
   const HH = isMob ? 28 : 34;
   const LH = isMob ? 20 : 26;
   const baseRH = isMob ? 30 : 38;
