@@ -6,7 +6,34 @@
 <title>TSG Project Planner — Energy Services Co., Ltd.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Sarabun:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Fallback: if Google Fonts fails, use system Thai font */
+  @font-face {
+    font-family: 'Sarabun';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Sarabun'), local('Sarabun-Regular'),
+         url('https://fonts.gstatic.com/s/sarabun/v13/DtVmJx26TKEr37c9YK5sulol.woff2') format('woff2');
+    unicode-range: U+0E00-U+0E7F, U+0020-U+007E;
+  }
+  @font-face {
+    font-family: 'Sarabun';
+    font-style: normal;
+    font-weight: 600;
+    src: local('Sarabun SemiBold'), local('Sarabun-SemiBold'),
+         url('https://fonts.gstatic.com/s/sarabun/v13/DtVhJx26TKEr37c9YNpo-us.woff2') format('woff2');
+    unicode-range: U+0E00-U+0E7F, U+0020-U+007E;
+  }
+  @font-face {
+    font-family: 'Sarabun';
+    font-style: normal;
+    font-weight: 700;
+    src: local('Sarabun Bold'), local('Sarabun-Bold'),
+         url('https://fonts.gstatic.com/s/sarabun/v13/DtVhJx26TKEr37c9YL5r-us.woff2') format('woff2');
+    unicode-range: U+0E00-U+0E7F, U+0020-U+007E;
+  }
+</style>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 :root {
@@ -33,12 +60,12 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   padding:6px 16px;background:#1971c2;border-bottom:1px solid #1864ab;
   position:sticky;top:0;z-index:200;height:40px;
 }
-#topbar h1{font-size:12px;font-weight:700;color:#fff;letter-spacing:0.04em;}
+#topbar h1{font-size:14px;font-weight:700;color:#fff;letter-spacing:0.04em;}
 #topbar .right{display:flex;align-items:center;gap:10px;}
-#userInfo{font-size:11px;color:rgba(255,255,255,0.8);font-family:var(--mono);}
+#userInfo{font-size:13px;color:rgba(255,255,255,0.8);font-family:var(--mono);}
 .btn{
-  padding:4px 12px;border-radius:4px;border:1px solid var(--border);
-  background:#fff;color:var(--text);font-size:11px;font-family:var(--font);
+  padding:6px 14px;border-radius:4px;border:1px solid var(--border);
+  background:#fff;color:var(--text);font-size:13px;font-family:var(--font);
   cursor:pointer;transition:all 0.15s;white-space:nowrap;
 }
 .btn:hover{background:var(--surface2);}
@@ -78,9 +105,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 
 .home-right{
   flex:1;display:flex;flex-direction:column;
-  padding:12px;gap:10px;overflow-y:auto;background:#f8f9fa;
+  padding:16px;gap:12px;overflow-y:auto;background:#f8f9fa;
+  align-items:center;
 }
-.home-chart-wrap{height:220px;position:relative;}
+.home-chart-wrap{height:240px;width:50%;min-width:360px;position:relative;}
 .home-chart-title{
   position:absolute;top:8px;left:50%;transform:translateX(-50%);
   font-size:10px;font-weight:600;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;
@@ -112,8 +140,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 
 /* S-curve section - top, centered 50% */
 .scurve-section{
-  height:300px;
-  padding:16px 0 8px;
+  height:320px;
+  padding:16px 0 10px;
   background:#fff;
   border-bottom:1px solid var(--border);
   display:flex;justify-content:center;
@@ -136,9 +164,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   border-top:1px solid var(--border);
 }
 .table-wrap{overflow-x:auto;}
-table{width:100%;border-collapse:collapse;font-size:12px;}
+table{width:100%;border-collapse:collapse;font-size:14px;}
 thead th{
-  padding:5px 6px;font-size:11px;font-weight:700;color:#495057;
+  padding:6px 8px;font-size:13px;font-weight:700;color:#495057;
   letter-spacing:0.02em;text-transform:uppercase;
   background:#e9ecef;border:1px solid #ced4da;
   white-space:nowrap;position:sticky;top:0;z-index:10;
@@ -148,14 +176,14 @@ tbody tr{border-bottom:1px solid #dee2e6;}
 tbody tr:hover{background:#f1f8ff;}
 tbody tr:nth-child(even){background:#f8f9fa;}
 tbody tr:nth-child(even):hover{background:#f1f8ff;}
-td{padding:4px 5px;vertical-align:middle;border-right:1px solid #dee2e6;height:28px;}
+td{padding:5px 6px;vertical-align:middle;border-right:1px solid #dee2e6;height:34px;}
 td:first-child{border-left:1px solid #dee2e6;}
 
 /* Editable cells - Excel like */
 .cell-input{
   width:100%;background:transparent;border:none;
-  color:var(--text);font-size:12px;font-family:'Sarabun',sans-serif;
-  padding:2px 3px;transition:all 0.1s;
+  color:var(--text);font-size:14px;font-family:'Sarabun',sans-serif;
+  padding:3px 4px;transition:all 0.1s;
 }
 .cell-input:focus{outline:2px solid #1971c2;outline-offset:-1px;background:#fff;}
 .cell-input[readonly]{color:var(--text3);cursor:default;}
@@ -171,7 +199,7 @@ body:not(.editable) .cell-input{
 /* Weight sum */
 .weight-bar{
   padding:4px 12px;border-top:1px solid var(--border);
-  display:flex;gap:16px;font-size:10px;font-family:var(--mono);color:var(--text2);
+  display:flex;gap:16px;font-size:13px;font-family:var(--mono);color:var(--text2);
   background:#f8f9fa;position:sticky;bottom:0;
 }
 .wok{color:var(--green)!important;} .wwarn{color:var(--red)!important;}
@@ -185,7 +213,7 @@ body:not(.editable) .cell-input{
 .sc-half canvas{display:block;}
 .sc-label{
   position:absolute;top:6px;left:50%;transform:translateX(-50%);
-  font-size:9px;font-weight:600;color:#495057;letter-spacing:0.08em;
+  font-size:13px;font-weight:600;color:#495057;letter-spacing:0.04em;
   text-transform:uppercase;pointer-events:none;white-space:nowrap;
 }
 
@@ -754,10 +782,14 @@ function getProjectRange(rows) {
 // ════════════════════════════════════════
 // GANTT CANVAS
 // ════════════════════════════════════════
-async function waitFonts() {
-  await document.fonts.load("400 12px Sarabun");
-  await document.fonts.load("600 12px Sarabun");
-  await document.fonts.load("700 12px Sarabun");
+async async function waitFonts() {
+  try {
+    await Promise.all([
+      document.fonts.load("400 16px Sarabun"),
+      document.fonts.load("600 16px Sarabun"),
+      document.fonts.load("700 16px Sarabun")
+    ]);
+  } catch(e){}
 }
 
 function renderGantt() {
@@ -765,10 +797,10 @@ function renderGantt() {
   const canvas = document.getElementById('ganttCanvas');
   if(!wrap||!canvas) return;
   const W=wrap.clientWidth||800;
-  const HDR_H_est=30, LEG_H_est=24;
+  const HDR_H_est=36, LEG_H_est=28;
   const rows2=appData[currentPlan]?.rows||[];
   const N2=Math.max(rows2.length,1);
-  const rowH_est=30;
+  const rowH_est=40;
   const H=HDR_H_est + N2*rowH_est + LEG_H_est + 4;
   canvas.width=W; canvas.height=H;
   canvas.style.width='100%';
@@ -784,9 +816,9 @@ function renderGantt() {
   const {start:pStart, end:pEnd, days:totalDays} = getProjectRange(rows);
   const today = new Date();
 
-  const LABEL_W=240, HDR_H=30, LEG_H=24;
+  const LABEL_W=260, HDR_H=36, LEG_H=28;
   const N=rows.length;
-  const rowH=30;
+  const rowH=40;
   const barW=W-LABEL_W;
   const dx=d=>LABEL_W+(d/totalDays)*barW;
   const dxDate=d=>dx(dayDiff(pStart,d));
@@ -808,7 +840,7 @@ function renderGantt() {
     ctx.fillStyle=i%2===0?'#1971c2':'#1864ab';
     ctx.fillRect(x1,0,x2-x1,HDR_H);
     ctx.fillStyle='#ffffff';
-    ctx.font='600 9.5px Sarabun';
+    ctx.font='600 19px Sarabun';
     ctx.textAlign='center';
     ctx.fillText(m.toLocaleString('default',{month:'short'})+"'"+String(m.getFullYear()).slice(2),(x1+x2)/2,17);
   });
@@ -817,7 +849,7 @@ function renderGantt() {
   ctx.fillStyle='#1971c2';
   ctx.fillRect(0,0,LABEL_W,HDR_H);
   ctx.fillStyle='#ffffff';
-  ctx.font='700 11px Sarabun';
+  ctx.font='700 22px Sarabun';
   ctx.textAlign='center';
   ctx.fillText('DESCRIPTION',LABEL_W/2,19);
 
@@ -840,7 +872,7 @@ function renderGantt() {
     ctx.strokeStyle='#ef4444';ctx.lineWidth=1.5;ctx.setLineDash([4,3]);
     ctx.beginPath();ctx.moveTo(tx,HDR_H);ctx.lineTo(tx,H-LEG_H);ctx.stroke();
     ctx.setLineDash([]);
-    ctx.fillStyle='#ef4444';ctx.font='700 8px Sarabun';ctx.textAlign='center';
+    ctx.fillStyle='#ef4444';ctx.font='700 16px Sarabun';ctx.textAlign='center';
     ctx.fillText('TODAY',tx,HDR_H-3);
   }
   ctx.setLineDash([]);
@@ -857,7 +889,7 @@ function renderGantt() {
 
     // item no + description in gantt
     ctx.fillStyle=r.desc?'#212529':'#adb5bd';
-    ctx.font=`${r.desc?'600':'400'} 11px Sarabun`;
+    ctx.font=`${r.desc?'700':'400'} 22px Sarabun`;
     ctx.textAlign='left';
     const ganttLbl=(r.itemNo?(r.itemNo+' '):'')+(r.desc||('row '+r.no));
     ctx.fillText(ganttLbl.substring(0,28), 5, y+rh*0.68);
@@ -867,7 +899,7 @@ function renderGantt() {
 
     // Plan bar (upper)
     const bx=dxDate(ps), ex=dxDate(pe), bw=Math.max(ex-bx,2);
-    const planH=rh*0.36, planY=y+rh*0.06;
+    const planH=rh*0.40, planY=y+rh*0.05;
     ctx.fillStyle='#1971c2';
     ctx.beginPath();
     if(ctx.roundRect) ctx.roundRect(bx,planY,bw,planH,2); else ctx.rect(bx,planY,bw,planH);
@@ -875,14 +907,14 @@ function renderGantt() {
 
     // dates outside bar
     const midY=planY+planH/2+3.5;
-    ctx.fillStyle='#868e96';ctx.font='600 9px Sarabun';
+    ctx.fillStyle='#868e96';ctx.font='600 18px Sarabun';
     ctx.textAlign='right'; ctx.fillText(fmtDate(ps),bx-2,midY);
     ctx.textAlign='left';  ctx.fillText(fmtDate(pe),bx+bw+2,midY);
 
     // dur inside
     if(bw>22){
       const dur=dayDiff(ps,pe)+1;
-      ctx.fillStyle='rgba(255,255,255,0.8)';ctx.font='600 7px IBM Plex Mono';
+      ctx.fillStyle='rgba(255,255,255,0.8)';ctx.font='600 14px Sarabun';
       ctx.textAlign='center';ctx.fillText(dur+'d',bx+bw/2,planY+planH*0.76);
     }
 
@@ -890,7 +922,7 @@ function renderGantt() {
     const as=parseDate(r.actStart||r.start), ae=parseDate(r.actFinish||r.finish);
     if(!as||!ae) return;
     const ax=dxDate(as), aex=dxDate(ae), aew=Math.max(aex-ax,2);
-    const actH=rh*0.30, actY=y+rh*0.56;
+    const actH=rh*0.34, actY=y+rh*0.54;
     const actMidY=actY+actH/2;
     ctx.fillStyle='#b8860b';
     ctx.beginPath();
@@ -904,7 +936,7 @@ function renderGantt() {
       ctx.beginPath();ctx.moveTo(ax,actMidY);ctx.lineTo(redW,actMidY);ctx.stroke();
       ctx.lineCap='butt';
       // % label above bar
-      ctx.fillStyle='#ef4444';ctx.font='700 10px Sarabun';
+      ctx.fillStyle='#ef4444';ctx.font='700 20px Sarabun';
       ctx.textAlign='center';ctx.fillText(actPct+'%',ax+(actPct/100)*aew/2,actY-2);
     }
   });
@@ -915,7 +947,7 @@ function renderGantt() {
   ctx.beginPath();ctx.moveTo(0,H-LEG_H);ctx.lineTo(W,H-LEG_H);ctx.stroke();
   const ly=H-LEG_H+7;
   ctx.fillStyle='#3b82f6';ctx.fillRect(LABEL_W+10,ly-4,20,7);
-  ctx.fillStyle='#64748b';ctx.font='9px Sarabun';ctx.textAlign='left';
+  ctx.fillStyle='#64748b';ctx.font='18px Sarabun';ctx.textAlign='left';
   ctx.fillText('Plan',LABEL_W+34,ly+1.5);
   ctx.fillStyle='#22c55e';ctx.fillRect(LABEL_W+74,ly-4,20,7);
   ctx.fillText('Actual (% complete)',LABEL_W+98,ly+1.5);
@@ -982,7 +1014,7 @@ function drawSCurve(canvasId, rows, planColor, actColor) {
     ctx.lineWidth=p===0||p===100?1:0.5;
     ctx.setLineDash(p===0||p===100?[]:[2,3]);
     ctx.beginPath();ctx.moveTo(px1,gy);ctx.lineTo(px2,gy);ctx.stroke();
-    ctx.fillStyle='#868e96';ctx.font='8px IBM Plex Mono';
+    ctx.fillStyle='#868e96';ctx.font='16px Sarabun';
     ctx.textAlign='right';ctx.fillText(p+'%',px1-3,gy+3);
   }
   ctx.setLineDash([]);
@@ -995,7 +1027,7 @@ function drawSCurve(canvasId, rows, planColor, actColor) {
     const gx=px1+(dayDiff(projStart,m)/totalDays)*pw;
     ctx.strokeStyle='rgba(206,212,218,0.8)';ctx.lineWidth=0.5;ctx.setLineDash([2,3]);
     ctx.beginPath();ctx.moveTo(gx,py1);ctx.lineTo(gx,py2);ctx.stroke();ctx.setLineDash([]);
-    ctx.fillStyle='#64748b';ctx.font='8px Sarabun';ctx.textAlign='center';
+    ctx.fillStyle='#64748b';ctx.font='16px Sarabun';ctx.textAlign='center';
     ctx.fillText(m.toLocaleString('default',{month:'short'}),gx,py2+14);
   });
 
@@ -1036,7 +1068,7 @@ function drawSCurve(canvasId, rows, planColor, actColor) {
 
   // Legend
   ctx.fillStyle=planColor;ctx.fillRect(px1+3,py2-16,14,4);
-  ctx.fillStyle='#64748b';ctx.font='8px Sarabun';ctx.textAlign='left';ctx.fillText('Plan',px1+20,py2-13);
+  ctx.fillStyle='#64748b';ctx.font='16px Sarabun';ctx.textAlign='left';ctx.fillText('Plan',px1+20,py2-13);
   ctx.strokeStyle=actColor;ctx.lineWidth=1.8;ctx.setLineDash([4,2]);
   ctx.beginPath();ctx.moveTo(px1+48,py2-14);ctx.lineTo(px1+62,py2-14);ctx.stroke();ctx.setLineDash([]);
   ctx.fillStyle='#64748b';ctx.fillText('Actual',px1+65,py2-13);
@@ -1092,7 +1124,7 @@ function drawSCurveCombined(canvasId, rows) {
     ctx.lineWidth=p===0||p===100?1:0.5;
     ctx.setLineDash(p===0||p===100?[]:[2,3]);
     ctx.beginPath();ctx.moveTo(px1,gy);ctx.lineTo(px2,gy);ctx.stroke();
-    ctx.fillStyle='#868e96';ctx.font='8px IBM Plex Mono';
+    ctx.fillStyle='#868e96';ctx.font='16px Sarabun';
     ctx.textAlign='right';ctx.fillText(p+'%',px1-3,gy+3);
   }
   ctx.setLineDash([]);
@@ -1105,7 +1137,7 @@ function drawSCurveCombined(canvasId, rows) {
     const gx=px1+(dayDiff(projStart,m)/totalDays)*pw;
     ctx.strokeStyle='rgba(206,212,218,0.8)';ctx.lineWidth=0.5;ctx.setLineDash([2,3]);
     ctx.beginPath();ctx.moveTo(gx,py1);ctx.lineTo(gx,py2);ctx.stroke();ctx.setLineDash([]);
-    ctx.fillStyle='#868e96';ctx.font='8px Sarabun';ctx.textAlign='center';
+    ctx.fillStyle='#868e96';ctx.font='16px Sarabun';ctx.textAlign='center';
     ctx.fillText(m.toLocaleString('default',{month:'short'}),gx,py2+14);
   });
 
@@ -1146,7 +1178,7 @@ function drawSCurveCombined(canvasId, rows) {
 
   // Legend
   ctx.fillStyle='#1971c2';ctx.fillRect(px1+4,py2-18,16,4);
-  ctx.fillStyle='#94a3b8';ctx.font='8px Sarabun';ctx.textAlign='left';
+  ctx.fillStyle='#94a3b8';ctx.font='16px Sarabun';ctx.textAlign='left';
   ctx.fillText('Plan',px1+23,py2-15);
   ctx.strokeStyle='#eab308';ctx.lineWidth=2;ctx.setLineDash([5,3]);
   ctx.beginPath();ctx.moveTo(px1+52,py2-16);ctx.lineTo(px1+68,py2-16);ctx.stroke();ctx.setLineDash([]);
