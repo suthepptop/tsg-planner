@@ -410,12 +410,12 @@ function renderGantt(){
     const x2=Math.min(W,dx(new Date(m.getFullYear(),m.getMonth()+1,1)));
     ctx.fillStyle=i%2===0?'#1560a8':'#1050a0';
     ctx.fillRect(x1,0,x2-x1,HH);
-    ctx.fillStyle='#fff';ctx.font="bold 13px 'Sukhumvit Set', Thonburi, 'Noto Sans Thai', 'Leelawadee UI', Tahoma";ctx.textAlign='center';
+    ctx.fillStyle='#fff';ctx.font="bold 13px sans-serif";ctx.textAlign='center';
     ctx.fillText(m.toLocaleString('default',{month:'short'})+"'"+String(m.getFullYear()).slice(2),(x1+x2)/2,HH-10);
     if(x1>LW){ctx.strokeStyle='#e0e0e0';ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(x1,HH);ctx.lineTo(x1,H-LH);ctx.stroke();}
   });
   ctx.fillStyle='#1560a8';ctx.fillRect(0,0,LW,HH);
-  ctx.fillStyle='#fff';ctx.font="bold 13px 'Sukhumvit Set', Thonburi, 'Noto Sans Thai', 'Leelawadee UI', Tahoma";ctx.textAlign='center';
+  ctx.fillStyle='#fff';ctx.font="bold 13px sans-serif";ctx.textAlign='center';
   ctx.fillText('Item / Description',LW/2,HH-10);
   ctx.strokeStyle='#999';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(LW,0);ctx.lineTo(LW,H);ctx.stroke();
   rows.forEach((r,i)=>{
@@ -424,16 +424,16 @@ function renderGantt(){
     ctx.strokeStyle='#e5e5e5';ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(0,y+RH);ctx.lineTo(W,y+RH);ctx.stroke();
     const lbl=((r.itemNo?r.itemNo+' ':'')+(r.desc||'')).substring(0,34);
     ctx.fillStyle=r.desc?'#111':'#aaa';
-    ctx.font=r.desc?"13px 'Sukhumvit Set',Thonburi,'Noto Sans Thai','Leelawadee UI',Tahoma":"italic 12px 'Sukhumvit Set',Thonburi,'Noto Sans Thai','Leelawadee UI',Tahoma";
+    ctx.font=r.desc?"13px sans-serif":"italic 12px sans-serif";
     ctx.textAlign='left';ctx.fillText(lbl||('row '+r.no),6,y+RH*0.65);
     const s=pd(r.ps),e=pd(r.pe);if(!s||!e)return;
     const bx=dx(s),ex=dx(e),bw=Math.max(ex-bx,3);
     const pH=RH*0.38,pY=y+RH*0.08;
     ctx.fillStyle='#1560a8';
     ctx.beginPath();if(ctx.roundRect)ctx.roundRect(bx,pY,bw,pH,3);else ctx.rect(bx,pY,bw,pH);ctx.fill();
-    if(bw>28){ctx.fillStyle='#fff';ctx.font="bold 11px 'Sukhumvit Set', Thonburi, 'Noto Sans Thai', 'Leelawadee UI', Tahoma";ctx.textAlign='center';ctx.fillText(dd(s,e)+1+'d',bx+bw/2,pY+pH*0.75);}
+    if(bw>28){ctx.fillStyle='#fff';ctx.font="bold 11px sans-serif";ctx.textAlign='center';ctx.fillText(dd(s,e)+1+'d',bx+bw/2,pY+pH*0.75);}
     const mY=pY+pH/2+4;
-    ctx.fillStyle='#666';ctx.font="10px 'Sukhumvit Set', Thonburi, 'Noto Sans Thai', 'Leelawadee UI', Tahoma";
+    ctx.fillStyle='#666';ctx.font="10px sans-serif";
     ctx.textAlign='right';ctx.fillText(fd(r.ps),bx-3,mY);
     ctx.textAlign='left';ctx.fillText(fd(r.pe),bx+bw+3,mY);
     const as=pd(r.as||r.ps),ae=pd(r.ae||r.pe);if(!as||!ae)return;
@@ -447,7 +447,7 @@ function renderGantt(){
       ctx.strokeStyle='#000';ctx.lineWidth=3;ctx.lineCap='round';
       ctx.beginPath();ctx.moveTo(ax,mAY);ctx.lineTo(rx,mAY);ctx.stroke();
       ctx.lineCap='butt';ctx.lineWidth=1;
-      ctx.fillStyle='#000';ctx.font="bold 10px 'Sukhumvit Set', Thonburi, 'Noto Sans Thai', 'Leelawadee UI', Tahoma";ctx.textAlign='right';
+      ctx.fillStyle='#000';ctx.font="bold 10px sans-serif";ctx.textAlign='right';
       ctx.fillText(pct+'%',ax-3,aY+aH*0.75);
     }
   });
@@ -456,14 +456,14 @@ function renderGantt(){
     const tx=dx(tc);
     ctx.strokeStyle='#cc0000';ctx.lineWidth=2;ctx.setLineDash([5,3]);
     ctx.beginPath();ctx.moveTo(tx,HH);ctx.lineTo(tx,H-LH);ctx.stroke();ctx.setLineDash([]);
-    ctx.fillStyle='#cc0000';ctx.font="bold 11px 'Sukhumvit Set', Thonburi, 'Noto Sans Thai', 'Leelawadee UI', Tahoma";ctx.textAlign='center';
+    ctx.fillStyle='#cc0000';ctx.font="bold 11px sans-serif";ctx.textAlign='center';
     ctx.fillText('TODAY',tx,HH+14);
   }
   ctx.fillStyle='#f4f6f8';ctx.fillRect(0,H-LH,W,LH);
   ctx.strokeStyle='#ddd';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,H-LH);ctx.lineTo(W,H-LH);ctx.stroke();
   const ly=H-LH+9;
   ctx.fillStyle='#1560a8';ctx.fillRect(LW+10,ly-5,24,9);
-  ctx.fillStyle='#333';ctx.font="11px 'Sukhumvit Set', Thonburi, 'Noto Sans Thai', 'Leelawadee UI', Tahoma";ctx.textAlign='left';ctx.fillText('Plan',LW+38,ly+2);
+  ctx.fillStyle='#333';ctx.font="11px sans-serif";ctx.textAlign='left';ctx.fillText('Plan',LW+38,ly+2);
   ctx.fillStyle='#FFD700';ctx.strokeStyle='#aaa';ctx.lineWidth=0.5;ctx.strokeRect(LW+78,ly-5,24,9);ctx.fillRect(LW+78,ly-5,24,9);
   ctx.fillStyle='#333';ctx.fillText('Actual',LW+106,ly+2);
   ctx.strokeStyle='#000';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(LW+80,ly);ctx.lineTo(LW+100,ly);ctx.stroke();
@@ -512,7 +512,7 @@ function drawSC(cid,rows,pc,ac){
     ctx.strokeStyle=p===0||p===100?'#bbb':'#e8e8e8';ctx.lineWidth=p===0||p===100?1:0.5;
     ctx.setLineDash(p===0||p===100?[]:[3,3]);
     ctx.beginPath();ctx.moveTo(px1,gy);ctx.lineTo(px2,gy);ctx.stroke();
-    ctx.fillStyle='#888';ctx.font="10px 'Sukhumvit Set', Thonburi, 'Noto Sans Thai', 'Leelawadee UI', Tahoma";ctx.textAlign='right';ctx.fillText(p+'%',px1-4,gy+3.5);
+    ctx.fillStyle='#888';ctx.font="10px sans-serif";ctx.textAlign='right';ctx.fillText(p+'%',px1-4,gy+3.5);
   });
   ctx.setLineDash([]);
   const months=[];let mc=new Date(pst.getFullYear(),pst.getMonth(),1);
@@ -521,18 +521,18 @@ function drawSC(cid,rows,pc,ac){
     const gx=px1+(dd(pst,m)/td)*pw;
     ctx.strokeStyle='#e8e8e8';ctx.lineWidth=0.5;ctx.setLineDash([2,3]);
     ctx.beginPath();ctx.moveTo(gx,py1);ctx.lineTo(gx,py2);ctx.stroke();ctx.setLineDash([]);
-    ctx.fillStyle='#888';ctx.font="10px 'Sukhumvit Set', Thonburi, 'Noto Sans Thai', 'Leelawadee UI', Tahoma";ctx.textAlign='center';
+    ctx.fillStyle='#888';ctx.font="10px sans-serif";ctx.textAlign='center';
     ctx.fillText(m.toLocaleString('default',{month:'short'}),gx,py2+14);
   });
   ctx.strokeStyle='#888';ctx.lineWidth=1;
   ctx.beginPath();ctx.moveTo(px1,py1);ctx.lineTo(px1,py2);ctx.lineTo(px2,py2);ctx.stroke();
   // Title top-left of canvas
-  ctx.fillStyle='#333';ctx.font="bold 11px 'Sukhumvit Set', Thonburi, 'Noto Sans Thai', 'Leelawadee UI', Tahoma";ctx.textAlign='left';
+  ctx.fillStyle='#333';ctx.font="bold 11px sans-serif";ctx.textAlign='left';
   const scTitle=cid==='scCanvas'?(plan==='material'?'Material S-Curve':'Installation S-Curve'):cid==='homeMatCanvas'?'Material S-Curve':'Installation S-Curve';
   ctx.fillText(scTitle,6,14);
   // As-of date top-right
   const aof=today.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
-  ctx.fillStyle='#555';ctx.font="11px 'Sukhumvit Set', Thonburi, 'Noto Sans Thai', 'Leelawadee UI', Tahoma";ctx.textAlign='right';
+  ctx.fillStyle='#555';ctx.font="11px sans-serif";ctx.textAlign='right';
   ctx.fillText('As of: '+aof,px2,py1-5);
   const step=Math.max(1,Math.floor(td/300));
   const pp=[],ap=[];
@@ -545,11 +545,11 @@ function drawSC(cid,rows,pc,ac){
   ctx.fillStyle=pc+'22';ctx.fill();
   const dl=(pts,col,dash)=>{if(!pts.length)return;ctx.strokeStyle=col;ctx.lineWidth=2;ctx.setLineDash(dash||[]);ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);pts.forEach(([x,y])=>ctx.lineTo(x,y));ctx.stroke();ctx.setLineDash([]);};
   dl(pp,pc);dl(ap,ac,[6,3]);
-  if(pp.length>0){const lp=pp[pp.length-1];ctx.fillStyle=pc;ctx.font="bold 11px 'Sukhumvit Set', Thonburi, 'Noto Sans Thai', 'Leelawadee UI', Tahoma";ctx.textAlign='left';ctx.fillText(Math.round(plan[Math.min(td-1,pp.length*step)||0]*100)+'%',lp[0]+4,lp[1]+4);}
+  if(pp.length>0){const lp=pp[pp.length-1];ctx.fillStyle=pc;ctx.font="bold 11px sans-serif";ctx.textAlign='left';ctx.fillText(Math.round(plan[Math.min(td-1,pp.length*step)||0]*100)+'%',lp[0]+4,lp[1]+4);}
   if(ap.length>0){
     const la=ap[ap.length-1];
     const actVal=Math.round(act[todayD]*100);
-    ctx.fillStyle=ac;ctx.font="bold 11px 'Sukhumvit Set', Thonburi, 'Noto Sans Thai', 'Leelawadee UI', Tahoma";ctx.textAlign='left';
+    ctx.fillStyle=ac;ctx.font="bold 11px sans-serif";ctx.textAlign='left';
     ctx.fillText(actVal+'%',la[0]+4,la[1]+4);
   }
   if(today>=pst&&today<=pen){
@@ -558,7 +558,7 @@ function drawSC(cid,rows,pc,ac){
     ctx.beginPath();ctx.moveTo(tx,py1);ctx.lineTo(tx,py2);ctx.stroke();ctx.setLineDash([]);
   }
   ctx.fillStyle=pc;ctx.fillRect(px1+4,py2-14,16,5);
-  ctx.fillStyle='#555';ctx.font="10px 'Sukhumvit Set', Thonburi, 'Noto Sans Thai', 'Leelawadee UI', Tahoma";ctx.textAlign='left';ctx.fillText('Plan',px1+23,py2-10);
+  ctx.fillStyle='#555';ctx.font="10px sans-serif";ctx.textAlign='left';ctx.fillText('Plan',px1+23,py2-10);
   ctx.strokeStyle=ac;ctx.lineWidth=2;ctx.setLineDash([5,3]);
   ctx.beginPath();ctx.moveTo(px1+55,py2-12);ctx.lineTo(px1+71,py2-12);ctx.stroke();ctx.setLineDash([]);
   ctx.fillStyle='#555';ctx.fillText('Actual',px1+74,py2-10);
