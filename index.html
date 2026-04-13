@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TSG Project Planner — Energy Services Co., Ltd.</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600;700&family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 :root {
@@ -16,7 +17,7 @@
   --orange:#f97316; --red:#ef4444;
   --plan-l1:#3b82f6; --plan-l2:#60a5fa; --plan-l3:#e6a85a;
   --actual-l1:#22c55e; --actual-l2:#4ade80; --actual-l3:#6ee7a0;
-  --font:'IBM Plex Sans',system-ui,sans-serif;
+  --font:'IBM Plex Sans','Sarabun',system-ui,sans-serif;
   --mono:'IBM Plex Mono',monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -625,11 +626,13 @@ function excelSerialToDate(serial) {
 function parseDate(s) {
   if(!s) return null;
   s = s.trim();
-  const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-  if(!m) return null;
-  const dt = new Date(+m[3], +m[2]-1, +m[1]);
-  if(isNaN(dt.getTime())) return null;
-  return dt;
+  // dd/mm/yyyy
+  let m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  if(m) {
+    const dt = new Date(+m[3], +m[2]-1, +m[1]);
+    if(!isNaN(dt.getTime())) return dt;
+  }
+  return null;
 }
 function fmtDate(d) {
   if(!d) return '';
@@ -691,7 +694,7 @@ function renderGantt() {
     ctx.fillStyle=i%2===0?'#1e2530':'#242d3a';
     ctx.fillRect(x1,0,x2-x1,HDR_H);
     ctx.fillStyle='#94a3b8';
-    ctx.font='600 9.5px IBM Plex Sans';
+    ctx.font='600 9.5px Sarabun, IBM Plex Sans';
     ctx.textAlign='center';
     ctx.fillText(m.toLocaleString('default',{month:'short'})+"'"+String(m.getFullYear()).slice(2),(x1+x2)/2,17);
   });
@@ -700,7 +703,7 @@ function renderGantt() {
   ctx.fillStyle='#161b24';
   ctx.fillRect(0,0,LABEL_W,HDR_H);
   ctx.fillStyle='#64748b';
-  ctx.font='600 9px IBM Plex Sans';
+  ctx.font='600 9px Sarabun, IBM Plex Sans';
   ctx.textAlign='center';
   ctx.fillText('DESCRIPTION',LABEL_W/2,17);
 
@@ -723,7 +726,7 @@ function renderGantt() {
     ctx.strokeStyle='#ef4444';ctx.lineWidth=1.5;ctx.setLineDash([4,3]);
     ctx.beginPath();ctx.moveTo(tx,HDR_H);ctx.lineTo(tx,H-LEG_H);ctx.stroke();
     ctx.setLineDash([]);
-    ctx.fillStyle='#ef4444';ctx.font='700 8px IBM Plex Sans';ctx.textAlign='center';
+    ctx.fillStyle='#ef4444';ctx.font='700 8px Sarabun, IBM Plex Sans';ctx.textAlign='center';
     ctx.fillText('TODAY',tx,HDR_H-3);
   }
   ctx.setLineDash([]);
@@ -740,7 +743,7 @@ function renderGantt() {
 
     // label
     ctx.fillStyle=r.desc?'#e2e8f0':'#3a4555';
-    ctx.font=`400 9.5px IBM Plex Sans`;
+    ctx.font=`400 9.5px Sarabun, Sarabun, IBM Plex Sans`;
     ctx.textAlign='left';
     const lbl=r.desc?`${r.itemNo?r.itemNo+' ':''}${r.desc}`:`— row ${r.no}`;
     ctx.fillText(lbl.substring(0,32),6,y+rh*0.65);
@@ -792,7 +795,7 @@ function renderGantt() {
   ctx.beginPath();ctx.moveTo(0,H-LEG_H);ctx.lineTo(W,H-LEG_H);ctx.stroke();
   const ly=H-LEG_H+7;
   ctx.fillStyle='#3b82f6';ctx.fillRect(LABEL_W+10,ly-4,20,7);
-  ctx.fillStyle='#64748b';ctx.font='9px IBM Plex Sans';ctx.textAlign='left';
+  ctx.fillStyle='#64748b';ctx.font='9px Sarabun, IBM Plex Sans';ctx.textAlign='left';
   ctx.fillText('Plan',LABEL_W+34,ly+1.5);
   ctx.fillStyle='#22c55e';ctx.fillRect(LABEL_W+74,ly-4,20,7);
   ctx.fillText('Actual (% complete)',LABEL_W+98,ly+1.5);
@@ -870,7 +873,7 @@ function drawSCurve(canvasId, rows, planColor, actColor) {
     const gx=px1+(dayDiff(projStart,m)/totalDays)*pw;
     ctx.strokeStyle='rgba(42,52,68,0.6)';ctx.lineWidth=0.5;ctx.setLineDash([2,3]);
     ctx.beginPath();ctx.moveTo(gx,py1);ctx.lineTo(gx,py2);ctx.stroke();ctx.setLineDash([]);
-    ctx.fillStyle='#64748b';ctx.font='8px IBM Plex Sans';ctx.textAlign='center';
+    ctx.fillStyle='#64748b';ctx.font='8px Sarabun, IBM Plex Sans';ctx.textAlign='center';
     ctx.fillText(m.toLocaleString('default',{month:'short'}),gx,py2+14);
   });
 
@@ -911,7 +914,7 @@ function drawSCurve(canvasId, rows, planColor, actColor) {
 
   // Legend
   ctx.fillStyle=planColor;ctx.fillRect(px1+3,py2-16,14,4);
-  ctx.fillStyle='#64748b';ctx.font='8px IBM Plex Sans';ctx.textAlign='left';ctx.fillText('Plan',px1+20,py2-13);
+  ctx.fillStyle='#64748b';ctx.font='8px Sarabun, IBM Plex Sans';ctx.textAlign='left';ctx.fillText('Plan',px1+20,py2-13);
   ctx.strokeStyle=actColor;ctx.lineWidth=1.8;ctx.setLineDash([4,2]);
   ctx.beginPath();ctx.moveTo(px1+48,py2-14);ctx.lineTo(px1+62,py2-14);ctx.stroke();ctx.setLineDash([]);
   ctx.fillStyle='#64748b';ctx.fillText('Actual',px1+65,py2-13);
