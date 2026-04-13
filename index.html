@@ -267,6 +267,8 @@ body:not(.editable) .cell-input{
               <th style="width:70px">Start</th>
               <th style="width:70px">Finish</th>
               <th style="width:38px">Wt%</th>
+              <th style="width:78px">Act Start</th>
+              <th style="width:78px">Act Finish</th>
               <th style="width:38px">Act%</th>
             </tr>
           </thead>
@@ -504,6 +506,8 @@ function renderTable() {
       <td><input class="cell-input mono" value="${r.start||''}" ${ro?'readonly':''} onchange="updDate(${i},'start',this.value)" placeholder="dd/mm/yyyy" style="width:68px"></td>
       <td><input class="cell-input mono" value="${r.finish||''}" ${ro?'readonly':''} onchange="updDate(${i},'finish',this.value)" placeholder="dd/mm/yyyy" style="width:68px"></td>
       <td><input class="cell-input mono num" value="${r.wt||0}" ${ro?'readonly':''} onchange="upd(${i},'wt',+this.value)" style="width:36px"></td>
+      <td><input class="cell-input mono" type="date" value="${toInputDate(r.actStart||r.start)}" ${ro?'readonly':''} onchange="updActDate(${i},'actStart',this.value)" style="width:76px"></td>
+      <td><input class="cell-input mono" type="date" value="${toInputDate(r.actFinish||r.finish)}" ${ro?'readonly':''} onchange="updActDate(${i},'actFinish',this.value)" style="width:76px"></td>
       <td><input class="cell-input mono num" value="${r.actPct||0}" ${ro?'readonly':''} onchange="upd(${i},'actPct',+this.value)" style="width:36px"></td>`;
     tbody.appendChild(tr);
   });
@@ -520,11 +524,17 @@ function upd(i, key, val) {
 
 function updDate(i, key, val) {
   appData[currentPlan].rows[i][key] = val;
-  // default actual = plan if not set
   const r = appData[currentPlan].rows[i];
   if(key==='start'  && !r.actStart)  r.actStart  = val;
   if(key==='finish' && !r.actFinish) r.actFinish = val;
   updateWeightSum(); renderGantt(); renderSCurves();
+  renderTable(); // refresh date inputs
+}
+
+function updActDate(i, key, val) {
+  // val comes as yyyy-mm-dd from date input
+  appData[currentPlan].rows[i][key] = fromInputDate(val);
+  renderGantt(); renderSCurves();
 }
 
 function updateWeightSum() {
@@ -571,8 +581,8 @@ function setupPaste() {
         let v = val.trim();
         if(key==='start' || key==='finish') v = normaliseDate(v);
         dataRows[rowIdx][key] = (key==='wt'||key==='actPct') ? normaliseNum(v) : (key==='no' ? (+v||0) : v);
-        if(key==='start'  && !dataRows[rowIdx].actStart)  dataRows[rowIdx].actStart  = v;
-        if(key==='finish' && !dataRows[rowIdx].actFinish) dataRows[rowIdx].actFinish = v;
+        if(key==='start')  dataRows[rowIdx].actStart  = dataRows[rowIdx].actStart  || v;
+        if(key==='finish') dataRows[rowIdx].actFinish = dataRows[rowIdx].actFinish || v;
       });
     });
     document.getElementById('rowCountInput').value = dataRows.length;
@@ -623,6 +633,21 @@ function excelSerialToDate(serial) {
 // ════════════════════════════════════════
 // DATE HELPERS
 // ════════════════════════════════════════
+function toInputDate(s) {
+  // convert dd/mm/yyyy or dd-mm-yyyy to yyyy-mm-dd for input[type=date]
+  if(!s) return '';
+  const m = s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+  if(!m) return '';
+  return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+}
+
+function fromInputDate(s) {
+  // convert yyyy-mm-dd to dd/mm/yyyy
+  if(!s) return '';
+  const [y,m,d] = s.split('-');
+  return `${d}/${m}/${y}`;
+}
+
 function parseDate(s) {
   if(!s) return null;
   s = s.trim();
@@ -670,7 +695,7 @@ function renderGantt() {
   const {start:pStart, end:pEnd, days:totalDays} = getProjectRange(rows);
   const today = new Date();
 
-  const LABEL_W=180, HDR_H=26, LEG_H=20;
+  const LABEL_W=60, HDR_H=26, LEG_H=20;
   const N=rows.length;
   const rowH=Math.max(18,(H-HDR_H-LEG_H)/N);
   const barW=W-LABEL_W;
@@ -741,12 +766,11 @@ function renderGantt() {
     ctx.strokeStyle='#1e2838';ctx.lineWidth=0.5;
     ctx.beginPath();ctx.moveTo(0,y+rh);ctx.lineTo(W,y+rh);ctx.stroke();
 
-    // label
-    ctx.fillStyle=r.desc?'#e2e8f0':'#3a4555';
-    ctx.font=`400 9.5px Sarabun, Sarabun, IBM Plex Sans`;
+    // item no only in gantt
+    ctx.fillStyle=r.itemNo?'#94a3b8':'#3a4555';
+    ctx.font=`600 9px Sarabun, IBM Plex Sans`;
     ctx.textAlign='left';
-    const lbl=r.desc?`${r.itemNo?r.itemNo+' ':''}${r.desc}`:`— row ${r.no}`;
-    ctx.fillText(lbl.substring(0,32),6,y+rh*0.65);
+    ctx.fillText(r.itemNo||String(r.no), 6, y+rh*0.65);
 
     const ps=parseDate(r.start), pe=parseDate(r.finish);
     if(!ps||!pe) return;
@@ -772,20 +796,24 @@ function renderGantt() {
       ctx.textAlign='center';ctx.fillText(dur+'d',bx+bw/2,planY+planH*0.76);
     }
 
-    // Actual bar (lower) — driven by actPct
-    const actPct=(+r.actPct||0)/100;
-    if(actPct<=0) return;
-    const actDur=dayDiff(ps,pe)*actPct;
-    const aeDate=new Date(ps.getTime()+actDur*86400000);
-    const ax=dxDate(ps), aew=Math.max(dxDate(aeDate)-ax,2);
+    // Actual bar — full width actStart to actFinish
+    const as=parseDate(r.actStart||r.start), ae=parseDate(r.actFinish||r.finish);
+    if(!as||!ae) return;
+    const ax=dxDate(as), aex=dxDate(ae), aew=Math.max(aex-ax,2);
     const actH=rh*0.30, actY=y+rh*0.56;
     ctx.fillStyle='#22c55e';
     ctx.beginPath();
     if(ctx.roundRect) ctx.roundRect(ax,actY,aew,actH,2); else ctx.rect(ax,actY,aew,actH);
     ctx.fill();
-    if(aew>18){
-      ctx.fillStyle='rgba(255,255,255,0.85)';ctx.font='600 7px IBM Plex Mono';
-      ctx.textAlign='center';ctx.fillText(r.actPct+'%',ax+aew/2,actY+actH*0.78);
+    // Red % line inside bar
+    const actPct=(+r.actPct||0);
+    if(actPct>0 && actPct<=100){
+      const redX=ax+(actPct/100)*aew;
+      ctx.strokeStyle='#ef4444';ctx.lineWidth=1.5;
+      ctx.beginPath();ctx.moveTo(redX,actY-1);ctx.lineTo(redX,actY+actH+1);ctx.stroke();
+      // % label above red line
+      ctx.fillStyle='#ef4444';ctx.font='700 7.5px IBM Plex Mono';
+      ctx.textAlign='center';ctx.fillText(actPct+'%',redX,actY-3);
     }
   });
 
