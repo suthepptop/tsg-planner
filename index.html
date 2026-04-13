@@ -45,8 +45,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .btn-sm{padding:3px 8px;font-size:10px;}
 
 /* ── PAGES ── */
-.page{display:none;height:calc(100vh - 40px);}
-.page.active{display:flex;flex-direction:column;}
+.page{display:none;}
+.page.active{display:block;}
+#homePage.active{display:flex;}
 
 /* ══════════════════════════════
    HOME PAGE
@@ -73,9 +74,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 
 .home-right{
   flex:1;display:flex;flex-direction:column;
-  padding:12px;gap:10px;overflow:hidden;background:#f8f9fa;
+  padding:12px;gap:10px;overflow-y:auto;background:#f8f9fa;
 }
-.home-chart-wrap{flex:1;min-height:0;position:relative;}
+.home-chart-wrap{height:220px;position:relative;}
 .home-chart-title{
   position:absolute;top:8px;left:50%;transform:translateX(-50%);
   font-size:10px;font-weight:600;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;
@@ -91,6 +92,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   display:flex;align-items:center;gap:8px;padding:6px 12px;
   background:#f1f3f5;border-bottom:1px solid var(--border);
   flex-wrap:wrap;
+  position:sticky;top:40px;z-index:100;
 }
 .plan-topbar .plan-title{font-size:12px;font-weight:700;color:var(--text);letter-spacing:0.04em;}
 .plan-topbar .spacer{flex:1;}
@@ -102,30 +104,34 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 }
 .row-input-wrap input:focus{outline:none;border-color:var(--accent);}
 
-.plan-body{display:flex;flex-direction:column;flex:1;overflow:hidden;min-height:0;}
+.plan-body{display:block;padding-bottom:40px;}
 
-/* S-curve section - top */
+/* S-curve section - top, centered 50% */
 .scurve-section{
-  height:220px;min-height:220px;
-  border-bottom:1px solid var(--border);
+  height:300px;
+  padding:16px 0 8px;
   background:#fff;
+  border-bottom:1px solid var(--border);
+  display:flex;justify-content:center;
+}
+.scurve-inner{
+  width:50%;min-width:400px;
+  position:relative;
 }
 
-/* Gantt section - middle */
+/* Gantt section - middle, auto height */
 .gantt-section{
-  height:280px;min-height:280px;
   border-bottom:1px solid var(--border);
-  background:#fff;position:relative;
-  overflow:hidden;
+  background:#fff;
+  overflow-x:auto;
 }
 
 /* Table section - bottom */
 .table-side{
-  flex:1;min-height:180px;
-  display:flex;flex-direction:column;
-  overflow:hidden;background:#fff;
+  background:#fff;
+  border-top:1px solid var(--border);
 }
-.table-wrap{flex:1;overflow:auto;}
+.table-wrap{overflow-x:auto;}
 table{width:100%;border-collapse:collapse;font-size:11px;}
 thead th{
   padding:2px 4px;font-size:9px;font-weight:700;color:#495057;
@@ -162,7 +168,7 @@ body:not(.editable) .cell-input{
 .weight-bar{
   padding:4px 12px;border-top:1px solid var(--border);
   display:flex;gap:16px;font-size:10px;font-family:var(--mono);color:var(--text2);
-  background:#f8f9fa;
+  background:#f8f9fa;position:sticky;bottom:0;
 }
 .wok{color:var(--green)!important;} .wwarn{color:var(--red)!important;}
 
@@ -215,12 +221,11 @@ body:not(.editable) .cell-input{
    MOBILE RESPONSIVE
 ══════════════════════════════ */
 @media (max-width: 768px) {
-  /* Topbar */
   #topbar h1 { font-size:10px; }
   #userInfo { display:none; }
 
   /* Home page — vertical stack */
-  #homePage { flex-direction:column !important; }
+  #homePage { flex-direction:column !important; height:auto !important; }
   .home-left {
     width:100% !important; min-width:unset !important;
     flex-direction:row !important; flex-wrap:wrap;
@@ -230,41 +235,31 @@ body:not(.editable) .cell-input{
   }
   .home-left h2 { width:100%; margin-bottom:0; }
   .plan-btn { width:calc(50% - 4px) !important; padding:10px 8px !important; }
-  .home-right { flex:1; padding:8px; gap:8px; }
+  .home-right { padding:8px; gap:8px; }
+  .home-chart-wrap { height:180px !important; }
 
-  /* Plan page — vertical stack */
-  .plan-body { flex-direction:column !important; overflow-y:auto !important; }
-  .chart-side { flex-direction:column !important; height:auto !important; }
-
-  /* Mobile: already vertical, just adjust heights */
-  .scurve-section { height:180px !important; min-height:180px !important; }
-  .gantt-section  { height:240px !important; min-height:240px !important; }
-  .table-side     { min-height:200px !important; }
+  /* S-curve: full width on mobile */
+  .scurve-inner { width:95% !important; min-width:unset !important; }
 
   /* Table horizontal scroll */
   .table-wrap { overflow-x:auto; }
-  table { min-width:520px; }
+  table { min-width:580px; }
 
-  /* Plan topbar wrap */
-  .plan-topbar { gap:6px; padding:6px 10px; }
+  /* Plan topbar */
+  .plan-topbar { gap:6px; padding:6px 10px; top:40px; }
   .plan-title { font-size:11px; }
   .row-input-wrap { font-size:10px; }
 
-  /* S-curve half on mobile = full height */
-  .sc-half { flex:1 !important; }
-
   /* Bigger tap targets */
   .btn { padding:7px 12px; font-size:11px; }
-  .cell-input { font-size:12px; padding:4px 4px; }
+  .cell-input { font-size:12px; padding:3px 4px; }
   input[type="date"] { font-size:11px; }
 }
 
 @media (max-width: 480px) {
   .plan-btn { width:100% !important; }
   #topbar h1 { font-size:9px; letter-spacing:0; }
-  .gantt-wrap { height:240px; }
-  .scurve-wrap { height:180px; }
-  .table-side { height:260px; }
+  .scurve-inner { width:98% !important; }
 }
 </style>
 </head>
@@ -324,11 +319,9 @@ body:not(.editable) .cell-input{
   <div class="plan-body">
     <!-- S-CURVE TOP -->
     <div class="scurve-section">
-      <div class="scurve-wrap">
-        <div class="sc-half" id="scHalf1">
-          <div class="sc-label" id="scLabel1">S-CURVE</div>
-          <canvas id="scCanvas1"></canvas>
-        </div>
+      <div class="scurve-inner" id="scHalf1">
+        <div class="sc-label" id="scLabel1">S-CURVE</div>
+        <canvas id="scCanvas1"></canvas>
       </div>
     </div>
     <!-- GANTT MIDDLE -->
@@ -761,9 +754,18 @@ function renderGantt() {
   const wrap = document.getElementById('ganttWrap');
   const canvas = document.getElementById('ganttCanvas');
   if(!wrap||!canvas) return;
-  const W=wrap.clientWidth, H=wrap.clientHeight;
-  if(!W||!H) return;
+  const W=wrap.clientWidth||800;
+  const HDR_H_est=26, LEG_H_est=20;
+  const rows2=appData[currentPlan]?.rows||[];
+  const N2=Math.max(rows2.length,1);
+  const rowH_est=24;
+  const H=HDR_H_est + N2*rowH_est + LEG_H_est + 4;
   canvas.width=W; canvas.height=H;
+  canvas.style.width='100%';
+  canvas.style.height=H+'px';
+  // update gantt section height
+  const sec=document.querySelector('.gantt-section');
+  if(sec) sec.style.height=H+'px';
   const ctx=canvas.getContext('2d');
   ctx.clearRect(0,0,W,H);
 
@@ -947,9 +949,11 @@ function drawSCurve(canvasId, rows, planColor, actColor) {
   const canvas=document.getElementById(canvasId);
   if(!canvas) return;
   const wrap=canvas.parentElement;
-  const W=wrap.clientWidth, H=wrap.clientHeight;
-  if(!W||!H) return;
+  const W=Math.max(wrap.clientWidth||400,300);
+  const H=220;
   canvas.width=W; canvas.height=H;
+  canvas.style.width='100%';
+  canvas.style.height=H+'px';
   const ctx=canvas.getContext('2d');
   ctx.fillStyle='#ffffff';ctx.fillRect(0,0,W,H);
 
@@ -1032,9 +1036,11 @@ function drawSCurveCombined(canvasId, rows) {
   const canvas=document.getElementById(canvasId);
   if(!canvas) return;
   const wrap=canvas.parentElement;
-  const W=wrap.clientWidth, H=wrap.clientHeight;
-  if(!W||!H) return;
+  const W=Math.max(wrap.clientWidth||400,300);
+  const H=280;
   canvas.width=W; canvas.height=H;
+  canvas.style.width='100%';
+  canvas.style.height=H+'px';
   const ctx=canvas.getContext('2d');
   ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,W,H);
 
