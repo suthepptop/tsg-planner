@@ -91,8 +91,11 @@ body:not(.editor) .ci { pointer-events: none; }
 
 @media (max-width: 768px) {
   #homePage.active { flex-direction: column; height: auto; }
-  .home-left { width: 100% !important; flex-direction: row; flex-wrap: wrap; border-right: none; border-bottom: 1px solid #ddd; padding: 10px 12px; gap: 8px; }
-  .plan-btn { width: calc(50% - 4px) !important; }
+  #homePage.active { flex-direction: column !important; height: auto !important; overflow-y: auto; }
+  .home-left { width: 100% !important; flex-direction: column !important; border-right: none; border-bottom: 1px solid #ddd; padding: 12px 16px; gap: 10px; align-items: stretch; justify-content: flex-start; }
+  .home-left h2 { font-size: 13px; }
+  .plan-btn { width: 100% !important; }
+  .home-right { width: 100%; flex: unset; padding: 12px 16px; gap: 12px; align-items: center; }
   .home-chart-box { width: 95%; min-width: unset; }
   .sc-box { width: 95%; min-width: unset; }
   table { min-width: 600px; }
@@ -515,7 +518,7 @@ function renderGantt(){
     const as=parseDate(r.as||r.ps),ae=parseDate(r.ae||r.pe);if(!as||!ae)return;
     const ax=dx(as),aex=dx(ae),aw=Math.max(aex-ax,3);
     const actH=ROW_H*0.32,actY=y+ROW_H*0.55;
-    ctx.fillStyle='#b8860b';
+    ctx.fillStyle='#FFD700';
     ctx.beginPath();if(ctx.roundRect)ctx.roundRect(ax,actY,aw,actH,3);else ctx.rect(ax,actY,aw,actH);ctx.fill();
 
     // Red horizontal line at Act%
@@ -523,11 +526,11 @@ function renderGantt(){
     if(pct>0){
       const redX=ax+(pct/100)*aw;
       const midActY=actY+actH/2;
-      ctx.strokeStyle='#cc0000';ctx.lineWidth=3;ctx.lineCap='round';
+      ctx.strokeStyle='#000000';ctx.lineWidth=3;ctx.lineCap='round';
       ctx.beginPath();ctx.moveTo(ax,midActY);ctx.lineTo(redX,midActY);ctx.stroke();
       ctx.lineCap='butt';ctx.lineWidth=1;
-      ctx.fillStyle='#cc0000';ctx.font='bold 10px Tahoma';ctx.textAlign='center';
-      ctx.fillText(pct+'%',ax+(pct/100)*aw/2,actY-2);
+      ctx.fillStyle='#000';ctx.font='bold 10px Tahoma';ctx.textAlign='right';
+      ctx.fillText(pct+'%', ax-3, actY+actH*0.75);
     }
   });
 
@@ -537,7 +540,7 @@ function renderGantt(){
   const ly=H-LEG_H+9;
   ctx.fillStyle='#1560a8';ctx.fillRect(LABEL_W+10,ly-5,24,9);
   ctx.fillStyle='#333';ctx.font='11px Tahoma';ctx.textAlign='left';ctx.fillText('Plan',LABEL_W+38,ly+2);
-  ctx.fillStyle='#b8860b';ctx.fillRect(LABEL_W+80,ly-5,24,9);
+  ctx.fillStyle='#FFD700';ctx.fillRect(LABEL_W+80,ly-5,24,9);
   ctx.fillText('Actual',LABEL_W+108,ly+2);
   ctx.strokeStyle='#cc0000';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(LABEL_W+82,ly);ctx.lineTo(LABEL_W+102,ly);ctx.stroke();
   ctx.fillStyle='#333';ctx.lineWidth=1;ctx.fillText('(red = Act%)',LABEL_W+160,ly+2);
