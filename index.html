@@ -554,7 +554,7 @@ function setupPaste() {
         const key = cols[colIdx];
         let v = val.trim();
         if(key==='start' || key==='finish') v = normaliseDate(v);
-        dataRows[rowIdx][key] = (key==='wt'||key==='actPct'||key==='no') ? (+v||0) : v;
+        dataRows[rowIdx][key] = (key==='wt'||key==='actPct') ? normaliseNum(v) : (key==='no' ? (+v||0) : v);
         if(key==='start'  && !dataRows[rowIdx].actStart)  dataRows[rowIdx].actStart  = v;
         if(key==='finish' && !dataRows[rowIdx].actFinish) dataRows[rowIdx].actFinish = v;
       });
@@ -568,7 +568,8 @@ function setupPaste() {
 
 function normaliseDate(s) {
   if(!s) return '';
-  // already dd/mm/yyyy
+  s = s.trim();
+  // dd/mm/yyyy or d/m/yyyy
   if(/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) {
     const [d,m,y] = s.split('/');
     return `${d.padStart(2,'0')}/${m.padStart(2,'0')}/${y}`;
@@ -585,6 +586,15 @@ function normaliseDate(s) {
   }
   return s;
 }
+
+function normaliseNum(v) {
+  // strip % sign and convert to number e.g. "5%" -> 5, "0.05" -> 5 if <1
+  v = String(v).trim().replace('%','');
+  let n = parseFloat(v)||0;
+  // if Excel stored as decimal fraction e.g. 0.05 = 5%
+  if(n > 0 && n <= 1 && !String(v).includes('.') === false && n !== Math.round(n)) n = n * 100;
+  return Math.round(n * 100) / 100;
+}
 function excelSerialToDate(serial) {
   return new Date((serial - 25569) * 86400000);
 }
@@ -594,9 +604,12 @@ function excelSerialToDate(serial) {
 // ════════════════════════════════════════
 function parseDate(s) {
   if(!s) return null;
+  s = s.trim();
   const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
   if(!m) return null;
-  return new Date(+m[3], +m[2]-1, +m[1]);
+  const dt = new Date(+m[3], +m[2]-1, +m[1]);
+  if(isNaN(dt.getTime())) return null;
+  return dt;
 }
 function fmtDate(d) {
   if(!d) return '';
