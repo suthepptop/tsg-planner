@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>TSG Project Planner — Energy Services Co., Ltd.</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600;700&family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -17,7 +17,7 @@
   --orange:#f97316; --red:#ef4444;
   --plan-l1:#3b82f6; --plan-l2:#60a5fa; --plan-l3:#e6a85a;
   --actual-l1:#22c55e; --actual-l2:#4ade80; --actual-l3:#6ee7a0;
-  --font:'IBM Plex Sans','Sarabun',system-ui,sans-serif;
+  --font:'Sarabun','IBM Plex Sans',system-ui,sans-serif;
   --mono:'IBM Plex Mono',monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -53,21 +53,21 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 ══════════════════════════════ */
 #homePage{flex-direction:row!important;}
 .home-left{
-  width:320px;min-width:320px;
+  width:200px;min-width:200px;
   background:var(--surface);border-right:1px solid var(--border);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:16px;padding:40px 24px;
+  display:flex;flex-direction:column;align-items:stretch;justify-content:center;
+  gap:10px;padding:20px 14px;
 }
-.home-left h2{font-size:13px;color:var(--text2);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;}
+.home-left h2{font-size:11px;color:var(--text3);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;}
 .plan-btn{
-  width:100%;padding:20px 16px;border-radius:8px;border:1px solid var(--border);
+  width:100%;padding:12px 12px;border-radius:6px;border:1px solid var(--border);
   background:var(--surface2);cursor:pointer;transition:all 0.2s;
   text-align:left;font-family:var(--font);
 }
 .plan-btn:hover{border-color:var(--accent);background:var(--surface3);}
-.plan-btn .pb-icon{font-size:22px;margin-bottom:6px;}
-.plan-btn .pb-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px;}
-.plan-btn .pb-sub{font-size:10px;color:var(--text3);}
+.plan-btn .pb-icon{font-size:16px;margin-bottom:3px;}
+.plan-btn .pb-title{font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px;}
+.plan-btn .pb-sub{font-size:9px;color:var(--text3);}
 .plan-btn.mat .pb-icon{color:#e2e8f0;}
 .plan-btn.inst .pb-icon{color:var(--yellow);}
 
@@ -102,7 +102,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 }
 .row-input-wrap input:focus{outline:none;border-color:var(--accent);}
 
-.plan-body{display:flex;flex:1;overflow:hidden;}
+.plan-body{display:flex;flex:1;overflow:hidden;min-height:0;}
 
 /* Table side */
 .table-side{
@@ -154,7 +154,7 @@ body:not(.editable) .cell-input{
 .wok{color:var(--green)!important;} .wwarn{color:var(--red)!important;}
 
 /* Gantt+Scurve side */
-.chart-side{flex:1;display:flex;flex-direction:row;overflow:hidden;}
+.chart-side{flex:1;display:flex;flex-direction:row;overflow:hidden;min-height:0;}
 .gantt-wrap{flex:1;overflow:hidden;position:relative;}
 .gantt-wrap canvas{display:block;}
 .scurve-wrap{
@@ -200,6 +200,75 @@ body:not(.editable) .cell-input{
   transition:opacity 0.3s;pointer-events:none;
 }
 #toast.show{opacity:1;}
+
+/* ══════════════════════════════
+   MOBILE RESPONSIVE
+══════════════════════════════ */
+@media (max-width: 768px) {
+  /* Topbar */
+  #topbar h1 { font-size:10px; }
+  #userInfo { display:none; }
+
+  /* Home page — vertical stack */
+  #homePage { flex-direction:column !important; }
+  .home-left {
+    width:100% !important; min-width:unset !important;
+    flex-direction:row !important; flex-wrap:wrap;
+    border-right:none !important; border-bottom:1px solid var(--border);
+    padding:10px 12px !important; gap:8px !important;
+    justify-content:flex-start !important;
+  }
+  .home-left h2 { width:100%; margin-bottom:0; }
+  .plan-btn { width:calc(50% - 4px) !important; padding:10px 8px !important; }
+  .home-right { flex:1; padding:8px; gap:8px; }
+
+  /* Plan page — vertical stack */
+  .plan-body { flex-direction:column !important; overflow-y:auto !important; }
+  .chart-side { flex-direction:column !important; height:auto !important; }
+
+  /* Mobile order: s-curve top, gantt middle, table bottom */
+  .scurve-wrap {
+    width:100% !important; min-width:unset !important;
+    height:220px; min-height:220px;
+    border-left:none !important; border-bottom:1px solid var(--border);
+    order:1;
+  }
+  .gantt-wrap {
+    width:100%; height:280px; min-height:280px;
+    order:2; border-bottom:1px solid var(--border);
+  }
+  .table-side {
+    width:100% !important; min-width:unset !important;
+    height:300px; min-height:300px;
+    border-right:none !important;
+    order:3;
+  }
+
+  /* Table horizontal scroll */
+  .table-wrap { overflow-x:auto; }
+  table { min-width:520px; }
+
+  /* Plan topbar wrap */
+  .plan-topbar { gap:6px; padding:6px 10px; }
+  .plan-title { font-size:11px; }
+  .row-input-wrap { font-size:10px; }
+
+  /* S-curve half on mobile = full height */
+  .sc-half { flex:1 !important; }
+
+  /* Bigger tap targets */
+  .btn { padding:7px 12px; font-size:11px; }
+  .cell-input { font-size:12px; padding:4px 4px; }
+  input[type="date"] { font-size:11px; }
+}
+
+@media (max-width: 480px) {
+  .plan-btn { width:100% !important; }
+  #topbar h1 { font-size:9px; letter-spacing:0; }
+  .gantt-wrap { height:240px; }
+  .scurve-wrap { height:180px; }
+  .table-side { height:260px; }
+}
 </style>
 </head>
 <body>
@@ -1059,7 +1128,7 @@ function drawSCurveCombined(canvasId, rows) {
 
   // Legend
   ctx.fillStyle='#e2e8f0';ctx.fillRect(px1+4,py2-18,16,4);
-  ctx.fillStyle='#94a3b8';ctx.font='8px IBM Plex Sans';ctx.textAlign='left';
+  ctx.fillStyle='#94a3b8';ctx.font='8px Sarabun,IBM Plex Sans';ctx.textAlign='left';
   ctx.fillText('Plan',px1+23,py2-15);
   ctx.strokeStyle='#eab308';ctx.lineWidth=2;ctx.setLineDash([5,3]);
   ctx.beginPath();ctx.moveTo(px1+52,py2-16);ctx.lineTo(px1+68,py2-16);ctx.stroke();ctx.setLineDash([]);
@@ -1107,6 +1176,8 @@ function resizeAll() {
 
 let _rt;
 window.addEventListener('resize',()=>{clearTimeout(_rt);_rt=setTimeout(resizeAll,80);});
+// Also trigger resize on orientation change for mobile
+window.addEventListener('orientationchange',()=>{setTimeout(resizeAll,200);});
 
 // ════════════════════════════════════════
 // RENDER ALL (after data load)
