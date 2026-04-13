@@ -298,7 +298,7 @@ async function saveData(){
   const bytes=new TextEncoder().encode(json);
   let bin='';bytes.forEach(b=>bin+=String.fromCharCode(b));
   const content=btoa(bin);
-  const body={message:`Update ${plan}`,content,...(sha?{sha}:{})};
+  const body={message:`Update ${plan} data`,content};if(sha)body.sha=sha;
   try{
     const r=await fetch(API,{method:'PUT',headers:{Authorization:`token ${pat}`,'Content-Type':'application/json'},body:JSON.stringify(body)});
     if(!r.ok){const e=await r.json();toast('✗ '+e.message,true);return;}
