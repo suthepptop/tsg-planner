@@ -144,6 +144,23 @@ body:not(.ed) .ci {pointer-events:none}
 .ok {color:#2a8a2a;font-weight:700}
 .wn {color:#c00;font-weight:700}
 
+/* PRINT MODE FOR A4 PORTRAIT PDF EXPORT */
+.print-mode {
+  width: 1000px !important;
+  max-width: 1000px !important;
+  margin: 0 auto;
+  background: #fff;
+}
+.print-mode .scs { padding: 20px 0; border-bottom: none; page-break-inside: avoid; }
+.print-mode .scb { width: 85% !important; border: none; padding: 0; min-width: unset; box-shadow: none; }
+.print-mode .gs { overflow-x: hidden !important; border-bottom: none; page-break-inside: avoid; margin-bottom: 20px; }
+.print-mode .ts { page-break-before: auto; }
+.print-mode .tw { overflow-x: hidden !important; }
+.print-mode table { table-layout: fixed; width: 100%; }
+.print-mode tr { page-break-inside: avoid; }
+.print-mode td, .print-mode th { padding: 4px; }
+.print-mode .ci { background: transparent !important; border: none !important; color: #000 !important; font-family: Sarabun, sans-serif; }
+
 /* MODAL */
 .mo {display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center}
 .mo.on {display:flex}
@@ -323,31 +340,46 @@ function exportExcel() {
 
 function exportPDF() {
   if(!plan) return;
-  toast('Generating continuous PDF...');
+  toast('Generating A4 Portrait PDF...');
   
   const element = document.getElementById('ppg');
   const toolbar = document.getElementById('planToolbar');
   
+  // Enter print mode formatting
   toolbar.style.display = 'none';
+  element.classList.add('print-mode');
   
-  const w = element.scrollWidth;
-  const h = element.scrollHeight;
+  // Re-render charts specifically for the 1000px wide print format
+  renderGantt();
+  renderSC();
   
-  const opt = {
-    margin:       [10, 10], 
-    filename:     `TSG_${plan}_plan.pdf`,
-    image:        { type: 'jpeg', quality: 0.98 },
-    html2canvas:  { scale: 2, windowWidth: w },
-    jsPDF:        { unit: 'px', format: [w + 20, h + 20], orientation: 'landscape' } 
-  };
-  
-  html2pdf().set(opt).from(element).save().then(() => {
-    toolbar.style.display = 'flex'; 
-    toast('✓ PDF Exported Successfully');
-  }).catch(() => {
-    toolbar.style.display = 'flex'; 
-    toast('✗ PDF generation failed', true);
-  });
+  // Give canvas a split second to re-draw before capturing
+  setTimeout(() => {
+    const opt = {
+      margin:       [10, 10, 10, 10], // 10mm margin on all sides
+      filename:     `TSG_${plan}_plan.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true, windowWidth: 1000 },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }, // Strict A4 Portrait Mode
+      pagebreak:    { mode: ['css', 'legacy'] }
+    };
+    
+    html2pdf().set(opt).from(element).save().then(() => {
+      // Restore the UI back to normal Interactive Mode
+      toolbar.style.display = 'flex'; 
+      element.classList.remove('print-mode');
+      renderGantt();
+      renderSC();
+      toast('✓ PDF Exported Successfully');
+    }).catch(() => {
+      // Ensure UI restores even if it fails
+      toolbar.style.display = 'flex'; 
+      element.classList.remove('print-mode');
+      renderGantt();
+      renderSC();
+      toast('✗ PDF generation failed', true);
+    });
+  }, 200);
 }
 
 // ── SESSION RESTORE ──
@@ -597,7 +629,7 @@ function setupPaste(){
   document.addEventListener('paste',window._pf);
 }
 
-// ── GANTT ──
+// ── GANTT (DYNAMIC MULTI-LINE TEXT WRAPPING) ──
 function renderGantt(){
   const cv=$('cGantt'),sec=$('gsec');
   if(!cv||!plan)return;
@@ -606,10 +638,45 @@ function renderGantt(){
   const today=new Date();
   
   const W=Math.max(sec.getBoundingClientRect().width||sec.offsetWidth||900,600);
-  
   const LW = Math.floor(W * 0.35); 
-  const HH=34,RH=38,LH=26;
-  const H=HH+rows.length*RH+LH;
+  const HH=34, LH=26;
+  
+  const tmpCtx = cv.getContext('2d');
+  const maxW = LW - 10;
+  
+  const getLines = (ctx, text, maxWidth) => {
+      if(!text) return [''];
+      const lines = []; let curr = '';
+      for(let i=0; i<text.length; i++) {
+          const c = text[i];
+          if (ctx.measureText(curr + c).width <= maxWidth) { 
+              curr += c; 
+          } else {
+              const ls = curr.lastIndexOf(' ');
+              if(ls > 0 && curr.length - ls < 15) {
+                   lines.push(curr.substring(0, ls));
+                   curr = curr.substring(ls + 1) + c;
+              } else { 
+                   lines.push(curr); 
+                   curr = c; 
+              }
+          }
+      }
+      if(curr) lines.push(curr);
+      return lines;
+  };
+
+  const rowData = rows.map((r, i) => {
+      const lbl = (r.itemNo ? r.itemNo + ' ' : '') + (r.desc || '');
+      const isDesc = !!r.desc;
+      tmpCtx.font = (isDesc ? '13px ' : 'italic 12px ') + FN;
+      const lines = getLines(tmpCtx, lbl || ('row '+r.no), maxW);
+      const rh = Math.max(38, lines.length * 18 + 12);
+      return { r, lines, rh, isDesc };
+  });
+
+  const totalRH = rowData.reduce((sum, rd) => sum + rd.rh, 0);
+  const H = HH + totalRH + LH;
   
   cv.width=W;cv.height=H;cv.style.width=W+'px';cv.style.height=H+'px';
   const ctx=cv.getContext('2d');
@@ -632,43 +699,54 @@ function renderGantt(){
   ctx.fillStyle='#fff';ctx.font='bold 13px '+FN;ctx.textAlign='center';ctx.fillText('Item / Description',LW/2,HH-10);
   ctx.strokeStyle='#999';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(LW,0);ctx.lineTo(LW,H);ctx.stroke();
 
-  // Rows
-  rows.forEach((r,i)=>{
-    const y=HH+i*RH;
+  // Draw dynamically wrapped rows
+  let y = HH;
+  rowData.forEach((rd, i) => {
+    const r = rd.r;
+    const RH = rd.rh;
     ctx.fillStyle=i%2?'#fff':'#f7f9fb';ctx.fillRect(0,y,W,RH);
     ctx.strokeStyle='#e5e5e5';ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(0,y+RH);ctx.lineTo(W,y+RH);ctx.stroke();
-    const lbl=((r.itemNo?r.itemNo+' ':'')+(r.desc||'')).substring(0,42);
-    ctx.fillStyle=r.desc?'#111':'#aaa';
-    ctx.font=(r.desc?'13px ':'italic 12px ')+FN;
-    ctx.textAlign='left';ctx.fillText(lbl||('row '+r.no),5,y+RH*0.65);
-    const s=pd(r.ps),e=pd(r.pe);if(!s||!e)return;
     
-    // Plan bar
-    const bx=dx(s),ex=dx(e),bw=Math.max(ex-bx,3);
-    const pH=RH*0.38,pY=y+RH*0.08;
-    ctx.fillStyle='#1560a8';
-    ctx.beginPath();if(ctx.roundRect)ctx.roundRect(bx,pY,bw,pH,3);else ctx.rect(bx,pY,bw,pH);ctx.fill();
-    if(bw>26){ctx.fillStyle='#fff';ctx.font='bold 10px '+FN;ctx.textAlign='center';ctx.fillText(dd(s,e)+1+'d',bx+bw/2,pY+pH*0.76);}
-    const mY=pY+pH/2+4;
-    ctx.fillStyle='#666';ctx.font='10px '+FN;
-    ctx.textAlign='right';ctx.fillText(fd(r.ps),bx-3,mY);
-    ctx.textAlign='left';ctx.fillText(fd(r.pe),bx+bw+3,mY);
+    // Draw Text lines
+    ctx.fillStyle=rd.isDesc?'#111':'#aaa';
+    ctx.font=(rd.isDesc?'13px ':'italic 12px ')+FN;
+    ctx.textAlign='left';
+    rd.lines.forEach((line, li) => {
+        const textStartY = y + (RH - (rd.lines.length * 18)) / 2 + 13;
+        ctx.fillText(line, 5, textStartY + li * 18);
+    });
     
-    // Actual bar
-    const as=pd(r.as||r.ps),ae=pd(r.ae||r.pe);if(!as||!ae)return;
-    const ax=dx(as),aex=dx(ae),aw=Math.max(aex-ax,3);
-    const aH=RH*0.30,aY=y+RH*0.56;
-    ctx.fillStyle='#FFD700';
-    ctx.beginPath();if(ctx.roundRect)ctx.roundRect(ax,aY,aw,aH,3);else ctx.rect(ax,aY,aw,aH);ctx.fill();
-    const pct=+r.pct||0;
-    if(pct>0){
-      const rx=ax+(pct/100)*aw,mAY=aY+aH/2;
-      ctx.strokeStyle='#000';ctx.lineWidth=3;ctx.lineCap='round';
-      ctx.beginPath();ctx.moveTo(ax,mAY);ctx.lineTo(rx,mAY);ctx.stroke();
-      ctx.lineCap='butt';ctx.lineWidth=1;
-      ctx.fillStyle='#000';ctx.font='bold 10px '+FN;ctx.textAlign='right';
-      ctx.fillText(pct+'%',ax-3,aY+aH*0.75);
+    // Draw Bars
+    const s=pd(r.ps),e=pd(r.pe);
+    if(s && e){
+        const bx=dx(s),ex=dx(e),bw=Math.max(ex-bx,3);
+        const pH=14, pY=y+(RH - 26)/2; 
+        ctx.fillStyle='#1560a8';
+        ctx.beginPath();if(ctx.roundRect)ctx.roundRect(bx,pY,bw,pH,3);else ctx.rect(bx,pY,bw,pH);ctx.fill();
+        if(bw>26){ctx.fillStyle='#fff';ctx.font='bold 10px '+FN;ctx.textAlign='center';ctx.fillText(dd(s,e)+1+'d',bx+bw/2,pY+10);}
+        const mY=pY+11;
+        ctx.fillStyle='#666';ctx.font='10px '+FN;
+        ctx.textAlign='right';ctx.fillText(fd(r.ps),bx-3,mY);
+        ctx.textAlign='left';ctx.fillText(fd(r.pe),bx+bw+3,mY);
+        
+        const as=pd(r.as||r.ps),ae=pd(r.ae||r.pe);
+        if(as && ae){
+            const ax=dx(as),aex=dx(ae),aw=Math.max(aex-ax,3);
+            const aH=10, aY=pY+pH+2;
+            ctx.fillStyle='#FFD700';
+            ctx.beginPath();if(ctx.roundRect)ctx.roundRect(ax,aY,aw,aH,3);else ctx.rect(ax,aY,aw,aH);ctx.fill();
+            const pct=+r.pct||0;
+            if(pct>0){
+                const rx=ax+(pct/100)*aw, mAY=aY+aH/2;
+                ctx.strokeStyle='#000';ctx.lineWidth=3;ctx.lineCap='round';
+                ctx.beginPath();ctx.moveTo(ax,mAY);ctx.lineTo(rx,mAY);ctx.stroke();
+                ctx.lineCap='butt';ctx.lineWidth=1;
+                ctx.fillStyle='#000';ctx.font='bold 10px '+FN;ctx.textAlign='right';
+                ctx.fillText(pct+'%',ax-3,aY+8);
+            }
+        }
     }
+    y += RH;
   });
 
   // Today line on top
