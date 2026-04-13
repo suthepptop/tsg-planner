@@ -524,40 +524,46 @@ function updateWeightSum() {
 
 // ── PASTE FROM EXCEL ──
 function setupPaste() {
-  const tbody = document.getElementById('dataBody');
-  tbody.addEventListener('paste', e => {
-    e.preventDefault();
-    const text = (e.clipboardData || window.clipboardData).getData('text');
-    const rows = text.trim().split('\n').map(r=>r.split('\t'));
-    // find focused cell row/col
+  if(window._pasteFn) document.removeEventListener('paste', window._pasteFn);
+  window._pasteFn = function(e) {
+    if(!isEditor || !currentPlan) return;
+    const tbody = document.getElementById('dataBody');
+    if(!tbody) return;
     const active = document.activeElement;
     const allInputs = Array.from(tbody.querySelectorAll('input'));
-    let startIdx = allInputs.indexOf(active);
-    if(startIdx<0) startIdx=0;
-    const colsPerRow = 7; // no,itemNo,desc,start,finish,wt,actPct
-    const startRow = Math.floor(startIdx/colsPerRow);
+    const startIdx = allInputs.indexOf(active);
+    if(startIdx < 0) return;
+    e.preventDefault();
+    const text = (e.clipboardData || window.clipboardData).getData('text');
+    if(!text) return;
+    const pasteRows = text.trim().split(/\r?\n/).map(r => r.split('\t'));
+    const colsPerRow = 7;
+    const startRow = Math.floor(startIdx / colsPerRow);
     const startCol = startIdx % colsPerRow;
     const cols = ['no','itemNo','desc','start','finish','wt','actPct'];
     const dataRows = appData[currentPlan].rows;
-
-    rows.forEach((pasteRow, ri) => {
+    const needed = startRow + pasteRows.length;
+    while(dataRows.length < needed) {
+      dataRows.push({no:dataRows.length+1,itemNo:'',desc:'',start:'',finish:'',wt:0,actPct:0,actStart:'',actFinish:''});
+    }
+    pasteRows.forEach((pasteRow, ri) => {
       const rowIdx = startRow + ri;
-      if(rowIdx >= dataRows.length) return;
       pasteRow.forEach((val, ci) => {
         const colIdx = startCol + ci;
         if(colIdx >= cols.length) return;
         const key = cols[colIdx];
         let v = val.trim();
-        // normalise date: Excel might give dd/mm/yyyy or d/m/yyyy
-        if(key==='start'||key==='finish') v = normaliseDate(v);
+        if(key==='start' || key==='finish') v = normaliseDate(v);
         dataRows[rowIdx][key] = (key==='wt'||key==='actPct'||key==='no') ? (+v||0) : v;
-        // default actuals
         if(key==='start'  && !dataRows[rowIdx].actStart)  dataRows[rowIdx].actStart  = v;
         if(key==='finish' && !dataRows[rowIdx].actFinish) dataRows[rowIdx].actFinish = v;
       });
     });
+    document.getElementById('rowCountInput').value = dataRows.length;
     renderTable(); renderGantt(); renderSCurves();
-  });
+    toast('✓ Pasted ' + pasteRows.length + ' rows');
+  };
+  document.addEventListener('paste', window._pasteFn);
 }
 
 function normaliseDate(s) {
