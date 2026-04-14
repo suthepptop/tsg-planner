@@ -554,6 +554,17 @@ function restoreSession() {
 }
 
 window.onload=()=>{
+  // Detect embedded webview (LINE, Facebook, Instagram, etc.)
+  const ua = navigator.userAgent;
+  const isWebview = /Line|FBAN|FBAV|Instagram|MicroMessenger|WebView|(iPhone|iPod|iPad).*AppleWebKit(?!.*Safari)/i.test(ua);
+  if(isWebview){
+    document.body.innerHTML = `<div style="padding:30px;text-align:center;font-family:Sarabun,sans-serif;">
+      <div style="font-size:18px;font-weight:700;color:#c00;margin-bottom:12px;">⚠️ กรุณาเปิดใน Browser</div>
+      <div style="font-size:14px;color:#444;margin-bottom:20px;">แอปนี้ไม่รองรับการ Login ผ่าน LINE / Facebook Browser<br>กรุณาเปิดใน Chrome หรือ Safari</div>
+      <button onclick="window.open(location.href,'_blank')" style="padding:10px 24px;background:#1560a8;color:#fff;border:none;border-radius:6px;font-size:14px;font-family:Sarabun,sans-serif;cursor:pointer;">เปิดใน Browser ภายนอก</button>
+    </div>`;
+    return;
+  }
   restoreSession(); 
   const lp = sessionStorage.getItem('lastPlan');
   if(lp) {
