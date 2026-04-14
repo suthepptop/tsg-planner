@@ -163,6 +163,7 @@ body:not(.ed) .ci {pointer-events:none}
 
 /* BILLING DASHBOARD */
 .bil-cont { padding: 20px; display: flex; flex-direction: column; gap: 20px; align-items: center; }
+.bil-date { width: 100%; max-width: 600px; text-align: right; font-size: 12px; color: #666; font-weight: 700; margin-bottom: -10px; }
 .b-card { background: #fff; border: 1px solid #ddd; border-radius: 8px; width: 100%; max-width: 600px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden; }
 .b-head { background: #1560a8; color: #fff; padding: 12px 20px; font-weight: 700; font-size: 16px; display: flex; justify-content: space-between; }
 .b-head.inst { background: #d97706; }
@@ -201,8 +202,8 @@ body:not(.ed) .ci {pointer-events:none}
 .print-mode .col-desc  { width: auto !important; } 
 .print-mode .col-date  { width: 11% !important; text-align: center; }
 .print-mode .col-bg    { width: 8% !important; text-align: right; }
-.print-mode .col-pct   { width: 6% !important; text-align: center; }
-.print-mode .col-claim { width: 10% !important; text-align: right; }
+.print-mode .col-pct   { width: 5% !important; text-align: center; }
+.print-mode .col-claim { width: 9% !important; text-align: right; }
 .print-mode th { font-size: 11px !important; padding: 6px 4px !important; white-space: normal; background: #e8edf2 !important; }
 .print-mode td { padding: 4px !important; border: 1px solid #ddd !important; }
 .print-mode .ci { font-size: 11px !important; padding: 0 !important; background: transparent !important; border: none !important; color: #000 !important; width: 100% !important; height: auto !important; min-width: 0 !important; }
@@ -262,6 +263,8 @@ body:not(.ed) .ci {pointer-events:none}
 @media(max-width:480px){
   #bar h1 {display:none}
   #uinfo {display:none}
+  /* Give login button space on small screens */
+  #bar .tnav {flex: 1;}
 }
 </style>
 </head>
@@ -308,6 +311,7 @@ body:not(.ed) .ci {pointer-events:none}
 
 <div class="pg" id="bpg">
   <div class="bil-cont">
+    <div class="bil-date" id="bil-date">Calculation Date: </div>
     
     <div class="b-card">
       <div class="b-head">
@@ -332,7 +336,7 @@ body:not(.ed) .ci {pointer-events:none}
           <span class="b-val" id="bil-m-ret">0.00</span>
         </div>
         <div class="b-row b-hl">
-          <span class="b-lbl">Current Claimable (Progress × Pool):</span>
+          <span class="b-lbl" id="bil-m-claim-lbl">Current Claimable:</span>
           <span class="b-val" id="bil-m-claim">0.00 THB</span>
         </div>
       </div>
@@ -365,7 +369,7 @@ body:not(.ed) .ci {pointer-events:none}
           <span class="b-val" id="bil-i-ret2">0.00</span>
         </div>
         <div class="b-row b-hl">
-          <span class="b-lbl">Current Claimable (Progress × Pool):</span>
+          <span class="b-lbl" id="bil-i-claim-lbl">Current Claimable:</span>
           <span class="b-val" id="bil-i-claim">0.00 THB</span>
         </div>
       </div>
@@ -407,7 +411,7 @@ body:not(.ed) .ci {pointer-events:none}
           <th class="col-date">Act Start</th>
           <th class="col-date">Act Finish</th>
           <th class="col-pct">Act%</th>
-          <th class="col-claim" id="th-claim" style="display:none;">Claimable</th>
+          <th class="col-claim" id="th-claim" style="display:none;">Claimable (THB)</th>
         </tr></thead>
         <tbody id="tb"></tbody>
       </table>
@@ -585,7 +589,13 @@ window.onload=()=>{
     showPg('hpg');
   }
 
-  google.accounts.id.initialize({client_id:GCI,callback:onLogin,auto_select:true});
+  // UPDATED GOOGLE SIGN IN CONFIG FOR MOBILE (Disabled auto_select, added itp_support)
+  google.accounts.id.initialize({
+      client_id:GCI,
+      callback:onLogin,
+      auto_select:false, 
+      itp_support:true 
+  });
   google.accounts.id.renderButton($('gBtn'),{theme:'filled_blue',size:'small',text:'signin_with',shape:'rectangular'});
   loadData();
 };
@@ -947,6 +957,10 @@ function goBilling(){
 // ── BILLING LOGIC (EXACT TABLE MATH MATCH) ──
 function formatTHB(num) { return num.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}); }
 function updateBilling() {
+  // SET CALCULATION DATE
+  const d = new Date();
+  $('bil-date').textContent = 'Calculation Date: ' + d.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
+
   const mTot = D.material.rows.reduce((s,r)=>s+(+r.bg||0),0);
   const iTot = D.installation.rows.reduce((s,r)=>s+(+r.bg||0),0);
   
@@ -965,6 +979,9 @@ function updateBilling() {
   $('bil-m-down').textContent = formatTHB(mTot * 0.30);
   $('bil-m-pool').textContent = formatTHB(mTot * 0.60);
   $('bil-m-ret').textContent  = formatTHB(mTot * 0.10);
+  
+  // DYNAMIC CLAIMABLE TEXT (Act% x Pool)
+  $('bil-m-claim-lbl').textContent = `Current Claimable (${mPct}% × ${formatTHB(mTot * 0.60)}):`;
   $('bil-m-claim').textContent = formatTHB(mClaim) + ' THB';
   
   // Installation 20/65/7.5/7.5
@@ -973,6 +990,9 @@ function updateBilling() {
   $('bil-i-pool').textContent = formatTHB(iTot * 0.65);
   $('bil-i-ret1').textContent = formatTHB(iTot * 0.075);
   $('bil-i-ret2').textContent = formatTHB(iTot * 0.075);
+  
+  // DYNAMIC CLAIMABLE TEXT (Act% x Pool)
+  $('bil-i-claim-lbl').textContent = `Current Claimable (${iPct}% × ${formatTHB(iTot * 0.65)}):`;
   $('bil-i-claim').textContent = formatTHB(iClaim) + ' THB';
 }
 
@@ -1399,7 +1419,6 @@ function drawSC(cvId,rows,snapData,pc,ac_color){
   }
 }
 
-function renderSC(){if(!plan)return;drawSC('cSC',D[plan].rows,D[plan].snap,plan==='material'?'#1560a8':'#d97706','#2a8a2a');}
 function calcP(rows){
     const tw=rows.reduce((s,r)=>s+(+r.bg||0),0);
     if(!tw)return "0.00";
