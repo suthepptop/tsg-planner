@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 
 <style>
-/* ROOT LOCK & PADDING FOR FIXED MENUS */
+/* ROOT LOCK */
 * {box-sizing:border-box;margin:0;padding:0;font-family:Sarabun,sans-serif}
 html, body {
   width: 100%; 
@@ -20,17 +20,22 @@ html, body {
   background:#f4f6f8;
   color:#222;
   overscroll-behavior-x: none;
-  padding-top: 44px; /* Space for Top Fixed Bar */
-  padding-bottom: 45px; /* Space for Bottom Fixed Footer */
+  padding-bottom: 50px; /* Space for the floating bottom footer */
 }
 
-/* 1. FIXED TOP MENU */
-#bar {position:fixed;top:0;left:0;right:0;z-index:400;display:flex;align-items:center;gap:8px;padding:0 12px;height:44px;background:#1560a8;border-bottom:2px solid #0f4a8a;flex-wrap:nowrap;}
+/* NATIVE STICKY MENUS - Will not break layout */
+#bar {position:sticky;top:0;z-index:1000;display:flex;align-items:center;gap:8px;padding:0 12px;min-height:44px;background:#1560a8;border-bottom:2px solid #0f4a8a;flex-wrap:wrap; width: 100%;}
 #bar h1 {font-size:13px;font-weight:700;color:#fff;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #bar .r {display:flex;align-items:center;gap:6px}
 #uinfo {font-size:11px;color:rgba(255,255,255,.85)}
 
-.tnav {display:flex;gap:4px;}
+.ptb {position:sticky;top:44px;z-index:999;display:flex;align-items:center;gap:7px;padding:6px 13px;background:#f0f2f5;border-bottom:1px solid #ddd;flex-wrap:wrap; width: 100%;}
+thead th { position: sticky; top: 84px; z-index: 998; background: #e8edf2; border: 1px solid #bbb; font-size: 12px; font-weight: 700; color: #333; text-align: left; padding: 8px 10px; }
+
+/* FLOATING BOTTOM FOOTER */
+.wtb { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000; padding: 8px 13px; background: #f4f6f8; border-top: 2px solid #1560a8; font-size: 13px; color: #333; display: flex; gap: 18px; font-weight: 700; flex-wrap: wrap; box-shadow: 0 -2px 10px rgba(0,0,0,.15); }
+
+.tnav {display:flex;gap:4px;flex-wrap:wrap}
 .tnb {padding:3px 9px;border-radius:4px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.15);color:#fff;font-size:11px;cursor:pointer;font-family:Sarabun,sans-serif;white-space:nowrap}
 .tnb:hover {background:rgba(255,255,255,.3)}
 .tnb.on {background:rgba(255,255,255,.9);color:#1560a8;font-weight:700}
@@ -71,15 +76,13 @@ html, body {
 .prfm {height:5px;background:#1560a8;border-radius:3px;transition:width .4s}
 .prfi {height:5px;background:#d97706;border-radius:3px;transition:width .4s}
 
-/* 2. FIXED TOOLBAR FOR PLAN PAGE */
-.ptb {position:fixed;top:44px;left:0;right:0;z-index:350;display:flex;align-items:center;gap:7px;padding:6px 13px;background:#f0f2f5;border-bottom:1px solid #ddd;flex-wrap:wrap; height: 40px;}
 .ptit {font-size:14px;font-weight:700;color:#1560a8}
 .sp {flex:1}
 .rwc {display:flex;align-items:center;gap:5px;font-size:12px;color:#666}
 .rwc input {width:50px;padding:3px 5px;border:1px solid #ccc;border-radius:3px;font-size:12px;text-align:center;font-family:Sarabun,sans-serif}
 
-/* S-CURVE PUSHED DOWN FOR FIXED TOOLBAR */
-.scs {display:flex;justify-content:center;padding:10px 0;background:#fff;border-bottom:1px solid #ddd; width: 100%; margin-top: 40px;}
+/* S-CURVE */
+.scs {display:flex;justify-content:center;padding:13px 0 9px;background:#fff;border-bottom:1px solid #ddd; width: 100%;}
 .scb {width:50%;min-width:360px;background:#fff;border:1px solid #ddd;border-radius:6px;padding:8px; max-width: 100%;}
 .scb canvas {display:block;width:100%}
 
@@ -97,19 +100,6 @@ table {
   width: 100%;
   min-width: 1000px;
   table-layout: fixed;
-}
-
-thead th {
-  padding: 8px 10px;
-  background: #e8edf2;
-  border: 1px solid #bbb;
-  font-size: 12px;
-  font-weight: 700;
-  color: #333;
-  position: sticky;
-  top: 84px; /* Stays below Bar + Toolbar */
-  z-index: 200;
-  text-align: left;
 }
 
 .col-no    { width: 45px;  text-align: center; }
@@ -160,8 +150,6 @@ body.ed .ci:not([readonly]) {
 }
 body:not(.ed) .ci {pointer-events:none}
 
-/* 3. FIXED BOTTOM FOOTER */
-.wtb {position:fixed;bottom:0;left:0;right:0;z-index:400;padding:6px 13px;background:#f4f6f8;border-top:2px solid #1560a8;font-size:13px;color:#333;display:flex;gap:18px;font-weight:700;flex-wrap:wrap;box-shadow:0 -2px 10px rgba(0,0,0,.1);}
 .ok {color:#2a8a2a;font-weight:700}
 .wn {color:#c00;font-weight:700}
 
@@ -190,16 +178,11 @@ body:not(.ed) .ci {pointer-events:none}
 .md input {width:100%;padding:6px 9px;border:1px solid #ccc;border-radius:4px;font-size:12px;margin-bottom:10px;font-family:Sarabun,sans-serif}
 .ma {display:flex;gap:7px;justify-content:flex-end;margin-top:7px}
 
-#toast {position:fixed;bottom:50px;right:18px;background:#fff;border:1px solid #ccc;border-radius:5px;padding:7px 14px;font-size:12px;color:#222;box-shadow:0 2px 10px rgba(0,0,0,.12);opacity:0;transition:opacity .3s;pointer-events:none;z-index:999}
+#toast {position:fixed;bottom:60px;right:18px;background:#fff;border:1px solid #ccc;border-radius:5px;padding:7px 14px;font-size:12px;color:#222;box-shadow:0 2px 10px rgba(0,0,0,.12);opacity:0;transition:opacity .3s;pointer-events:none;z-index:999}
 #toast.on {opacity:1}
 
-/* 4. MOBILE BROWSER OPTIMIZATIONS (STRICT 95% WIDTH) */
+/* MOBILE BROWSER OPTIMIZATIONS */
 @media(max-width:768px){
-  body { padding-top: 84px; } /* Header + subheader */
-  #bar { height: auto; padding: 5px; flex-wrap: wrap; }
-  .ptb { top: 54px; height: auto; padding: 4px; }
-  .scs { margin-top: 20px; }
-  
   #hpg.on {flex-direction:column!important;height:auto!important;overflow-y:auto; width: 100%;}
   .hsb {width:100%!important;border-right:none;border-bottom:1px solid #ddd}
   .pb {width:100%!important}
@@ -209,35 +192,32 @@ body:not(.ed) .ci {pointer-events:none}
   .scs {padding: 10px 5px; width: 100%; max-width: 100%;}
   .scb {width:100%; max-width: 100%; min-width:unset; padding: 5px;}
   #bar h1 {font-size:10px}
-  thead th { top: 90px; } 
   
-  /* FORCE 95% WIDTH CONTAINERS */
-  .ts { width: 95%; margin: 0 auto; overflow-x: hidden; }
+  /* PERFECT 96% MOBILE WIDTH */
+  .ts { width: 96%; margin: 0 auto; overflow-x: hidden; }
   .tw { width: 100%; overflow-x: hidden; }
+  table { min-width: 100% !important; width: 100% !important; max-width: 100% !important; table-layout: fixed; }
   
-  /* PERFECT 100% SUM CONSTRAINTS */
-  table { width: 100% !important; min-width: 100% !important; max-width: 100% !important; table-layout: fixed; }
   .col-no    { width: 4% !important; }
-  .col-item  { width: 7% !important; }
-  .col-desc  { width: 15% !important; }
-  .col-date  { width: 11% !important; } /* ps, pe, as, ae = 44% */
-  .col-bg    { width: 11% !important; text-align: right; }
+  .col-item  { width: 8% !important; }
+  .col-desc  { width: 16% !important; }
+  .col-date  { width: 11% !important; } /* x4 dates = 44% */
+  .col-bg    { width: 10% !important; text-align: right; }
   .col-pct   { width: 7% !important; text-align: center; }
   .col-claim { width: 11% !important; text-align: right; }
-  /* Sum: 4+7+15 + 44 + 11 + 7 + 11 = 99% + padding buffer */
+  /* Sum = 100% perfectly */
   
-  th, td { padding: 1px !important; height: 26px !important; border: 1px solid #ccc; word-wrap: break-word;}
-  th { font-size: 7px !important; letter-spacing: -0.5px; line-height: 1; }
+  thead th { font-size: 8px !important; padding: 4px 1px !important; word-wrap: break-word; letter-spacing: -0.2px; line-height: 1.1; top: 80px; }
+  td { padding: 1px !important; height: 26px !important; }
+  .ci { font-size: 8px !important; height: 22px !important; padding: 0 !important; letter-spacing: -0.3px;}
   
-  .ci { font-size: 7px !important; height: 20px !important; padding: 0 !important; letter-spacing: -0.3px;}
-  
-  /* Hide calendar icon completely to save space */
   input[type="date"]::-webkit-inner-spin-button,
   input[type="date"]::-webkit-calendar-picker-indicator { display: none; -webkit-appearance: none; margin: 0; }
   
-  .wtb { font-size: 10px; padding: 5px; gap: 8px;}
+  .wtb { font-size: 10px; padding: 5px 8px; gap: 8px; }
   .rwc input { width: 35px; font-size: 10px; padding: 2px; }
-  .btnsm { padding: 2px 5px; font-size: 9px; }
+  .btnsm { padding: 2px 5px; font-size: 10px; }
+  .bil-cont { padding: 10px; }
 }
 
 @media(max-width:480px){
@@ -250,7 +230,7 @@ body:not(.ed) .ci {pointer-events:none}
 <body>
 
 <div id="bar">
-  <h1>TSG PLANNER</h1>
+  <h1>TSG PROJECT PLANNER</h1>
   <div class="tnav">
     <button class="tnb" id="nbM" onclick="goPlan('material')">📦 Material</button>
     <button class="tnb" id="nbI" onclick="goPlan('installation')">🔧 Installation</button>
@@ -299,7 +279,7 @@ body:not(.ed) .ci {pointer-events:none}
       </div>
       <div class="b-body">
         <div class="b-row">
-          <span class="b-lbl">Total Contract Budget (Auto Sum):</span>
+          <span class="b-lbl">Total Contract Budget:</span>
           <span class="b-val" id="bil-m-tot" style="color:#1560a8;">0.00 THB</span>
         </div>
         <div class="b-row">
@@ -328,7 +308,7 @@ body:not(.ed) .ci {pointer-events:none}
       </div>
       <div class="b-body">
         <div class="b-row">
-          <span class="b-lbl">Total Contract Budget (Auto Sum):</span>
+          <span class="b-lbl">Total Contract Budget:</span>
           <span class="b-val" id="bil-i-tot" style="color:#d97706;">0.00 THB</span>
         </div>
         <div class="b-row">
@@ -359,6 +339,7 @@ body:not(.ed) .ci {pointer-events:none}
 
 <div class="pg" id="ppg">
   <div class="ptb" id="planToolbar">
+    <button class="btn btnsm" onclick="goHome()">← Home</button>
     <span class="ptit" id="ptit"></span>
     
     <button class="btn btnsm" style="margin-left:8px; border-color:#d97706; color:#d97706;" onclick="exportPDF()">📄 PDF</button>
@@ -385,18 +366,19 @@ body:not(.ed) .ci {pointer-events:none}
           <th class="col-desc">Description</th>
           <th class="col-date">Plan Start</th>
           <th class="col-date">Plan Finish</th>
-          <th class="col-bg" id="th-bg" style="display:none;">Budget</th>
+          <th class="col-bg" id="th-bg" style="display:none;">Budget (THB)</th>
           <th class="col-date">Act Start</th>
           <th class="col-date">Act Finish</th>
           <th class="col-pct">Act%</th>
-          <th class="col-claim" id="th-claim" style="display:none;">Claimable</th>
+          <th class="col-claim" id="th-claim" style="display:none;">Claimable (THB)</th>
         </tr></thead>
         <tbody id="tb"></tbody>
       </table>
     </div>
+    
     <div class="wtb">
-        <span id="foot-bg" style="display:none;">Plan Budget: <span id="wts" style="color:#1560a8;">0.00 THB</span> &nbsp;|&nbsp; </span>
-        <span id="foot-claim" style="display:none;">Claimable: <span id="tot-claim" style="color:#2a8a2a;">0.00 THB</span> &nbsp;|&nbsp; </span>
+        <span id="foot-bg" style="display:none;">Plan Budget: <span id="wts" style="color:#1560a8;">0.00</span> &nbsp;|&nbsp; </span>
+        <span id="foot-claim" style="display:none;">Claimable: <span id="tot-claim" style="color:#2a8a2a;">0.00</span> &nbsp;|&nbsp; </span>
         Tasks: <span id="acn">0</span>
     </div>
   </div>
@@ -453,7 +435,7 @@ function formatAmt(num) {
 function getRange(rows){
   let mn=null,mx=null;
   rows.forEach(r=>{
-      if(!r.ps && !r.pe && (!r.bg || r.bg == 0)) return; 
+      if(!r.ps && !r.pe && (!r.bg || r.bg == 0)) return; // Ignore headers
       const s=pd(r.ps),e=pd(r.pe);
       if(s&&(!mn||s<mn))mn=s;if(e&&(!mx||e>mx))mx=e;
   });
@@ -523,11 +505,11 @@ window.onload=()=>{
     showPg('hpg');
   }
 
+  // RESTORED WORKING GOOGLE LOGIN
   google.accounts.id.initialize({
       client_id:GCI,
       callback:onLogin,
-      auto_select:false,
-      itp_support:true
+      auto_select:true
   });
   google.accounts.id.renderButton($('gBtn'),{theme:'filled_blue',size:'small',text:'signin_with',shape:'rectangular'});
   loadData();
@@ -766,9 +748,26 @@ async function loadData() {
     const bytes = Uint8Array.from(raw, c => c.charCodeAt(0));
     const txt = new TextDecoder('utf-8').decode(bytes);
     const d = JSON.parse(txt);
+    
+    const migrate = (arr, totalBase) => {
+        arr.forEach(r => {
+            if (r.wt !== undefined && r.bg === undefined) {
+                r.bg = Math.round((r.wt / 100) * totalBase);
+                delete r.wt;
+            }
+        });
+    };
 
-    if (d.material) { D.material.rows = d.material.rows || []; D.material.snap = d.material.snap || {}; }
-    if (d.installation) { D.installation.rows = d.installation.rows || []; D.installation.snap = d.installation.snap || {}; }
+    if (d.material) { 
+        D.material.rows = d.material.rows || []; 
+        migrate(D.material.rows, 2150000);
+        D.material.snap = d.material.snap || {}; 
+    }
+    if (d.installation) { 
+        D.installation.rows = d.installation.rows || []; 
+        migrate(D.installation.rows, 3100000); 
+        D.installation.snap = d.installation.snap || {}; 
+    }
     toast('✓ Data loaded');
   } catch(e) { 
     initD(); 
@@ -841,19 +840,26 @@ function goPlan(p){
   document.querySelectorAll('.tnb').forEach(b=>b.classList.remove('on'));
   $(p==='material'?'nbM':'nbI').classList.add('on');
   if(isEd)showEdUI();
-  showPg('ppg');
-  renderTable();
   
-  // Strict timeout to ensure DOM layout calculates before canvas renders
-  setTimeout(()=>{renderGantt();renderSC();}, 150);
+  showPg('ppg');
+  
+  requestAnimationFrame(() => {
+      renderTable();
+      renderGantt();
+      renderSC();
+  });
 }
 
 function goHome(){
   plan=null;
   sessionStorage.removeItem('lastPlan');
   document.querySelectorAll('.tnb').forEach(b=>b.classList.remove('on'));
+  
   showPg('hpg');
-  setTimeout(renderHome, 150);
+  
+  requestAnimationFrame(() => {
+      renderHome();
+  });
 }
 
 function goBilling(){
@@ -929,7 +935,7 @@ function renderTable(){
     const tr=document.createElement('tr');
     if(isHdr) tr.className = 'hdr';
     
-    // Live typing triggers math calculation without re-rendering whole table
+    // REALTIME LIVE TYPING
     const bgStr = isHdr ? '' : (r.bg ? formatAmt(r.bg) : '0.00');
     const bgTd = isEd ? `<td><input class="ci r" value="${bgStr}" ${ro||isHdr?'readonly':''} onfocus="if(this.value==='0.00'||this.value==='0'||this.value==='')this.value='';" onblur="if(this.value==='')this.value='0.00'; renderTable();" oninput="up(${i},'bg',this.value)"></td>` : '';
     
@@ -1038,22 +1044,15 @@ function setupPaste(){
 }
 
 function renderGantt(){
-  const cv=$('cGantt'),sec=$('gsec');
+  const cv=$('cGantt');
   if(!cv||!plan)return;
-
-  // LAYOUT WAIT FIX
-  let secW = sec.clientWidth;
-  if (!secW || secW < 50) {
-      setTimeout(renderGantt, 50);
-      return;
-  }
 
   const rows=D[plan].rows;
   const{start:ps,end:pe,days:td}=getRange(rows);
   const today=new Date();
   
   const isMob = window.innerWidth <= 768;
-  const W = isMob ? window.innerWidth : Math.max(secW, 600);
+  const W = isMob ? window.innerWidth * 0.96 : window.innerWidth;
   const LW = Math.floor(W * (isMob ? 0.30 : 0.35)); 
   
   const HH = isMob ? 28 : 34;
@@ -1257,7 +1256,7 @@ function buildC(rows, snapData){
 function drawSC(cvId,rows,snapData,pc,ac_color){
   const cv=$(cvId);if(!cv)return;
   
-  // STRICT MATHEMATICAL WIDTH: Ignores broken DOM states entirely
+  // PURE MATHEMATICAL WIDTH. DOES NOT RELY ON DOM.
   const isMob = window.innerWidth <= 768;
   let W = window.innerWidth;
   
