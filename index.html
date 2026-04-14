@@ -114,7 +114,8 @@ thead th {
 .col-desc  { width: auto;  } 
 .col-date  { width: 135px; } 
 .col-bg    { width: 85px;  text-align: right; }
-.col-pct   { width: 60px;  text-align: center; }
+.col-pct   { width: 55px;  text-align: center; }
+.col-claim { width: 95px;  text-align: right; }
 
 tbody tr:nth-child(even) {background:#f7f9fb}
 tbody tr:hover {background:#eef4ff}
@@ -156,7 +157,7 @@ body.ed .ci:not([readonly]) {
 }
 body:not(.ed) .ci {pointer-events:none}
 
-.wtb {padding:5px 13px;background:#f4f6f8;border-top:1px solid #ddd;font-size:13px;color:#333;display:flex;gap:18px; width: 100%; font-weight: 700;}
+.wtb {padding:5px 13px;background:#f4f6f8;border-top:1px solid #ddd;font-size:13px;color:#333;display:flex;gap:18px; width: 100%; font-weight: 700; flex-wrap: wrap;}
 .ok {color:#2a8a2a;font-weight:700}
 .wn {color:#c00;font-weight:700}
 
@@ -201,6 +202,7 @@ body:not(.ed) .ci {pointer-events:none}
 .print-mode .col-date  { width: 11% !important; text-align: center; }
 .print-mode .col-bg    { width: 8% !important; text-align: right; }
 .print-mode .col-pct   { width: 5% !important; text-align: center; }
+.print-mode .col-claim { width: 9% !important; text-align: right; }
 .print-mode th { font-size: 11px !important; padding: 6px 4px !important; white-space: normal; background: #e8edf2 !important; }
 .print-mode td { padding: 4px !important; border: 1px solid #ddd !important; }
 .print-mode .ci { font-size: 11px !important; padding: 0 !important; background: transparent !important; border: none !important; color: #000 !important; width: 100% !important; height: auto !important; min-width: 0 !important; }
@@ -241,6 +243,7 @@ body:not(.ed) .ci {pointer-events:none}
   .col-date { width: 14% !important; }
   .col-bg   { width: 10% !important; text-align: right; }
   .col-pct { width: 6% !important; }
+  .col-claim { width: 12% !important; text-align: right; }
   
   th { font-size: 8px !important; padding: 4px 1px !important; word-wrap: break-word; letter-spacing: -0.2px; }
   td { padding: 1px !important; height: 26px !important; }
@@ -403,12 +406,14 @@ body:not(.ed) .ci {pointer-events:none}
           <th class="col-date">Act Start</th>
           <th class="col-date">Act Finish</th>
           <th class="col-pct">Act%</th>
+          <th class="col-claim" id="th-claim" style="display:none;">Claimable</th>
         </tr></thead>
         <tbody id="tb"></tbody>
       </table>
     </div>
     <div class="wtb">
         <span id="foot-bg" style="display:none;">Total Plan Budget: <span id="wts" style="color:#1560a8;">0 THB</span> &nbsp;|&nbsp; </span>
+        <span id="foot-claim" style="display:none;">Total Claimable: <span id="tot-claim" style="color:#2a8a2a;">0 THB</span> &nbsp;|&nbsp; </span>
         Tasks in Progress: <span id="acn">0</span>
     </div>
   </div>
@@ -482,16 +487,18 @@ function recordSnap() {
 function exportExcel() {
   if(!plan) return;
   const rows = D[plan].rows;
+  const rate = plan === 'material' ? 0.60 : 0.65;
   
-  // SECURE EXPORT: Only Admins get the Budget column
+  // SECURE EXPORT: Only Admins get the Budget & Claimable column
   let csv = isEd ? 
-    "\ufeffNo.,Item No.,Description,Plan Start,Plan Finish,Budget (THB),Act Start,Act Finish,Act%\n" : 
+    "\ufeffNo.,Item No.,Description,Plan Start,Plan Finish,Budget (THB),Act Start,Act Finish,Act%,Claimable (THB)\n" : 
     "\ufeffNo.,Item No.,Description,Plan Start,Plan Finish,Act Start,Act Finish,Act%\n";
   
   rows.forEach(r => {
     const desc = (r.desc || '').replace(/"/g, '""');
     if (isEd) {
-        csv += `${r.no || ''},"${r.itemNo || ''}","${desc}",${r.ps || ''},${r.pe || ''},${r.bg || 0},${r.as || ''},${r.ae || ''},${r.pct || 0}\n`;
+        const claim = (!r.bg || r.bg==0) ? 0 : ((r.bg||0) * (r.pct||0)/100 * rate);
+        csv += `${r.no || ''},"${r.itemNo || ''}","${desc}",${r.ps || ''},${r.pe || ''},${r.bg || 0},${r.as || ''},${r.ae || ''},${r.pct || 0},${claim}\n`;
     } else {
         csv += `${r.no || ''},"${r.itemNo || ''}","${desc}",${r.ps || ''},${r.pe || ''},${r.as || ''},${r.ae || ''},${r.pct || 0}\n`;
     }
@@ -610,7 +617,9 @@ function showEdUI(){
   // UNHIDE CONFIDENTIAL ELEMENTS FOR ADMIN
   $('nbB').style.display='inline-block';
   $('th-bg').style.display='table-cell';
+  $('th-claim').style.display='table-cell';
   $('foot-bg').style.display='inline';
+  $('foot-claim').style.display='inline';
 }
 
 function signOut(){
@@ -626,7 +635,9 @@ function signOut(){
   ['soBtn','savBtn','rstBtn','nbB'].forEach(id=>$(id).style.display='none');
   $('rwc').style.display='none';
   $('th-bg').style.display='none';
+  $('th-claim').style.display='none';
   $('foot-bg').style.display='none';
+  $('foot-claim').style.display='none';
   
   if(plan)renderTable();
 }
@@ -987,25 +998,34 @@ function renderTable(){
   if(!plan)return;
   const rows=D[plan].rows,ro=!isEd;
   const tb=$('tb');tb.innerHTML='';
+  
+  // Progress Pool Multiplier
+  const rate = plan === 'material' ? 0.60 : 0.65;
+  
   rows.forEach((r,i)=>{
     const isHdr = (!r.bg || r.bg == 0) && !r.ps && !r.pe;
+    const dateType = isHdr ? 'text' : 'date'; // Hides placeholder on headers
     
     const tr=document.createElement('tr');
     if(isHdr) tr.className = 'hdr';
     
-    // STRICT SECURITY: Only inject the Budget <td> if logged in as Admin
+    // STRICT SECURITY: Only inject Budget & Claimable <td> if logged in as Admin
     const bgTd = isEd ? `<td><input class="ci r" value="${isHdr ? '' : formatInt(r.bg)}" ${ro||isHdr?'readonly':''} onchange="up(${i},'bg',nn(this.value))"></td>` : '';
+    
+    const claimVal = isHdr ? '' : formatInt((r.bg||0) * (r.pct||0)/100 * rate);
+    const claimTd = isEd ? `<td><input class="ci r" value="${claimVal}" readonly style="color:#2a8a2a; font-weight:700;"></td>` : '';
     
     tr.innerHTML=`
       <td><input class="ci r" value="${r.no}" ${ro?'readonly':''} onchange="up(${i},'no',this.value)"></td>
       <td><input class="ci" value="${r.itemNo||''}" ${ro?'readonly':''} onchange="up(${i},'itemNo',this.value)"></td>
       <td><input class="ci" value="${r.desc||''}" ${ro?'readonly':''} onchange="up(${i},'desc',this.value)"></td>
-      <td><input class="ci" type="date" value="${toI(r.ps)}" ${ro||isHdr?'readonly':''} onchange="upd(${i},'ps',frI(this.value))"></td>
-      <td><input class="ci" type="date" value="${toI(r.pe)}" ${ro||isHdr?'readonly':''} onchange="upd(${i},'pe',frI(this.value))"></td>
+      <td><input class="ci" type="${dateType}" value="${toI(r.ps)}" ${ro||isHdr?'readonly':''} onchange="upd(${i},'ps',frI(this.value))"></td>
+      <td><input class="ci" type="${dateType}" value="${toI(r.pe)}" ${ro||isHdr?'readonly':''} onchange="upd(${i},'pe',frI(this.value))"></td>
       ${bgTd}
-      <td><input class="ci" type="date" value="${toI(r.as||r.ps)}" ${ro||isHdr?'readonly':''} onchange="up(${i},'as',frI(this.value))"></td>
-      <td><input class="ci" type="date" value="${toI(r.ae||r.pe)}" ${ro||isHdr?'readonly':''} onchange="up(${i},'ae',frI(this.value))"></td>
-      <td><input class="ci r" value="${isHdr ? '' : (r.pct||0)}" ${ro||isHdr?'readonly':''} onchange="up(${i},'pct',nn(this.value))"></td>`;
+      <td><input class="ci" type="${dateType}" value="${toI(r.as||r.ps)}" ${ro||isHdr?'readonly':''} onchange="up(${i},'as',frI(this.value))"></td>
+      <td><input class="ci" type="${dateType}" value="${toI(r.ae||r.pe)}" ${ro||isHdr?'readonly':''} onchange="up(${i},'ae',frI(this.value))"></td>
+      <td><input class="ci r" value="${isHdr ? '' : (r.pct||0)}" ${ro||isHdr?'readonly':''} onchange="up(${i},'pct',nn(this.value))"></td>
+      ${claimTd}`;
     tb.appendChild(tr);
   });
   updWt();
@@ -1016,7 +1036,7 @@ function up(i,k,v){
   recordSnap(); 
   renderGantt();
   renderSC();
-  if(k==='bg' || k==='ps' || k==='pe') renderTable(); 
+  if(k==='bg' || k==='ps' || k==='pe' || k==='pct') renderTable(); // Redraw if these change
 }
 function upd(i,k,v){
   D[plan].rows[i][k]=v;
@@ -1031,9 +1051,14 @@ function upd(i,k,v){
 function updWt(){
   if(!plan)return;
   const rows=D[plan].rows;
-  const totBg=rows.reduce((a,r)=>a+(+r.bg||0),0);
-  $('wts').textContent=formatTHB(totBg) + ' THB';
-  $('acn').textContent=rows.filter(r=>r.pct>0 && r.bg>0).length;
+  const rate = plan === 'material' ? 0.60 : 0.65;
+  
+  const totBg = rows.reduce((a,r)=>a+(+r.bg||0),0);
+  const totClaim = rows.reduce((a,r)=>a+((+r.bg||0) * (+r.pct||0)/100 * rate),0);
+  
+  $('wts').textContent = formatTHB(totBg) + ' THB';
+  $('tot-claim').textContent = formatTHB(totClaim) + ' THB';
+  $('acn').textContent = rows.filter(r=>r.pct>0 && r.bg>0).length;
 }
 
 // ── PASTE ──
