@@ -21,7 +21,7 @@ html, body {
   overscroll-behavior-x: none;
 }
 
-#bar {position:sticky;top:0;z-index:200;display:flex;align-items:center;gap:8px;padding:0 12px;min-height:44px;background:#1560a8;border-bottom:2px solid #0f4a8a;flex-wrap:wrap; width: 100%;}
+#bar {position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;gap:8px;padding:0 12px;min-height:44px;background:#1560a8;border-bottom:2px solid #0f4a8a;flex-wrap:wrap; width: 100%;}
 #bar h1 {font-size:13px;font-weight:700;color:#fff;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #bar .r {display:flex;align-items:center;gap:6px}
 #uinfo {font-size:11px;color:rgba(255,255,255,.85)}
@@ -39,8 +39,8 @@ html, body {
 .btnsm {padding:3px 9px;font-size:11px}
 
 .pg {display:none; width: 100%; max-width: 100%;}
-.pg.on {display:block}
-#hpg.on {display:flex;height:calc(100vh - 44px);overflow:hidden; width: 100%; background:#fff;}
+.pg.on {display:block; padding-top: 88px;}
+#hpg.on {display:flex;height:calc(100vh - 44px);overflow:hidden; width: 100%; background:#fff; padding-top: 44px;}
 
 /* HOME */
 .hsb {width:190px;min-width:190px;background:#f4f6f8;border-right:1px solid #ddd;display:flex;flex-direction:column;padding:14px 12px;gap:10px;overflow-y:auto}
@@ -68,7 +68,7 @@ html, body {
 .prfi {height:5px;background:#d97706;border-radius:3px;transition:width .4s}
 
 /* PLAN PAGE */
-.ptb {position:sticky;top:44px;z-index:100;display:flex;align-items:center;gap:7px;padding:6px 13px;background:#f0f2f5;border-bottom:1px solid #ddd;flex-wrap:wrap; width: 100%;}
+.ptb {position:fixed;top:44px;left:0;right:0;z-index:100;display:flex;align-items:center;gap:7px;padding:6px 13px;background:#f0f2f5;border-bottom:1px solid #ddd;flex-wrap:wrap; width: 100%;}
 .ptit {font-size:14px;font-weight:700;color:#1560a8}
 .sp {flex:1}
 .rwc {display:flex;align-items:center;gap:5px;font-size:12px;color:#666}
