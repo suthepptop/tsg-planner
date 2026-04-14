@@ -864,6 +864,7 @@ function showPg(id){document.querySelectorAll('.pg').forEach(p=>p.classList.remo
 function goPlan(p){
   plan=p;
   sessionStorage.setItem('lastPlan',p);
+  sessionStorage.removeItem('lastPage');
   $('ptit').textContent=p==='material'?'📦 Material Plan':'🔧 Installation Plan';
   $('rwn').value=D[p].rows.length;
   document.querySelectorAll('.tnb').forEach(b=>b.classList.remove('on'));
@@ -882,6 +883,7 @@ function goHome(){
 }
 function goBilling(){
   plan=null;
+  sessionStorage.setItem('lastPage','billing');
   sessionStorage.removeItem('lastPlan');
   document.querySelectorAll('.tnb').forEach(b=>b.classList.remove('on'));
   $('nbB').classList.add('on');
@@ -1294,7 +1296,10 @@ function renderHome(){
 function renderAll(){
   initD();
   const lp=sessionStorage.getItem('lastPlan');
-  if(lp){
+  const lb=sessionStorage.getItem('lastPage');
+  if(lb==='billing'){
+    requestAnimationFrame(()=>requestAnimationFrame(()=>goBilling()));
+  } else if(lp){
     requestAnimationFrame(()=>requestAnimationFrame(()=>goPlan(lp)));
   } else {
     requestAnimationFrame(()=>requestAnimationFrame(renderHome));
