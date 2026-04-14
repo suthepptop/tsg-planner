@@ -263,8 +263,6 @@ body:not(.ed) .ci {pointer-events:none}
 @media(max-width:480px){
   #bar h1 {display:none}
   #uinfo {display:none}
-  /* Give login button space on small screens */
-  #bar .tnav {flex: 1;}
 }
 </style>
 </head>
@@ -589,12 +587,12 @@ window.onload=()=>{
     showPg('hpg');
   }
 
-  // UPDATED GOOGLE SIGN IN CONFIG FOR MOBILE (Disabled auto_select, added itp_support)
+  // FORCE MOBILE LOGIN FIX (Disabled auto_select, added itp_support)
   google.accounts.id.initialize({
       client_id:GCI,
       callback:onLogin,
-      auto_select:false, 
-      itp_support:true 
+      auto_select:false,
+      itp_support:true
   });
   google.accounts.id.renderButton($('gBtn'),{theme:'filled_blue',size:'small',text:'signin_with',shape:'rectangular'});
   loadData();
@@ -613,8 +611,7 @@ function onLogin(resp){
       showEdUI();
       setupPaste();
   } else {
-      // Ensure sensitive data is hidden if another user logs in
-      signOut(); 
+      signOut(); // Force public security protocol
   }
   if(plan)renderTable();
   toast(isEd?'✓ Editor':'✓ View only');
@@ -957,7 +954,6 @@ function goBilling(){
 // ── BILLING LOGIC (EXACT TABLE MATH MATCH) ──
 function formatTHB(num) { return num.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}); }
 function updateBilling() {
-  // SET CALCULATION DATE
   const d = new Date();
   $('bil-date').textContent = 'Calculation Date: ' + d.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
 
@@ -970,32 +966,24 @@ function updateBilling() {
   $('bil-m-pct').textContent = mPct + '% Progress';
   $('bil-i-pct').textContent = iPct + '% Progress';
   
-  // Exact Math calculated row-by-row
   const mClaim = D.material.rows.reduce((a,r)=>a+((+r.bg||0) * (+r.pct||0)/100 * 0.60), 0);
   const iClaim = D.installation.rows.reduce((a,r)=>a+((+r.bg||0) * (+r.pct||0)/100 * 0.65), 0);
   
-  // Material 30/60/10
   $('bil-m-tot').textContent = formatTHB(mTot) + ' THB';
   $('bil-m-down').textContent = formatTHB(mTot * 0.30);
   $('bil-m-pool').textContent = formatTHB(mTot * 0.60);
   $('bil-m-ret').textContent  = formatTHB(mTot * 0.10);
-  
-  // DYNAMIC CLAIMABLE TEXT (Act% x Pool)
   $('bil-m-claim-lbl').textContent = `Current Claimable (${mPct}% × ${formatTHB(mTot * 0.60)}):`;
   $('bil-m-claim').textContent = formatTHB(mClaim) + ' THB';
   
-  // Installation 20/65/7.5/7.5
   $('bil-i-tot').textContent = formatTHB(iTot) + ' THB';
   $('bil-i-down').textContent = formatTHB(iTot * 0.20);
   $('bil-i-pool').textContent = formatTHB(iTot * 0.65);
   $('bil-i-ret1').textContent = formatTHB(iTot * 0.075);
   $('bil-i-ret2').textContent = formatTHB(iTot * 0.075);
-  
-  // DYNAMIC CLAIMABLE TEXT (Act% x Pool)
   $('bil-i-claim-lbl').textContent = `Current Claimable (${iPct}% × ${formatTHB(iTot * 0.65)}):`;
   $('bil-i-claim').textContent = formatTHB(iClaim) + ' THB';
 }
-
 
 function applyRows(){
   if(!isEd)return;
@@ -1024,17 +1012,15 @@ function renderTable(){
   const rows=D[plan].rows,ro=!isEd;
   const tb=$('tb');tb.innerHTML='';
   
-  // Progress Pool Multiplier
   const rate = plan === 'material' ? 0.60 : 0.65;
   
   rows.forEach((r,i)=>{
     const isHdr = (!r.bg || r.bg == 0) && !r.ps && !r.pe;
-    const dateType = isHdr ? 'text' : 'date'; // Hides placeholder on headers
+    const dateType = isHdr ? 'text' : 'date'; 
     
     const tr=document.createElement('tr');
     if(isHdr) tr.className = 'hdr';
     
-    // STRICT SECURITY: Only inject Budget & Claimable <td> if logged in as Admin
     const bgTd = isEd ? `<td><input class="ci r" value="${isHdr ? '' : formatInt(r.bg)}" ${ro||isHdr?'readonly':''} onchange="up(${i},'bg',nn(this.value))"></td>` : '';
     
     const claimVal = isHdr ? '' : formatInt((r.bg||0) * (r.pct||0)/100 * rate);
@@ -1061,7 +1047,7 @@ function up(i,k,v){
   recordSnap(); 
   renderGantt();
   renderSC();
-  if(k==='bg' || k==='ps' || k==='pe' || k==='pct') renderTable(); // Redraw if these change
+  if(k==='bg' || k==='ps' || k==='pe' || k==='pct') renderTable(); 
 }
 function upd(i,k,v){
   D[plan].rows[i][k]=v;
@@ -1129,8 +1115,8 @@ function renderGantt(){
   const today=new Date();
   
   const isMob = window.innerWidth <= 768;
-  // STRICT MOBILE WIDTH FIX
-  const W = isMob ? window.innerWidth : Math.max(sec.getBoundingClientRect().width || sec.offsetWidth, 600);
+  const secW = sec.getBoundingClientRect().width || sec.offsetWidth || window.innerWidth;
+  const W = isMob ? secW : Math.max(secW, 600);
   const LW = Math.floor(W * (isMob ? 0.30 : 0.35)); 
   
   const HH = isMob ? 28 : 34;
@@ -1337,10 +1323,15 @@ function buildC(rows, snapData){
 function drawSC(cvId,rows,snapData,pc,ac_color){
   const cv=$(cvId);if(!cv)return;
   
-  const isMob = window.innerWidth <= 768;
-  const W = isMob ? window.innerWidth - 10 : (cv.parentElement.getBoundingClientRect().width||cv.parentElement.offsetWidth||400);
-  const H=parseInt(cv.getAttribute('height'))||200;
-  if(W<10)return;
+  // BULLETPROOF WIDTH FIX: Strictly retrieve parent width, safely fallback to 400 if hidden
+  let PW = cv.parentElement.getBoundingClientRect().width || cv.parentElement.offsetWidth;
+  if (!PW || PW < 10) PW = window.innerWidth > 768 ? 400 : window.innerWidth - 10;
+  
+  const W = PW;
+  const H = parseInt(cv.getAttribute('height'))||200;
+  
+  if(W<10)return; // Extreme safeguard
+  
   cv.width=Math.round(W);cv.height=H;
   const ctx=cv.getContext('2d');
   ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
@@ -1396,8 +1387,8 @@ function drawSC(cvId,rows,snapData,pc,ac_color){
   const step=Math.max(1,Math.floor(td/300));
   const pp=[],ap=[];
   for(let d=0;d<td;d+=step){
-    pp.push([px1+(d/td)*pw,py2-pl[d]*ph]);
-    if(d<=todD)ap.push([px1+(d/td)*pw,py2-act[d]*ph]);
+    pp.push([px1+(d/td)*pw, py2 - (pl[d]||0)*ph]);
+    if(d<=todD)ap.push([px1+(d/td)*pw, py2 - (act[d]||0)*ph]);
   }
 
   if(pp.length){
