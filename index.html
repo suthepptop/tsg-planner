@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 
 <style>
+/* ROOT LOCK TO PREVENT HORIZONTAL SCROLL IN LINE BROWSER */
 * {box-sizing:border-box;margin:0;padding:0;font-family:Sarabun,sans-serif}
 html, body {
   width: 100%; 
@@ -603,53 +604,153 @@ function signOut(){
   if(plan)renderTable();
 }
 
-// ── DATA TEMPLATES (BUDGET BASED) ──
+// ── DATA TEMPLATES (FULLY EXPANDED BOQ BUDGET BASED) ──
 function initD(){
   const matTmpl = [
-      {no:'', itemNo:'', desc:'1. งานจัดหาวัสดุอุปกรณ์และประกอบ', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
-      {no:1, itemNo:'5.1', desc:'MDB-1 / Main Distribution Board', ps:'01/04/2026', pe:'31/05/2026', bg:149000, as:'', ae:'', pct:0},
-      {no:2, itemNo:'5.2', desc:'MCC / Motor Control Center', ps:'01/04/2026', pe:'31/05/2026', bg:220000, as:'', ae:'', pct:0},
-      {no:3, itemNo:'5.3', desc:'PLC Panel + UPS 40kVA + Battery', ps:'01/04/2026', pe:'10/06/2026', bg:415000, as:'', ae:'', pct:0},
-      {no:4, itemNo:'5.4', desc:'Control Desk', ps:'01/04/2026', pe:'10/06/2026', bg:102600, as:'', ae:'', pct:0},
-      {no:5, itemNo:'5.5', desc:'Control Marshalling Panel', ps:'01/04/2026', pe:'31/05/2026', bg:85400, as:'', ae:'', pct:0},
-      {no:6, itemNo:'5.6', desc:'I/O Remote Box (Fiber) x3', ps:'01/04/2026', pe:'31/05/2026', bg:90400, as:'', ae:'', pct:0},
-      {no:'', itemNo:'', desc:'2. Cable tray & conduit', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
-      {no:7, itemNo:'6.2', desc:'Conduit & Fitting (Zone 1-4)', ps:'06/04/2026', pe:'25/05/2026', bg:184200, as:'', ae:'', pct:0},
-      {no:8, itemNo:'6.3', desc:'Accessories (Cable Tie, Gland, etc.)', ps:'06/04/2026', pe:'25/05/2026', bg:69000, as:'', ae:'', pct:0},
-      {no:9, itemNo:'6.4', desc:'Junction Box (Field) x12 sets', ps:'06/04/2026', pe:'25/05/2026', bg:48600, as:'', ae:'', pct:0},
-      {no:'', itemNo:'', desc:'3. ระบบกราวด์ (Grounding)', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
-      {no:10, itemNo:'7.4', desc:'Ground Test Box (Steel) x7 sets', ps:'01/04/2026', pe:'07/05/2026', bg:72500, as:'', ae:'', pct:0},
-      {no:11, itemNo:'7.5', desc:'Grounding Accessories', ps:'23/03/2026', pe:'30/04/2026', bg:68800, as:'', ae:'', pct:0},
-      {no:'', itemNo:'', desc:'4. ระบบแสงสว่าง', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
-      {no:12, itemNo:'9.1', desc:'ตู้ Load Center x2', ps:'01/04/2026', pe:'31/05/2026', bg:41200, as:'', ae:'', pct:0},
-      {no:13, itemNo:'9.2', desc:'Conduit & Fitting แสงสว่าง', ps:'01/04/2026', pe:'31/05/2026', bg:40400, as:'', ae:'', pct:0},
-      {no:14, itemNo:'9.3', desc:'สายไฟแสงสว่าง', ps:'01/04/2026', pe:'31/05/2026', bg:34200, as:'', ae:'', pct:0},
-      {no:15, itemNo:'9.4', desc:'โคมไฟ + หลอดไฟ High Bay 200W', ps:'01/04/2026', pe:'31/05/2026', bg:63400, as:'', ae:'', pct:0},
-      {no:'', itemNo:'', desc:'5. กล้องวงจรปิด (CCTV)', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
-      {no:16, itemNo:'10.1', desc:'กล้อง CCTV WiFi IP67 x9', ps:'23/03/2026', pe:'25/05/2026', bg:65600, as:'', ae:'', pct:0},
-      {no:17, itemNo:'10.2', desc:'NVR 16CH + HDD', ps:'23/03/2026', pe:'25/05/2026', bg:25900, as:'', ae:'', pct:0},
-      {no:18, itemNo:'10.4', desc:'สาย LAN Cat6 / Fiber Optic', ps:'23/03/2026', pe:'25/05/2026', bg:73600, as:'', ae:'', pct:0}
+      {no:'', itemNo:'', desc:'5. ตู้ไฟฟ้า+PLC', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:1, itemNo:'5.1.1', desc:'Enclosure MDB-1', ps:'01/04/2026', pe:'31/05/2026', bg:39400, as:'', ae:'', pct:0},
+      {no:2, itemNo:'5.1.2', desc:'Main MCCB 630AT', ps:'01/04/2026', pe:'31/05/2026', bg:49000, as:'', ae:'', pct:0},
+      {no:3, itemNo:'5.1.3', desc:'Digital Multimeter', ps:'01/04/2026', pe:'31/05/2026', bg:12200, as:'', ae:'', pct:0},
+      {no:4, itemNo:'5.1.4', desc:'CT 630/5A', ps:'01/04/2026', pe:'31/05/2026', bg:5900, as:'', ae:'', pct:0},
+      {no:5, itemNo:'5.1.5', desc:'Pilot Lamp etc', ps:'01/04/2026', pe:'31/05/2026', bg:7500, as:'', ae:'', pct:0},
+      {no:6, itemNo:'5.1.6', desc:'MCCB 200AT', ps:'01/04/2026', pe:'31/05/2026', bg:16900, as:'', ae:'', pct:0},
+      {no:7, itemNo:'5.1.7', desc:'MCCB 125AT', ps:'01/04/2026', pe:'31/05/2026', bg:39100, as:'', ae:'', pct:0},
+      {no:8, itemNo:'5.1.8', desc:'MCCB 30AT', ps:'01/04/2026', pe:'31/05/2026', bg:5500, as:'', ae:'', pct:0},
+      {no:9, itemNo:'5.1.9', desc:'Main Busbar', ps:'01/04/2026', pe:'31/05/2026', bg:22100, as:'', ae:'', pct:0},
+      {no:10, itemNo:'5.1.10', desc:'สายไฟ Control MDB', ps:'01/04/2026', pe:'31/05/2026', bg:10400, as:'', ae:'', pct:0},
+      {no:11, itemNo:'5.2.1', desc:'Enclosure MCC', ps:'01/04/2026', pe:'31/05/2026', bg:39400, as:'', ae:'', pct:0},
+      {no:12, itemNo:'5.2.2', desc:'Main MCCB 200AT', ps:'01/04/2026', pe:'31/05/2026', bg:17400, as:'', ae:'', pct:0},
+      {no:13, itemNo:'5.2.3', desc:'DM + CT + Fuse', ps:'01/04/2026', pe:'31/05/2026', bg:14600, as:'', ae:'', pct:0},
+      {no:14, itemNo:'5.2.4', desc:'Pilot Lamp Start-Stop', ps:'01/04/2026', pe:'31/05/2026', bg:7500, as:'', ae:'', pct:0},
+      {no:15, itemNo:'5.2.5', desc:'Y/D 30kW', ps:'01/04/2026', pe:'31/05/2026', bg:72500, as:'', ae:'', pct:0},
+      {no:16, itemNo:'5.2.6', desc:'Y/D 7.5kW', ps:'01/04/2026', pe:'31/05/2026', bg:37700, as:'', ae:'', pct:0},
+      {no:17, itemNo:'5.2.7', desc:'DOL 5.5kW', ps:'01/04/2026', pe:'31/05/2026', bg:19100, as:'', ae:'', pct:0},
+      {no:18, itemNo:'5.2.8', desc:'Spare 32AT', ps:'01/04/2026', pe:'31/05/2026', bg:7800, as:'', ae:'', pct:0},
+      {no:19, itemNo:'5.2.9', desc:'Main Busbar 630A', ps:'01/04/2026', pe:'31/05/2026', bg:17400, as:'', ae:'', pct:0},
+      {no:20, itemNo:'5.2.10', desc:'สายไฟ Control MCC', ps:'01/04/2026', pe:'31/05/2026', bg:10400, as:'', ae:'', pct:0},
+      {no:21, itemNo:'5.2.11', desc:'ตู้ลูกย่อย LC1', ps:'01/04/2026', pe:'31/05/2026', bg:51300, as:'', ae:'', pct:0},
+      {no:22, itemNo:'5.3.1', desc:'ตู้ PLC + Controller', ps:'01/04/2026', pe:'10/06/2026', bg:102600, as:'', ae:'', pct:0},
+      {no:23, itemNo:'5.3.2', desc:'UPS 40 kVA', ps:'01/04/2026', pe:'10/06/2026', bg:173500, as:'', ae:'', pct:0},
+      {no:24, itemNo:'5.3.3', desc:'Battery', ps:'01/04/2026', pe:'10/06/2026', bg:138900, as:'', ae:'', pct:0},
+      {no:25, itemNo:'5.4.1', desc:'Control Desk', ps:'01/04/2026', pe:'10/06/2026', bg:102600, as:'', ae:'', pct:0},
+      {no:26, itemNo:'5.5.1', desc:'Control Marshalling', ps:'01/04/2026', pe:'31/05/2026', bg:85400, as:'', ae:'', pct:0},
+      {no:27, itemNo:'5.6', desc:'I/O Remote Box', ps:'01/04/2026', pe:'31/05/2026', bg:90400, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'6. Cable tray & conduit', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:28, itemNo:'6.2.1', desc:'Conduit (Zone 1)', ps:'06/04/2026', pe:'25/05/2026', bg:115900, as:'', ae:'', pct:0},
+      {no:29, itemNo:'6.2.2', desc:'Conduit (Zone 2)', ps:'06/04/2026', pe:'25/05/2026', bg:12400, as:'', ae:'', pct:0},
+      {no:30, itemNo:'6.2.3', desc:'Conduit (Zone 3)', ps:'06/04/2026', pe:'25/05/2026', bg:12400, as:'', ae:'', pct:0},
+      {no:31, itemNo:'6.2.4', desc:'Conduit (Zone 4)', ps:'06/04/2026', pe:'25/05/2026', bg:43500, as:'', ae:'', pct:0},
+      {no:32, itemNo:'6.3', desc:'Accessories', ps:'06/04/2026', pe:'25/05/2026', bg:69000, as:'', ae:'', pct:0},
+      {no:33, itemNo:'6.4.1', desc:'Junction Box (STM 1)', ps:'06/04/2026', pe:'25/05/2026', bg:8100, as:'', ae:'', pct:0},
+      {no:34, itemNo:'6.4.2', desc:'Junction Box (STM 2&3)', ps:'06/04/2026', pe:'25/05/2026', bg:8100, as:'', ae:'', pct:0},
+      {no:35, itemNo:'6.4.3', desc:'Junction Box (STM 4)', ps:'06/04/2026', pe:'25/05/2026', bg:8100, as:'', ae:'', pct:0},
+      {no:36, itemNo:'6.4.4', desc:'Junction Box (โรงสี 1)', ps:'06/04/2026', pe:'25/05/2026', bg:8100, as:'', ae:'', pct:0},
+      {no:37, itemNo:'6.4.5', desc:'Junction Box (โรงสี 2)', ps:'06/04/2026', pe:'25/05/2026', bg:8100, as:'', ae:'', pct:0},
+      {no:38, itemNo:'6.4.6', desc:'Junction Box (โรงสี 3)', ps:'06/04/2026', pe:'25/05/2026', bg:8100, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'7. ระบบกราวด์', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:39, itemNo:'7.4', desc:'Ground test box', ps:'01/04/2026', pe:'07/05/2026', bg:72500, as:'', ae:'', pct:0},
+      {no:40, itemNo:'7.5', desc:'Accessories', ps:'23/03/2026', pe:'30/04/2026', bg:68800, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'8. อุปกรณ์ Instrument', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:41, itemNo:'8.5', desc:'Accessories', ps:'27/04/2026', pe:'31/05/2026', bg:17300, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'9. ระบบแสงสว่าง', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:42, itemNo:'9.1', desc:'ตู้ load center', ps:'01/04/2026', pe:'31/05/2026', bg:41200, as:'', ae:'', pct:0},
+      {no:43, itemNo:'9.2.1', desc:'Conduit & fitting', ps:'01/04/2026', pe:'31/05/2026', bg:40400, as:'', ae:'', pct:0},
+      {no:44, itemNo:'9.3.1', desc:'สายไฟ Steam Trans', ps:'01/04/2026', pe:'31/05/2026', bg:29100, as:'', ae:'', pct:0},
+      {no:45, itemNo:'9.3.2', desc:'สายไฟ Accum 2', ps:'01/04/2026', pe:'31/05/2026', bg:5100, as:'', ae:'', pct:0},
+      {no:46, itemNo:'9.4.1', desc:'โคมไฟ STM High Bay', ps:'01/04/2026', pe:'31/05/2026', bg:27600, as:'', ae:'', pct:0},
+      {no:47, itemNo:'9.4.2', desc:'โคมไฟ STM 2x36W', ps:'01/04/2026', pe:'31/05/2026', bg:24800, as:'', ae:'', pct:0},
+      {no:48, itemNo:'9.4.3', desc:'โคมไฟ Accum2 High Bay', ps:'01/04/2026', pe:'31/05/2026', bg:11000, as:'', ae:'', pct:0},
+      {no:49, itemNo:'9.5', desc:'Accessories', ps:'01/04/2026', pe:'31/05/2026', bg:28200, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'10. กล้องวงจรปิด (CCTV)', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:50, itemNo:'10.1.1', desc:'กล้อง STM', ps:'23/03/2026', pe:'25/05/2026', bg:29100, as:'', ae:'', pct:0},
+      {no:51, itemNo:'10.1.2', desc:'กล้อง Plant 1', ps:'23/03/2026', pe:'25/05/2026', bg:7300, as:'', ae:'', pct:0},
+      {no:52, itemNo:'10.1.3', desc:'กล้อง โรงสี 1 2 3', ps:'23/03/2026', pe:'25/05/2026', bg:21900, as:'', ae:'', pct:0},
+      {no:53, itemNo:'10.1.4', desc:'กล้อง Accum 2', ps:'23/03/2026', pe:'25/05/2026', bg:7300, as:'', ae:'', pct:0},
+      {no:54, itemNo:'10.2.1', desc:'NVR', ps:'23/03/2026', pe:'25/05/2026', bg:14400, as:'', ae:'', pct:0},
+      {no:55, itemNo:'10.2.2', desc:'HDD', ps:'23/03/2026', pe:'25/05/2026', bg:11500, as:'', ae:'', pct:0},
+      {no:56, itemNo:'10.3.1', desc:'Media Converter', ps:'23/03/2026', pe:'25/05/2026', bg:43800, as:'', ae:'', pct:0},
+      {no:57, itemNo:'10.4.1', desc:'LAN Accum2-โรงสี3', ps:'23/03/2026', pe:'25/05/2026', bg:13200, as:'', ae:'', pct:0},
+      {no:58, itemNo:'10.4.2', desc:'LAN Control-STM', ps:'23/03/2026', pe:'25/05/2026', bg:9300, as:'', ae:'', pct:0},
+      {no:59, itemNo:'10.4.3', desc:'Fiber โรงสี1-Control', ps:'23/03/2026', pe:'25/05/2026', bg:26200, as:'', ae:'', pct:0},
+      {no:60, itemNo:'10.4.4', desc:'Fiber โรงสี2-Control', ps:'23/03/2026', pe:'25/05/2026', bg:26200, as:'', ae:'', pct:0},
+      {no:61, itemNo:'10.4.5', desc:'Fiber โรงสี2-โรงสี3', ps:'23/03/2026', pe:'25/05/2026', bg:18700, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'12. Pipe Rack', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:62, itemNo:'12.2', desc:'Support for Cable Tray', ps:'01/04/2026', pe:'31/05/2026', bg:56800, as:'', ae:'', pct:0}
   ];
 
   const instTmpl = [
-      {no:'', itemNo:'', desc:'2. งานออกแบบและติดตั้ง', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
-      {no:1, itemNo:'16.1', desc:'Electrical Single Line / Electrical SLD', ps:'16/02/2026', pe:'25/04/2026', bg:50000, as:'', ae:'', pct:0},
-      {no:2, itemNo:'16.2', desc:'Cable Schedule & Route', ps:'02/03/2026', pe:'30/04/2026', bg:60000, as:'', ae:'', pct:0},
-      {no:3, itemNo:'16.3', desc:'Cable Arrangement Diagram', ps:'02/03/2026', pe:'30/04/2026', bg:50000, as:'', ae:'', pct:0},
-      {no:4, itemNo:'16.4', desc:'Grounding System Design', ps:'16/02/2026', pe:'25/04/2026', bg:60000, as:'', ae:'', pct:0},
-      {no:5, itemNo:'16.5', desc:'Lightning Arrester Design', ps:'16/02/2026', pe:'20/04/2026', bg:50000, as:'', ae:'', pct:0},
-      {no:6, itemNo:'16.6', desc:'Hook-up Drawing', ps:'23/03/2026', pe:'20/05/2026', bg:50000, as:'', ae:'', pct:0},
-      {no:7, itemNo:'16.7', desc:'Panel GA Drawing', ps:'02/03/2026', pe:'20/04/2026', bg:60000, as:'', ae:'', pct:0},
-      {no:8, itemNo:'16.8', desc:'Panel Wiring Diagram', ps:'02/03/2026', pe:'30/04/2026', bg:80000, as:'', ae:'', pct:0},
-      {no:9, itemNo:'16.9', desc:'I/O Assignment List', ps:'02/03/2026', pe:'20/04/2026', bg:50000, as:'', ae:'', pct:0},
-      {no:'', itemNo:'', desc:'งานลากสายไฟ (Cabling)', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
-      {no:10, itemNo:'19.5', desc:'Cable Pulling & Terminate', ps:'10/06/2026', pe:'30/06/2026', bg:200000, as:'', ae:'', pct:0},
-      {no:'', itemNo:'', desc:'งานติดตั้ง Instrument', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
-      {no:11, itemNo:'20.1', desc:'Pressure Transmitter Install', ps:'25/05/2026', pe:'30/06/2026', bg:80000, as:'', ae:'', pct:0},
-      {no:12, itemNo:'20.2', desc:'Temp & Level Transmitter Install', ps:'25/05/2026', pe:'30/06/2026', bg:80000, as:'', ae:'', pct:0},
-      {no:'', itemNo:'', desc:'งานติดตั้งแสงสว่าง & CCTV', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
-      {no:13, itemNo:'21.1', desc:'ติดตั้งโคมไฟและลากสาย', ps:'01/06/2026', pe:'30/06/2026', bg:60000, as:'', ae:'', pct:0},
-      {no:14, itemNo:'22.1', desc:'งานติดตั้ง CCTV และลากสาย', ps:'01/06/2026', pe:'30/06/2026', bg:70000, as:'', ae:'', pct:0}
+      {no:'', itemNo:'', desc:'16. งานออกแบบ+เขียนแบบ', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:1, itemNo:'16.1', desc:'Electrical Single Line', ps:'16/02/2026', pe:'25/04/2026', bg:28800, as:'', ae:'', pct:0},
+      {no:2, itemNo:'16.2', desc:'Cable Schedule & Route', ps:'02/03/2026', pe:'30/04/2026', bg:34500, as:'', ae:'', pct:0},
+      {no:3, itemNo:'16.3', desc:'Cable arrangement diagram', ps:'02/03/2026', pe:'30/04/2026', bg:28800, as:'', ae:'', pct:0},
+      {no:4, itemNo:'16.4', desc:'Grounding System Design', ps:'16/02/2026', pe:'25/04/2026', bg:34500, as:'', ae:'', pct:0},
+      {no:5, itemNo:'16.5', desc:'Lightning Arrester Design', ps:'16/02/2026', pe:'20/04/2026', bg:28800, as:'', ae:'', pct:0},
+      {no:6, itemNo:'16.6', desc:'Hook-up Drawing', ps:'23/03/2026', pe:'20/05/2026', bg:28800, as:'', ae:'', pct:0},
+      {no:7, itemNo:'16.7', desc:'Panel GA Drawing', ps:'02/03/2026', pe:'20/04/2026', bg:34500, as:'', ae:'', pct:0},
+      {no:8, itemNo:'16.8', desc:'Panel Wiring Diagram', ps:'02/03/2026', pe:'30/04/2026', bg:34500, as:'', ae:'', pct:0},
+      {no:9, itemNo:'16.9', desc:'I/O Assignment List', ps:'02/03/2026', pe:'20/04/2026', bg:34500, as:'', ae:'', pct:0},
+      {no:10, itemNo:'16.10', desc:'Lighting Design', ps:'09/03/2026', pe:'10/05/2026', bg:28800, as:'', ae:'', pct:0},
+      {no:11, itemNo:'16.11', desc:'CCTV Layout', ps:'09/03/2026', pe:'10/05/2026', bg:28800, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'17. งาน Programming', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:12, itemNo:'17.1', desc:'PLC Programming', ps:'01/04/2026', pe:'31/05/2026', bg:230000, as:'', ae:'', pct:0},
+      {no:13, itemNo:'17.2', desc:'Control Logic', ps:'01/04/2026', pe:'31/05/2026', bg:57500, as:'', ae:'', pct:0},
+      {no:14, itemNo:'17.3', desc:'Alarm & Data Logging', ps:'01/04/2026', pe:'31/05/2026', bg:57500, as:'', ae:'', pct:0},
+      {no:15, itemNo:'17.4', desc:'HMI Programming', ps:'01/04/2026', pe:'31/05/2026', bg:115000, as:'', ae:'', pct:0},
+      {no:16, itemNo:'17.5', desc:'Screen Design', ps:'01/04/2026', pe:'31/05/2026', bg:57500, as:'', ae:'', pct:0},
+      {no:17, itemNo:'17.6', desc:'User Management', ps:'01/04/2026', pe:'31/05/2026', bg:57500, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'18. FAT (Factory Test)', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:18, itemNo:'18.1', desc:'Panel Testing', ps:'01/05/2026', pe:'31/05/2026', bg:5800, as:'', ae:'', pct:0},
+      {no:19, itemNo:'18.2', desc:'PLC Simulation', ps:'01/05/2026', pe:'31/05/2026', bg:5800, as:'', ae:'', pct:0},
+      {no:20, itemNo:'18.3', desc:'HMI Testing', ps:'01/05/2026', pe:'31/05/2026', bg:5800, as:'', ae:'', pct:0},
+      {no:21, itemNo:'18.4', desc:'Interlock Testing', ps:'01/05/2026', pe:'31/05/2026', bg:11500, as:'', ae:'', pct:0},
+      {no:22, itemNo:'18.5', desc:'Communication Test', ps:'01/05/2026', pe:'31/05/2026', bg:5800, as:'', ae:'', pct:0},
+      {no:23, itemNo:'18.6', desc:'Customer Witness', ps:'01/05/2026', pe:'31/05/2026', bg:5800, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'19. งานติดตั้ง', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:24, itemNo:'19.1', desc:'Ground installation', ps:'01/04/2026', pe:'30/04/2026', bg:262900, as:'', ae:'', pct:0},
+      {no:25, itemNo:'19.2', desc:'Panel Installation', ps:'01/05/2026', pe:'31/05/2026', bg:105200, as:'', ae:'', pct:0},
+      {no:26, itemNo:'19.3', desc:'Cable Tray Installation', ps:'06/04/2026', pe:'25/05/2026', bg:404900, as:'', ae:'', pct:0},
+      {no:27, itemNo:'19.4', desc:'Conduit Installation', ps:'06/04/2026', pe:'25/05/2026', bg:262900, as:'', ae:'', pct:0},
+      {no:28, itemNo:'19.5', desc:'Cable Pulling & connection', ps:'10/06/2026', pe:'30/06/2026', bg:157800, as:'', ae:'', pct:0},
+      {no:29, itemNo:'19.6', desc:'Accessories', ps:'01/06/2026', pe:'30/06/2026', bg:36800, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'20. งานติดตั้ง Field Instrument', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:30, itemNo:'20.1.1', desc:'Pressure Transmitter+Impulse Line', ps:'25/05/2026', pe:'30/06/2026', bg:32200, as:'', ae:'', pct:0},
+      {no:31, itemNo:'20.1.2', desc:'Pressure Transmitter+Syphon', ps:'25/05/2026', pe:'30/06/2026', bg:29900, as:'', ae:'', pct:0},
+      {no:32, itemNo:'20.1.3', desc:'Temp Transmitter', ps:'25/05/2026', pe:'30/06/2026', bg:36800, as:'', ae:'', pct:0},
+      {no:33, itemNo:'20.1.4', desc:'Flow Transmitter+Impulse Line (DP)', ps:'25/05/2026', pe:'30/06/2026', bg:20700, as:'', ae:'', pct:0},
+      {no:34, itemNo:'20.1.5', desc:'Level Transmitter+Impulse Line (DP)', ps:'25/05/2026', pe:'30/06/2026', bg:20700, as:'', ae:'', pct:0},
+      {no:35, itemNo:'20.1.6', desc:'Level Trans. Direct Mounting', ps:'25/05/2026', pe:'30/06/2026', bg:9200, as:'', ae:'', pct:0},
+      {no:36, itemNo:'20.1.7', desc:'Pressure Gauge', ps:'25/05/2026', pe:'30/06/2026', bg:78200, as:'', ae:'', pct:0},
+      {no:37, itemNo:'20.1.8', desc:'Temp Gauge', ps:'25/05/2026', pe:'30/06/2026', bg:29900, as:'', ae:'', pct:0},
+      {no:38, itemNo:'20.1.9', desc:'Level Gauge', ps:'25/05/2026', pe:'30/06/2026', bg:13800, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'21. งานติดตั้งแสงสว่าง', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:39, itemNo:'21.1', desc:'ติดตั้งตู้ load center, โคมไฟ และลากสาย', ps:'01/06/2026', pe:'30/06/2026', bg:86300, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'22. งานติดตั้ง CCTV', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:40, itemNo:'22.1', desc:'กล้อง CCTV และ ลากสาย', ps:'01/06/2026', pe:'30/06/2026', bg:115000, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'23. งานติดตั้งอุปกรณ์โรงงาน', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:41, itemNo:'23.1', desc:'Steam Transformer Install', ps:'01/06/2026', pe:'30/06/2026', bg:0, as:'', ae:'', pct:0},
+      {no:42, itemNo:'23.2', desc:'Accumulator#1 Install', ps:'01/06/2026', pe:'30/06/2026', bg:0, as:'', ae:'', pct:0},
+      {no:43, itemNo:'23.3', desc:'Accumulator#2 Install', ps:'01/06/2026', pe:'30/06/2026', bg:0, as:'', ae:'', pct:0},
+      {no:44, itemNo:'23.4', desc:'Soft, Condensate, Flash, Return Tank', ps:'01/06/2026', pe:'30/06/2026', bg:0, as:'', ae:'', pct:0},
+      {no:45, itemNo:'23.5', desc:'Pump Installation', ps:'01/06/2026', pe:'30/06/2026', bg:0, as:'', ae:'', pct:0},
+      {no:46, itemNo:'23.6', desc:'Control Valve Install', ps:'01/06/2026', pe:'30/06/2026', bg:0, as:'', ae:'', pct:0},
+      {no:47, itemNo:'23.7', desc:'Instrument air piping', ps:'01/06/2026', pe:'30/06/2026', bg:0, as:'', ae:'', pct:0},
+      {no:48, itemNo:'23.8', desc:'Chemical Dosing Install', ps:'01/06/2026', pe:'30/06/2026', bg:0, as:'', ae:'', pct:0},
+      {no:49, itemNo:'23.9', desc:'Heat exchanger H/E2, H/E3', ps:'01/06/2026', pe:'30/06/2026', bg:0, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'24. Commissioning & SAT', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:50, itemNo:'24.1', desc:'Pre-Commissioning (Cold test)', ps:'01/07/2026', pe:'15/07/2026', bg:46000, as:'', ae:'', pct:0},
+      {no:51, itemNo:'24.2', desc:'Commissioning (Hot test)', ps:'01/07/2026', pe:'15/07/2026', bg:57500, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'25. Training', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:52, itemNo:'25.1', desc:'System Training', ps:'10/07/2026', pe:'15/07/2026', bg:0, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'26. เอกสาร', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:53, itemNo:'26.1', desc:'As-Built Drawing (Ele+Ins)', ps:'16/02/2026', pe:'15/07/2026', bg:17300, as:'', ae:'', pct:0},
+      {no:54, itemNo:'26.2', desc:'PLC/HMI Document', ps:'01/04/2026', pe:'15/07/2026', bg:11500, as:'', ae:'', pct:0},
+      {no:55, itemNo:'26.3', desc:'Operation Manual', ps:'01/07/2026', pe:'15/07/2026', bg:0, as:'', ae:'', pct:0},
+      {no:56, itemNo:'26.4', desc:'Training Material', ps:'01/07/2026', pe:'15/07/2026', bg:0, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'27. Expenses', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:57, itemNo:'27.1', desc:'ค่าเดินทาง+ที่พัก', ps:'16/02/2026', pe:'15/07/2026', bg:138000, as:'', ae:'', pct:0},
+      {no:58, itemNo:'27.2', desc:'Office container', ps:'16/02/2026', pe:'15/07/2026', bg:34500, as:'', ae:'', pct:0},
+      {no:59, itemNo:'27.3', desc:'Transportation', ps:'16/02/2026', pe:'15/07/2026', bg:57100, as:'', ae:'', pct:0},
+      {no:60, itemNo:'27.4', desc:'ค่าใช้จ่ายหน้างาน', ps:'16/02/2026', pe:'15/07/2026', bg:74100, as:'', ae:'', pct:0}
   ];
 
   if(!D.material) D.material = {rows:[], snap:{}};
@@ -688,7 +789,6 @@ async function loadData() {
     const txt = new TextDecoder('utf-8').decode(bytes);
     const d = JSON.parse(txt);
     
-    // Migration: If old data used 'wt' instead of 'bg', convert it to approx THB
     const migrate = (arr, totalBase) => {
         arr.forEach(r => {
             if (r.wt !== undefined && r.bg === undefined) {
@@ -705,7 +805,7 @@ async function loadData() {
     }
     if (d.installation) { 
         D.installation.rows = d.installation.rows || []; 
-        migrate(D.installation.rows, 1000000);
+        migrate(D.installation.rows, 3100000); // Set Installation base default to 3,100,000
         D.installation.snap = d.installation.snap || {}; 
     }
     toast('✓ Data loaded');
@@ -808,7 +908,6 @@ function goBilling(){
 // ── BILLING LOGIC (AUTO-PULLS FROM TABLE) ──
 function formatTHB(num) { return num.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}); }
 function updateBilling() {
-  // Sum up all budgets directly from the rows!
   const mTot = D.material.rows.reduce((s,r)=>s+(+r.bg||0),0);
   const iTot = D.installation.rows.reduce((s,r)=>s+(+r.bg||0),0);
   
@@ -903,7 +1002,7 @@ function updWt(){
   if(!plan)return;
   const rows=D[plan].rows;
   const totBg=rows.reduce((a,r)=>a+(+r.bg||0),0);
-  $('wts').textContent=formatTHB(totBg);
+  $('wts').textContent=formatTHB(totBg) + ' THB';
   $('acn').textContent=rows.filter(r=>r.pct>0 && r.bg>0).length;
 }
 
