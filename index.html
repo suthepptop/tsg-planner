@@ -328,7 +328,7 @@ body:not(.ed) .ci {pointer-events:none}
           <span class="b-val" id="bil-m-ret">0.00</span>
         </div>
         <div class="b-row b-hl">
-          <span class="b-lbl">Current Claimable (Progress × Pool):</span>
+          <span class="b-lbl">Current Claimable (<span id="bil-m-formula">0.00% × 0.00</span>):</span>
           <span class="b-val" id="bil-m-claim">0.00 THB</span>
         </div>
       </div>
@@ -361,7 +361,7 @@ body:not(.ed) .ci {pointer-events:none}
           <span class="b-val" id="bil-i-ret2">0.00</span>
         </div>
         <div class="b-row b-hl">
-          <span class="b-lbl">Current Claimable (Progress × Pool):</span>
+          <span class="b-lbl">Current Claimable (<span id="bil-i-formula">0.00% × 0.00</span>):</span>
           <span class="b-val" id="bil-i-claim">0.00 THB</span>
         </div>
       </div>
@@ -913,6 +913,7 @@ function updateBilling() {
   $('bil-m-pool').textContent = formatTHB(mTot * 0.60);
   $('bil-m-ret').textContent  = formatTHB(mTot * 0.10);
   $('bil-m-claim').textContent = formatTHB(mClaim) + ' THB';
+  $('bil-m-formula').textContent = mPct + '% × ' + formatTHB(mTot * 0.60);
 
   $('bil-i-tot').textContent = formatTHB(iTot) + ' THB';
   $('bil-i-down').textContent = formatTHB(iTot * 0.20);
@@ -920,6 +921,7 @@ function updateBilling() {
   $('bil-i-ret1').textContent = formatTHB(iTot * 0.075);
   $('bil-i-ret2').textContent = formatTHB(iTot * 0.075);
   $('bil-i-claim').textContent = formatTHB(iClaim) + ' THB';
+  $('bil-i-formula').textContent = iPct + '% × ' + formatTHB(iTot * 0.65);
 }
 
 function applyRows(){
