@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 
 <style>
-/* ROOT LAYOUT */
+/* ROOT LOCK TO PREVENT HORIZONTAL SCROLL IN LINE BROWSER */
 * {box-sizing:border-box;margin:0;padding:0;font-family:Sarabun,sans-serif}
 html, body {
   width: 100%; 
@@ -20,25 +20,24 @@ html, body {
   background:#f4f6f8;
   color:#222;
   overscroll-behavior-x: none;
-  padding-bottom: 50px; 
 }
 
-/* TOP MENU - FIXED */
-#bar {position:sticky;top:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:0 10px;min-height:44px;background:#1560a8;border-bottom:2px solid #0f4a8a; width: 100%;}
-#bar h1 {font-size:13px;font-weight:700;color:#fff;white-space:nowrap; margin-right: 10px;}
-#bar .r {display:flex;align-items:center;gap:6px;}
+#bar {position:sticky;top:0;z-index:200;display:flex;align-items:center;gap:8px;padding:0 12px;min-height:44px;background:#1560a8;border-bottom:2px solid #0f4a8a;flex-wrap:wrap; width: 100%;}
+#bar h1 {font-size:13px;font-weight:700;color:#fff;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#bar .r {display:flex;align-items:center;gap:6px}
 #uinfo {font-size:11px;color:rgba(255,255,255,.85)}
 
-.tnav {display:flex;gap:4px;flex-wrap:nowrap; overflow-x:auto; flex: 1;}
-.tnb {padding:4px 8px;border-radius:4px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.15);color:#fff;font-size:11px;cursor:pointer;font-family:Sarabun,sans-serif;white-space:nowrap}
+.tnav {display:flex;gap:4px;flex-wrap:wrap}
+.tnb {padding:3px 9px;border-radius:4px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.15);color:#fff;font-size:11px;cursor:pointer;font-family:Sarabun,sans-serif;white-space:nowrap}
 .tnb:hover {background:rgba(255,255,255,.3)}
 .tnb.on {background:rgba(255,255,255,.9);color:#1560a8;font-weight:700}
 
-.btn {padding:5px 10px;border-radius:4px;border:1px solid #aaa;background:#fff;color:#222;font-size:11px;font-family:Sarabun,sans-serif;cursor:pointer;white-space:nowrap;}
+.btn {padding:5px 13px;border-radius:4px;border:1px solid #aaa;background:#fff;color:#222;font-size:12px;font-family:Sarabun,sans-serif;cursor:pointer}
 .btn:hover {background:#f0f0f0}
 .btnp {background:#1560a8;border-color:#1560a8;color:#fff}
 .btnp:hover {background:#0f4a8a}
 .btnd {border-color:#c00;color:#c00}
+.btnsm {padding:3px 9px;font-size:11px}
 
 .pg {display:none; width: 100%; max-width: 100%;}
 .pg.on {display:block}
@@ -57,7 +56,7 @@ html, body {
 
 .hpg-r {flex:1;display:flex;flex-direction:column;padding:14px;gap:12px;background:#f9f9f9;overflow-y:auto;align-items:center; max-width: 100%;}
 .hcb {width:65%;min-width:300px;background:#fff;border:1px solid #ddd;border-radius:6px;padding:10px; max-width: 100%;}
-.hcb canvas {display:block;width:100%; height:auto;}
+.hcb canvas {display:block;width:100%}
 
 .prbox {margin-top:4px;border-top:1px solid #ddd;padding-top:10px;display:flex;flex-direction:column;gap:3px}
 .prlb {font-size:10px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
@@ -69,96 +68,148 @@ html, body {
 .prfm {height:5px;background:#1560a8;border-radius:3px;transition:width .4s}
 .prfi {height:5px;background:#d97706;border-radius:3px;transition:width .4s}
 
-/* TOOLBAR - STICKY */
-.ptb {position:sticky;top:44px;z-index:999;display:flex;align-items:center;gap:6px;padding:6px 10px;background:#f0f2f5;border-bottom:1px solid #ddd;flex-wrap:wrap; width: 100%;}
-.ptit {font-size:13px;font-weight:700;color:#1560a8}
+/* PLAN PAGE */
+.ptb {position:sticky;top:44px;z-index:100;display:flex;align-items:center;gap:7px;padding:6px 13px;background:#f0f2f5;border-bottom:1px solid #ddd;flex-wrap:wrap; width: 100%;}
+.ptit {font-size:14px;font-weight:700;color:#1560a8}
 .sp {flex:1}
-.rwc {display:flex;align-items:center;gap:4px;font-size:11px;color:#666}
-.rwc input {width:40px;padding:2px 4px;border:1px solid #ccc;border-radius:3px;font-size:11px;text-align:center;}
+.rwc {display:flex;align-items:center;gap:5px;font-size:12px;color:#666}
+.rwc input {width:50px;padding:3px 5px;border:1px solid #ccc;border-radius:3px;font-size:12px;text-align:center;font-family:Sarabun,sans-serif}
 
-/* S-CURVE CONTAINER */
-.scs {display:flex;justify-content:center;padding:15px 5px;background:#fff;border-bottom:1px solid #ddd; width: 100%;}
+/* S-CURVE */
+.scs {display:flex;justify-content:center;padding:13px 0 9px;background:#fff;border-bottom:1px solid #ddd; width: 100%;}
 .scb {width:50%;min-width:360px;background:#fff;border:1px solid #ddd;border-radius:6px;padding:8px; max-width: 100%;}
-.scb canvas {display:block;width:100%; height:auto;}
+.scb canvas {display:block;width:100%}
 
-/* GANTT CONTAINER */
-.gs {background:#fff;border-bottom:1px solid #ddd; width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;}
-.gs canvas {display:block; min-width: 600px;}
+/* GANTT */
+.gs {background:#fff;border-bottom:1px solid #ddd;overflow-x:hidden; width: 100%; max-width: 100%;}
+.gs canvas {display:block; max-width: 100%;}
 
 /* TABLE */
 .ts {background:#fff; width: 100%; max-width: 100%;}
-.tw {width: 100%; max-width: 100%; overflow-x:hidden;}
+.tw {overflow-x:auto; width: 100%; max-width: 100%;}
 
 table {
   border-collapse: collapse;
-  font-size: 12px;
+  font-size: 13px;
   width: 100%;
+  min-width: 1000px;
   table-layout: fixed;
 }
 
 thead th {
-  padding: 6px 4px;
+  padding: 8px 10px;
   background: #e8edf2;
   border: 1px solid #bbb;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   color: #333;
   position: sticky;
-  top: 84px; 
-  z-index: 900;
+  top: 0;
+  z-index: 5;
   text-align: left;
 }
 
 .col-no    { width: 45px;  text-align: center; }
-.col-item  { width: 90px; }
+.col-item  { width: 100px; }
 .col-desc  { width: auto;  } 
-.col-date  { width: 110px; text-align: center; } 
-.col-bg    { width: 95px;  text-align: right; }
-.col-pct   { width: 60px;  text-align: center; }
+.col-date  { width: 135px; } 
+.col-bg    { width: 85px;  text-align: right; }
+.col-pct   { width: 65px;  text-align: center; }
 .col-claim { width: 105px; text-align: right; }
 
 tbody tr:nth-child(even) {background:#f7f9fb}
 tbody tr:hover {background:#eef4ff}
 
+/* SMART HEADER ROW STYLING */
 tr.hdr td { background: #e8f0fb !important; border-top: 2px solid #1560a8 !important; border-bottom: 1px solid #1560a8 !important; }
 tr.hdr .ci { font-weight: 700; color: #1560a8; background: transparent !important; }
 tr.hdr .ci[readonly] { color: #1560a8; }
 tr.hdr:hover td { background: #dce7f8 !important; }
 
-td { border: 1px solid #ddd; padding: 1px 2px; height: 30px; vertical-align: middle;}
+td {
+  border: 1px solid #ddd;
+  padding: 2px 4px;
+  height: 34px;
+  vertical-align: middle;
+}
 
 .ci {
-  width: 100%; height: 26px; border: none; background: transparent;
-  font-size: 12px; font-family: Sarabun, sans-serif; color: #222;
-  padding: 0 4px; border-radius: 2px;
+  width: 100%;
+  height: 28px;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-family: Sarabun, sans-serif;
+  color: #222;
+  padding: 2px 6px;
+  border-radius: 2px;
 }
+
 .ci:focus {outline:2px solid #1560a8;outline-offset:-1px;background:#fff}
 .ci[readonly] {color:#888;cursor:default}
 .ci.r {text-align:right}
 
-body.ed .ci:not([readonly]) { background:#fffef0; cursor:text; pointer-events:all; border: 1px solid #e0e0e0; }
+body.ed .ci:not([readonly]) {
+  background:#fffef0;
+  cursor:text;
+  pointer-events:all;
+  border: 1px solid #e0e0e0;
+}
 body:not(.ed) .ci {pointer-events:none}
 
-/* FOOTER - FIXED TO BOTTOM */
-.wtb { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000; padding: 8px 12px; background: #f4f6f8; border-top: 2px solid #1560a8; font-size: 12px; color: #333; display: flex; gap: 15px; font-weight: 700; flex-wrap: wrap; box-shadow: 0 -2px 10px rgba(0,0,0,.15); }
+.wtb {padding:5px 13px;background:#f4f6f8;border-top:1px solid #ddd;font-size:13px;color:#333;display:flex;gap:18px; width: 100%; font-weight: 700; flex-wrap: wrap;}
+.ok {color:#2a8a2a;font-weight:700}
+.wn {color:#c00;font-weight:700}
 
 /* BILLING DASHBOARD */
-.bil-cont { padding: 20px; display: flex; flex-direction: column; gap: 15px; align-items: center; }
-.bil-date { width: 100%; max-width: 600px; text-align: right; font-size: 11px; color: #666; font-weight: 700; margin-bottom: -10px; }
+.bil-cont { padding: 20px; display: flex; flex-direction: column; gap: 20px; align-items: center; }
 .b-card { background: #fff; border: 1px solid #ddd; border-radius: 8px; width: 100%; max-width: 600px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden; }
-.b-head { background: #1560a8; color: #fff; padding: 10px 15px; font-weight: 700; font-size: 14px; display: flex; justify-content: space-between; }
+.b-head { background: #1560a8; color: #fff; padding: 12px 20px; font-weight: 700; font-size: 16px; display: flex; justify-content: space-between; }
 .b-head.inst { background: #d97706; }
-.b-body { padding: 15px; }
-.b-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee; font-size: 13px; }
+.b-body { padding: 20px; }
+.b-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; font-size: 14px; }
 .b-row:last-child { border-bottom: none; }
 .b-lbl { color: #555; }
-.b-val { font-weight: 700; color: #222; font-size: 14px;}
-.b-hl { background: #f0fdf4; padding: 12px; border-radius: 6px; border: 1px solid #bbf7d0; margin-top: 10px; }
-.b-hl .b-lbl { color: #166534; font-weight: 700; font-size: 14px; }
-.b-hl .b-val { color: #15803d; font-size: 16px; }
+.b-val { font-weight: 700; color: #222; font-size: 15px;}
+.b-hl { background: #f0fdf4; padding: 15px; border-radius: 6px; border: 1px solid #bbf7d0; margin-top: 15px; }
+.b-hl .b-lbl { color: #166534; font-weight: 700; font-size: 15px; }
+.b-hl .b-val { color: #15803d; font-size: 18px; }
+
+/* PRINT MODE FOR 100% WIDTH A4 CONTINUOUS PDF EXPORT */
+.print-mode {
+  width: 1000px !important;
+  max-width: 1000px !important;
+  min-width: 1000px !important;
+  margin: 0 !important;
+  padding: 20px !important; 
+  background: #fff !important;
+  height: auto !important;
+  overflow: visible !important;
+  position: absolute !important; 
+  top: 0 !important;
+  left: 0 !important;
+  z-index: 9999 !important;
+}
+.print-mode .scs { padding: 0 0 20px 0 !important; border-bottom: none !important; display: block; }
+.print-mode .scb { width: 100% !important; min-width: 100% !important; border: none !important; padding: 0 !important; box-shadow: none !important; }
+.print-mode .gs { overflow: visible !important; width: 100% !important; min-width: 100% !important; border-bottom: none !important; margin-bottom: 20px !important; }
+.print-mode .ts { overflow: visible !important; width: 100% !important; min-width: 100% !important; }
+.print-mode .tw { overflow: visible !important; width: 100% !important; min-width: 100% !important; }
+.print-mode table { width: 100% !important; min-width: 100% !important; table-layout: fixed !important; border-collapse: collapse !important; }
+.print-mode .col-no    { width: 4% !important; text-align: center; }
+.print-mode .col-item  { width: 8% !important; }
+.print-mode .col-desc  { width: auto !important; } 
+.print-mode .col-date  { width: 11% !important; text-align: center; }
+.print-mode .col-bg    { width: 8% !important; text-align: right; }
+.print-mode .col-pct   { width: 6% !important; text-align: center; }
+.print-mode .col-claim { width: 10% !important; text-align: right; }
+.print-mode th { font-size: 11px !important; padding: 6px 4px !important; white-space: normal; background: #e8edf2 !important; }
+.print-mode td { padding: 4px !important; border: 1px solid #ddd !important; }
+.print-mode .ci { font-size: 11px !important; padding: 0 !important; background: transparent !important; border: none !important; color: #000 !important; width: 100% !important; height: auto !important; min-width: 0 !important; }
+.print-mode .wtb { display: none !important; } 
 
 /* MODAL */
-.mo {display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:5000;align-items:center;justify-content:center}
+.mo {display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center}
 .mo.on {display:flex}
 .md {background:#fff;border-radius:8px;padding:22px 26px;min-width:320px;box-shadow:0 4px 20px rgba(0,0,0,.2)}
 .md h2 {font-size:14px;margin-bottom:7px}
@@ -167,10 +218,10 @@ body:not(.ed) .ci {pointer-events:none}
 .md input {width:100%;padding:6px 9px;border:1px solid #ccc;border-radius:4px;font-size:12px;margin-bottom:10px;font-family:Sarabun,sans-serif}
 .ma {display:flex;gap:7px;justify-content:flex-end;margin-top:7px}
 
-#toast {position:fixed;bottom:60px;right:18px;background:#fff;border:1px solid #ccc;border-radius:5px;padding:7px 14px;font-size:12px;color:#222;box-shadow:0 2px 10px rgba(0,0,0,.12);opacity:0;transition:opacity .3s;pointer-events:none;z-index:9999}
+#toast {position:fixed;bottom:18px;right:18px;background:#fff;border:1px solid #ccc;border-radius:5px;padding:7px 14px;font-size:12px;color:#222;box-shadow:0 2px 10px rgba(0,0,0,.12);opacity:0;transition:opacity .3s;pointer-events:none;z-index:999}
 #toast.on {opacity:1}
 
-/* MOBILE BROWSER OPTIMIZATIONS */
+/* MOBILE BROWSER OPTIMIZATIONS (Max Width 768px) */
 @media(max-width:768px){
   #hpg.on {flex-direction:column!important;height:auto!important;overflow-y:auto; width: 100%;}
   .hsb {width:100%!important;border-right:none;border-bottom:1px solid #ddd}
@@ -180,41 +231,44 @@ body:not(.ed) .ci {pointer-events:none}
   
   .scs {padding: 10px 5px; width: 100%; max-width: 100%;}
   .scb {width:100%; max-width: 100%; min-width:unset; padding: 5px;}
-  #bar h1 {display:none}
+  #bar h1 {font-size:10px}
   
-  .ptb { top: 40px; padding: 4px; }
-  thead th { top: 78px; }
+  .ts { width: 100%; max-width: 100%; overflow-x: hidden; }
+  .tw { width: 100%; max-width: 100%; overflow-x: hidden; }
+  table { min-width: 100% !important; width: 100% !important; max-width: 100% !important; table-layout: fixed; }
   
-  /* STRICT 96% WIDTH TABLE FOR MOBILE */
-  .ts { width: 96%; margin: 0 auto; overflow: hidden; }
-  .tw { width: 100%; overflow: hidden; }
-  table { width: 100% !important; min-width: 100% !important; table-layout: fixed; }
-  
-  /* 10 COLUMNS SUM TO EXACTLY 100% */
+  /* STRICT MOBILE PERCENTAGES (Sum = exactly 100%) */
   .col-no    { width: 4% !important; }
   .col-item  { width: 8% !important; }
-  .col-desc  { width: 17% !important; }
-  .col-date  { width: 10% !important; } /* x4 dates = 40% */
-  .col-bg    { width: 11% !important; text-align: right; }
-  .col-pct   { width: 8% !important; text-align: center; }
-  .col-claim { width: 12% !important; text-align: right; }
+  .col-desc  { width: 18% !important; }
+  .col-date  { width: 11% !important; }
+  .col-bg    { width: 9% !important; text-align: right; }
+  .col-pct   { width: 6% !important; text-align: center; }
+  .col-claim { width: 11% !important; text-align: right; }
   
-  th { font-size: 7px !important; padding: 2px 1px !important; word-wrap: break-word; letter-spacing: -0.2px; line-height: 1; text-align:center;}
-  td { padding: 1px !important; height: 24px !important; }
-  .ci { font-size: 8px !important; height: 20px !important; padding: 0 1px !important; letter-spacing: -0.3px;}
+  th { font-size: 8px !important; padding: 4px 1px !important; word-wrap: break-word; letter-spacing: -0.2px; }
+  td { padding: 1px !important; height: 26px !important; }
+  .ci { font-size: 9px !important; padding: 0 !important; height: 24px !important; letter-spacing: -0.2px;}
   
   input[type="date"]::-webkit-inner-spin-button,
   input[type="date"]::-webkit-calendar-picker-indicator { display: none; -webkit-appearance: none; margin: 0; }
   
-  .wtb { font-size: 10px; padding: 6px; gap: 8px; justify-content:center;}
-  .bil-cont { padding: 5px; }
+  .wtb { font-size: 10px; flex-wrap: wrap; }
+  .rwc input { width: 35px; font-size: 10px; padding: 2px; }
+  .btnsm { padding: 2px 5px; font-size: 10px; }
+  .bil-cont { padding: 10px; }
+}
+
+@media(max-width:480px){
+  #bar h1 {display:none}
+  #uinfo {display:none}
 }
 </style>
 </head>
 <body>
 
 <div id="bar">
-  <h1>TSG PLANNER</h1>
+  <h1>TSG PROJECT PLANNER</h1>
   <div class="tnav">
     <button class="tnb" id="nbM" onclick="goPlan('material')">📦 Material</button>
     <button class="tnb" id="nbI" onclick="goPlan('installation')">🔧 Installation</button>
@@ -254,7 +308,6 @@ body:not(.ed) .ci {pointer-events:none}
 
 <div class="pg" id="bpg">
   <div class="bil-cont">
-    <div class="bil-date" id="bil-date">Calculation Date: </div>
     
     <div class="b-card">
       <div class="b-head">
@@ -263,7 +316,7 @@ body:not(.ed) .ci {pointer-events:none}
       </div>
       <div class="b-body">
         <div class="b-row">
-          <span class="b-lbl">Total Contract Budget:</span>
+          <span class="b-lbl">Total Contract Budget (Auto Sum):</span>
           <span class="b-val" id="bil-m-tot" style="color:#1560a8;">0.00 THB</span>
         </div>
         <div class="b-row">
@@ -279,7 +332,7 @@ body:not(.ed) .ci {pointer-events:none}
           <span class="b-val" id="bil-m-ret">0.00</span>
         </div>
         <div class="b-row b-hl">
-          <span class="b-lbl" id="bil-m-claim-lbl">Current Claimable:</span>
+          <span class="b-lbl">Current Claimable (Progress × Pool):</span>
           <span class="b-val" id="bil-m-claim">0.00 THB</span>
         </div>
       </div>
@@ -292,7 +345,7 @@ body:not(.ed) .ci {pointer-events:none}
       </div>
       <div class="b-body">
         <div class="b-row">
-          <span class="b-lbl">Total Contract Budget:</span>
+          <span class="b-lbl">Total Contract Budget (Auto Sum):</span>
           <span class="b-val" id="bil-i-tot" style="color:#d97706;">0.00 THB</span>
         </div>
         <div class="b-row">
@@ -312,7 +365,7 @@ body:not(.ed) .ci {pointer-events:none}
           <span class="b-val" id="bil-i-ret2">0.00</span>
         </div>
         <div class="b-row b-hl">
-          <span class="b-lbl" id="bil-i-claim-lbl">Current Claimable:</span>
+          <span class="b-lbl">Current Claimable (Progress × Pool):</span>
           <span class="b-val" id="bil-i-claim">0.00 THB</span>
         </div>
       </div>
@@ -334,7 +387,7 @@ body:not(.ed) .ci {pointer-events:none}
       Rows:<input type="number" id="rwn" min="1" max="300" value="16">
       <button class="btn btnsm" onclick="applyRows()">Apply</button>
     </div>
-    <button class="btn btnsm btnd" id="rstBtn" style="display:none" onclick="resetRows()">✕ Reset Data</button>
+    <button class="btn btnsm btnd" id="rstBtn" style="display:none" onclick="resetRows()">✕ Reset Template</button>
     <button class="btn btnsm btnp" id="savBtn" style="display:none" onclick="saveData()">💾 Save</button>
   </div>
   
@@ -354,24 +407,23 @@ body:not(.ed) .ci {pointer-events:none}
           <th class="col-date">Act Start</th>
           <th class="col-date">Act Finish</th>
           <th class="col-pct">Act%</th>
-          <th class="col-claim" id="th-claim" style="display:none;">Claimable (THB)</th>
+          <th class="col-claim" id="th-claim" style="display:none;">Claimable</th>
         </tr></thead>
         <tbody id="tb"></tbody>
       </table>
     </div>
+    <div class="wtb">
+        <span id="foot-bg" style="display:none;">Total Plan Budget: <span id="wts" style="color:#1560a8;">0.00 THB</span> &nbsp;|&nbsp; </span>
+        <span id="foot-claim" style="display:none;">Total Claimable: <span id="tot-claim" style="color:#2a8a2a;">0.00 THB</span> &nbsp;|&nbsp; </span>
+        Tasks in Progress: <span id="acn">0</span>
+    </div>
   </div>
-</div>
-
-<div class="wtb" id="wFooter" style="display:none;">
-    <span id="foot-bg" style="display:none;">Total Budget: <span id="wts" style="color:#1560a8;">0.00 THB</span> &nbsp;|&nbsp; </span>
-    <span id="foot-claim" style="display:none;">Total Claimable: <span id="tot-claim" style="color:#2a8a2a;">0.00 THB</span> &nbsp;|&nbsp; </span>
-    Tasks in Progress: <span id="acn">0</span>
 </div>
 
 <div class="mo" id="patMo">
   <div class="md">
     <h2>GitHub Access Token</h2>
-    <p>Enter your PAT to load or save data.</p>
+    <p>Enter your PAT to load or save data. Stored in session.</p>
     <label>Token</label>
     <input type="password" id="patIn" placeholder="ghp_...">
     <div class="ma">
@@ -391,6 +443,7 @@ let D={material:{rows:[], snap:{}},installation:{rows:[], snap:{}}};
 const $=id=>document.getElementById(id);
 const FN='Sarabun,sans-serif';
 
+// ── HELPERS ──
 const pd=s=>{
   if(!s)return null;s=s.trim();
   const m=s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
@@ -411,15 +464,10 @@ const dd=(a,b)=>Math.round((b-a)/86400000);
 const fd=s=>{const d=pd(s);return d?`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`:'';}; 
 const toast=(msg,err=false)=>{const e=$('toast');e.textContent=msg;e.style.borderColor=err?'#c00':'#ccc';e.classList.add('on');setTimeout(()=>e.classList.remove('on'),2800);};
 
-function formatAmt(num) {
-  if (num === null || num === undefined || num === '') return "";
-  return Number(num).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-}
-
 function getRange(rows){
   let mn=null,mx=null;
   rows.forEach(r=>{
-      if(!r.ps && !r.pe && (!r.bg || r.bg == 0)) return; 
+      if(!r.ps && !r.pe && (!r.bg || r.bg == 0)) return; // Ignore headers
       const s=pd(r.ps),e=pd(r.pe);
       if(s&&(!mn||s<mn))mn=s;if(e&&(!mx||e>mx))mx=e;
   });
@@ -427,6 +475,7 @@ function getRange(rows){
   return{start:mn,end:mx,days:dd(mn,mx)+1};
 }
 
+// ── SNAPSHOT ENGINE ──
 function recordSnap() {
   if(!plan) return;
   if(!D[plan].snap) D[plan].snap = {};
@@ -435,11 +484,13 @@ function recordSnap() {
   D[plan].snap[tStr] = calcP(D[plan].rows);
 }
 
+// ── EXPORT FUNCTIONS (SECURED) ──
 function exportExcel() {
   if(!plan) return;
   const rows = D[plan].rows;
   const rate = plan === 'material' ? 0.60 : 0.65;
   
+  // SECURE EXPORT: Only Admins get the Budget & Claimable column
   let csv = isEd ? 
     "\ufeffNo.,Item No.,Description,Plan Start,Plan Finish,Budget (THB),Act Start,Act Finish,Act%,Claimable (THB)\n" : 
     "\ufeffNo.,Item No.,Description,Plan Start,Plan Finish,Act Start,Act Finish,Act%\n";
@@ -462,6 +513,50 @@ function exportExcel() {
   toast('✓ Excel (CSV) Exported');
 }
 
+function exportPDF() {
+  if(!plan) return;
+  toast('Generating continuous 100% A4-width PDF...');
+  
+  const element = document.getElementById('ppg');
+  const toolbar = document.getElementById('planToolbar');
+  
+  toolbar.style.display = 'none';
+  element.classList.add('print-mode');
+  
+  renderGantt();
+  renderSC();
+  
+  setTimeout(() => {
+    const w = element.offsetWidth; 
+    const h = element.offsetHeight;
+    const mmWidth = 210;
+    const mmHeight = (h / w) * mmWidth;
+    
+    const opt = {
+      margin:       0, 
+      filename:     `TSG_${plan}_plan.pdf`,
+      image:        { type: 'jpeg', quality: 1.0 },
+      html2canvas:  { scale: 2, useCORS: true, windowWidth: w, width: w, height: h, scrollY: 0 },
+      jsPDF:        { unit: 'mm', format: [mmWidth, mmHeight], orientation: 'portrait' } 
+    };
+    
+    html2pdf().set(opt).from(element).save().then(() => {
+      toolbar.style.display = 'flex'; 
+      element.classList.remove('print-mode');
+      renderGantt();
+      renderSC();
+      toast('✓ PDF Exported Successfully');
+    }).catch((err) => {
+      toolbar.style.display = 'flex'; 
+      element.classList.remove('print-mode');
+      renderGantt();
+      renderSC();
+      toast('✗ PDF generation failed', true);
+    });
+  }, 500);
+}
+
+// ── SESSION RESTORE ──
 function restoreSession() {
   const storedEd = sessionStorage.getItem('isEd');
   const storedEmail = sessionStorage.getItem('email');
@@ -476,6 +571,7 @@ function restoreSession() {
   }
 }
 
+// ── AUTH ──
 window.onload=()=>{
   restoreSession(); 
   
@@ -483,18 +579,13 @@ window.onload=()=>{
   if(lp) {
     plan = lp;
     showPg('ppg');
-    $('ptit').textContent=lp==='material'?'📦 Material':'🔧 Installation';
+    $('ptit').textContent=lp==='material'?'📦 Material Plan':'🔧 Installation Plan';
     $(lp==='material'?'nbM':'nbI').classList.add('on');
-    $('wFooter').style.display='flex';
   } else {
     showPg('hpg');
   }
 
-  google.accounts.id.initialize({
-      client_id:GCI,
-      callback:onLogin,
-      auto_select:true
-  });
+  google.accounts.id.initialize({client_id:GCI,callback:onLogin,auto_select:true});
   google.accounts.id.renderButton($('gBtn'),{theme:'filled_blue',size:'small',text:'signin_with',shape:'rectangular'});
   loadData();
 };
@@ -512,7 +603,8 @@ function onLogin(resp){
       showEdUI();
       setupPaste();
   } else {
-      signOut();
+      // Ensure sensitive data is hidden if another user logs in
+      signOut(); 
   }
   if(plan)renderTable();
   toast(isEd?'✓ Editor':'✓ View only');
@@ -523,6 +615,7 @@ function showEdUI(){
   $('rstBtn').style.display='inline-block';
   $('rwc').style.display='flex';
   
+  // UNHIDE CONFIDENTIAL ELEMENTS FOR ADMIN
   $('nbB').style.display='inline-block';
   $('th-bg').style.display='table-cell';
   $('th-claim').style.display='table-cell';
@@ -539,6 +632,7 @@ function signOut(){
   $('uinfo').textContent='';
   $('gBtn').style.display='block';
   
+  // HIDE CONFIDENTIAL ELEMENTS FOR PUBLIC
   ['soBtn','savBtn','rstBtn','nbB'].forEach(id=>$(id).style.display='none');
   $('rwc').style.display='none';
   $('th-bg').style.display='none';
@@ -549,6 +643,7 @@ function signOut(){
   if(plan)renderTable();
 }
 
+// ── DATA TEMPLATES (FULLY EXPANDED BOQ BUDGET BASED) ──
 function initD(){
   const matTmpl = [
       {no:'', itemNo:'', desc:'5. ตู้ไฟฟ้า+PLC', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
@@ -713,11 +808,12 @@ async function loadData() {
 
   try {
     const r = await fetch(API + '?t=' + Date.now(), { headers });
+    
     if (!r.ok) { 
         if ((r.status === 403 || r.status === 404) && !pat) {
             patAction = 'load';
             $('patMo').classList.add('on');
-            toast('GitHub Limit Reached. Enter PAT.', true);
+            toast('GitHub Limit Reached. Enter PAT to load data.', true);
         } else {
             initD(); 
         }
@@ -731,9 +827,26 @@ async function loadData() {
     const bytes = Uint8Array.from(raw, c => c.charCodeAt(0));
     const txt = new TextDecoder('utf-8').decode(bytes);
     const d = JSON.parse(txt);
+    
+    const migrate = (arr, totalBase) => {
+        arr.forEach(r => {
+            if (r.wt !== undefined && r.bg === undefined) {
+                r.bg = Math.round((r.wt / 100) * totalBase);
+                delete r.wt;
+            }
+        });
+    };
 
-    if (d.material) { D.material.rows = d.material.rows || []; D.material.snap = d.material.snap || {}; }
-    if (d.installation) { D.installation.rows = d.installation.rows || []; D.installation.snap = d.installation.snap || {}; }
+    if (d.material) { 
+        D.material.rows = d.material.rows || []; 
+        migrate(D.material.rows, 2150000);
+        D.material.snap = d.material.snap || {}; 
+    }
+    if (d.installation) { 
+        D.installation.rows = d.installation.rows || []; 
+        migrate(D.installation.rows, 3100000); 
+        D.installation.snap = d.installation.snap || {}; 
+    }
     toast('✓ Data loaded');
   } catch(e) { 
     initD(); 
@@ -748,16 +861,22 @@ async function saveData() {
       $('patMo').classList.add('on'); 
       return; 
   }
+
   if (!sha) {
     try {
       const check = await fetch(API, { headers: { Authorization: `token ${pat}` } });
-      if (check.ok) { const j = await check.json(); sha = j.sha; }
-    } catch(e) { }
+      if (check.ok) {
+        const j = await check.json();
+        sha = j.sha;
+      }
+    } catch(e) { console.warn("Could not pre-fetch SHA"); }
   }
+
   const json = JSON.stringify(D, null, 2);
   const bytes = new TextEncoder().encode(json);
   let bin = ''; bytes.forEach(b => bin += String.fromCharCode(b));
   const content = btoa(bin);
+  
   const body = { message: `Update TSG Plan data`, content };
   if (sha) body.sha = sha;
 
@@ -767,9 +886,19 @@ async function saveData() {
       headers: { Authorization: `token ${pat}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
-    if (!r.ok) { const e = await r.json(); toast('✗ ' + e.message, true); return; }
-    const j = await r.json(); sha = j.content.sha; toast('✓ Saved');
-  } catch(e) { toast('✗ Error', true); }
+    
+    if (!r.ok) { 
+      const e = await r.json(); 
+      toast('✗ ' + e.message, true); 
+      return; 
+    }
+    
+    const j = await r.json(); 
+    sha = j.content.sha; 
+    toast('✓ Saved');
+  } catch(e) { 
+    toast('✗ Error', true); 
+  }
 }
 
 function confirmPAT(){
@@ -777,11 +906,16 @@ function confirmPAT(){
     if(!v) return;
     sessionStorage.setItem('ghPAT',v);
     $('patMo').classList.remove('on');
-    if (patAction === 'save') saveData(); else loadData(); 
+    
+    if (patAction === 'save') {
+        saveData();
+    } else {
+        loadData(); 
+    }
 }
 
+// ── NAV ──
 function showPg(id){document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));$(id).classList.add('on');}
-
 function goPlan(p){
   plan=p;
   sessionStorage.setItem('lastPlan',p);
@@ -790,23 +924,17 @@ function goPlan(p){
   document.querySelectorAll('.tnb').forEach(b=>b.classList.remove('on'));
   $(p==='material'?'nbM':'nbI').classList.add('on');
   if(isEd)showEdUI();
-  
   showPg('ppg');
-  
-  // Force draw graphs to ensure 100% rendering
   renderTable();
-  renderGantt();
-  renderSC();
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{renderGantt();renderSC();}));
 }
-
 function goHome(){
   plan=null;
   sessionStorage.removeItem('lastPlan');
   document.querySelectorAll('.tnb').forEach(b=>b.classList.remove('on'));
   showPg('hpg');
-  renderHome();
+  requestAnimationFrame(()=>requestAnimationFrame(renderHome));
 }
-
 function goBilling(){
   plan=null;
   sessionStorage.removeItem('lastPlan');
@@ -816,37 +944,38 @@ function goBilling(){
   updateBilling();
 }
 
+// ── BILLING LOGIC (EXACT TABLE MATH MATCH) ──
+function formatTHB(num) { return num.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}); }
 function updateBilling() {
-  const d = new Date();
-  const bd = $('bil-date');
-  if (bd) bd.textContent = 'Calculation Date: ' + d.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
-
   const mTot = D.material.rows.reduce((s,r)=>s+(+r.bg||0),0);
   const iTot = D.installation.rows.reduce((s,r)=>s+(+r.bg||0),0);
+  
   const mPct = calcP(D.material.rows);
   const iPct = calcP(D.installation.rows);
   
-  const bmt = $('bil-m-pct'); if(bmt) bmt.textContent = mPct + '% Progress';
-  const bit = $('bil-i-pct'); if(bit) bit.textContent = iPct + '% Progress';
+  $('bil-m-pct').textContent = mPct + '% Progress';
+  $('bil-i-pct').textContent = iPct + '% Progress';
   
+  // Exact Math calculated row-by-row
   const mClaim = D.material.rows.reduce((a,r)=>a+((+r.bg||0) * (+r.pct||0)/100 * 0.60), 0);
   const iClaim = D.installation.rows.reduce((a,r)=>a+((+r.bg||0) * (+r.pct||0)/100 * 0.65), 0);
   
-  const bmtot = $('bil-m-tot'); if (bmtot) bmtot.textContent = formatAmt(mTot) + ' THB';
-  const bmd = $('bil-m-down'); if (bmd) bmd.textContent = formatAmt(mTot * 0.30);
-  const bmp = $('bil-m-pool'); if (bmp) bmp.textContent = formatAmt(mTot * 0.60);
-  const bmr = $('bil-m-ret'); if (bmr) bmr.textContent  = formatAmt(mTot * 0.10);
-  const bmcl = $('bil-m-claim-lbl'); if (bmcl) bmcl.textContent = `Current Claimable (${mPct}% × ${formatAmt(mTot * 0.60)}):`;
-  const bmc = $('bil-m-claim'); if (bmc) bmc.textContent = formatAmt(mClaim) + ' THB';
+  // Material 30/60/10
+  $('bil-m-tot').textContent = formatTHB(mTot) + ' THB';
+  $('bil-m-down').textContent = formatTHB(mTot * 0.30);
+  $('bil-m-pool').textContent = formatTHB(mTot * 0.60);
+  $('bil-m-ret').textContent  = formatTHB(mTot * 0.10);
+  $('bil-m-claim').textContent = formatTHB(mClaim) + ' THB';
   
-  const bitot = $('bil-i-tot'); if (bitot) bitot.textContent = formatAmt(iTot) + ' THB';
-  const bid = $('bil-i-down'); if (bid) bid.textContent = formatAmt(iTot * 0.20);
-  const bip = $('bil-i-pool'); if (bip) bip.textContent = formatAmt(iTot * 0.65);
-  const bir1 = $('bil-i-ret1'); if (bir1) bir1.textContent = formatAmt(iTot * 0.075);
-  const bir2 = $('bil-i-ret2'); if (bir2) bir2.textContent = formatAmt(iTot * 0.075);
-  const bicl = $('bil-i-claim-lbl'); if (bicl) bicl.textContent = `Current Claimable (${iPct}% × ${formatAmt(iTot * 0.65)}):`;
-  const bic = $('bil-i-claim'); if (bic) bic.textContent = formatAmt(iClaim) + ' THB';
+  // Installation 20/65/7.5/7.5
+  $('bil-i-tot').textContent = formatTHB(iTot) + ' THB';
+  $('bil-i-down').textContent = formatTHB(iTot * 0.20);
+  $('bil-i-pool').textContent = formatTHB(iTot * 0.65);
+  $('bil-i-ret1').textContent = formatTHB(iTot * 0.075);
+  $('bil-i-ret2').textContent = formatTHB(iTot * 0.075);
+  $('bil-i-claim').textContent = formatTHB(iClaim) + ' THB';
 }
+
 
 function applyRows(){
   if(!isEd)return;
@@ -856,7 +985,6 @@ function applyRows(){
   if(rows.length>n)rows.splice(n);
   renderTable(); recordSnap(); renderGantt(); renderSC();
 }
-
 function resetRows(){
   if(!isEd||!confirm('Reset to Default Template? ALL CURRENT DATA WILL BE LOST.'))return;
   D[plan].rows = [];
@@ -865,25 +993,32 @@ function resetRows(){
   renderTable(); recordSnap(); renderGantt(); renderSC(); toast('✓ Template Loaded');
 }
 
+// ── TABLE ──
+function formatInt(num) {
+  if (!num) return "";
+  return parseInt(num).toLocaleString('en-US');
+}
+
 function renderTable(){
   if(!plan)return;
   const rows=D[plan].rows,ro=!isEd;
   const tb=$('tb');tb.innerHTML='';
+  
+  // Progress Pool Multiplier
   const rate = plan === 'material' ? 0.60 : 0.65;
   
   rows.forEach((r,i)=>{
     const isHdr = (!r.bg || r.bg == 0) && !r.ps && !r.pe;
-    const dateType = isHdr ? 'text' : 'date'; 
+    const dateType = isHdr ? 'text' : 'date'; // Hides placeholder on headers
+    
     const tr=document.createElement('tr');
     if(isHdr) tr.className = 'hdr';
     
-    const bgStr = isHdr ? '' : (r.bg ? formatAmt(r.bg) : '0.00');
-    const bgTd = isEd ? `<td><input class="ci r" value="${bgStr}" ${ro||isHdr?'readonly':''} onfocus="if(this.value==='0.00'||this.value==='0'||this.value==='')this.value='';" onblur="if(this.value==='')this.value='0.00'; renderTable();" oninput="up(${i},'bg',this.value)"></td>` : '';
+    // STRICT SECURITY: Only inject Budget & Claimable <td> if logged in as Admin
+    const bgTd = isEd ? `<td><input class="ci r" value="${isHdr ? '' : formatInt(r.bg)}" ${ro||isHdr?'readonly':''} onchange="up(${i},'bg',nn(this.value))"></td>` : '';
     
-    const claimVal = isHdr ? '' : formatAmt((r.bg||0) * (r.pct||0)/100 * rate);
-    const claimTd = isEd ? `<td><input class="ci r" id="clm-${i}" value="${claimVal}" readonly style="color:#2a8a2a; font-weight:700;"></td>` : '';
-    
-    const pctStr = isHdr ? '' : (r.pct ? Number(r.pct).toFixed(2) : '0.00');
+    const claimVal = isHdr ? '' : formatInt((r.bg||0) * (r.pct||0)/100 * rate);
+    const claimTd = isEd ? `<td><input class="ci r" value="${claimVal}" readonly style="color:#2a8a2a; font-weight:700;"></td>` : '';
     
     tr.innerHTML=`
       <td><input class="ci r" value="${r.no}" ${ro?'readonly':''} onchange="up(${i},'no',this.value)"></td>
@@ -894,35 +1029,20 @@ function renderTable(){
       ${bgTd}
       <td><input class="ci" type="${dateType}" value="${toI(r.as||r.ps)}" ${ro||isHdr?'readonly':''} onchange="up(${i},'as',frI(this.value))"></td>
       <td><input class="ci" type="${dateType}" value="${toI(r.ae||r.pe)}" ${ro||isHdr?'readonly':''} onchange="up(${i},'ae',frI(this.value))"></td>
-      <td><input class="ci r" value="${pctStr}" ${ro||isHdr?'readonly':''} onfocus="if(this.value==='0.00'||this.value==='0'||this.value==='')this.value='';" onblur="if(this.value==='')this.value='0.00'; renderTable();" oninput="up(${i},'pct',this.value)"></td>
+      <td><input class="ci r" value="${isHdr ? '' : Number(r.pct||0).toFixed(2)}" ${ro||isHdr?'readonly':''} onchange="up(${i},'pct',nn(this.value))"></td>
       ${claimTd}`;
     tb.appendChild(tr);
   });
   updWt();
 }
-
 function up(i,k,v){
-  if(k==='bg' || k==='pct') D[plan].rows[i][k] = nn(v);
-  else D[plan].rows[i][k] = v;
-  
-  if(isEd && (k==='bg' || k==='pct')) {
-      const rate = plan === 'material' ? 0.60 : 0.65;
-      const r = D[plan].rows[i];
-      const el = $('clm-'+i);
-      if(el) el.value = formatAmt((r.bg||0) * (r.pct||0)/100 * rate);
-  }
-  updWt(); 
-  
-  clearTimeout(window._renderTmr);
-  window._renderTmr = setTimeout(() => {
-      recordSnap(); 
-      renderGantt();
-      renderSC();
-  }, 400);
-
-  if(k !== 'bg' && k !== 'pct') renderTable(); 
+  D[plan].rows[i][k]=v;
+  updWt();
+  recordSnap(); 
+  renderGantt();
+  renderSC();
+  if(k==='bg' || k==='ps' || k==='pe' || k==='pct') renderTable(); // Redraw if these change
 }
-
 function upd(i,k,v){
   D[plan].rows[i][k]=v;
   const r=D[plan].rows[i];
@@ -933,7 +1053,6 @@ function upd(i,k,v){
   renderSC();
   renderTable();
 }
-
 function updWt(){
   if(!plan)return;
   const rows=D[plan].rows;
@@ -942,11 +1061,12 @@ function updWt(){
   const totBg = rows.reduce((a,r)=>a+(+r.bg||0),0);
   const totClaim = rows.reduce((a,r)=>a+((+r.bg||0) * (+r.pct||0)/100 * rate),0);
   
-  const wts = $('wts'); if (wts) wts.textContent = formatAmt(totBg) + ' THB';
-  const tc = $('tot-claim'); if (tc) tc.textContent = formatAmt(totClaim) + ' THB';
-  const acn = $('acn'); if (acn) acn.textContent = rows.filter(r=>r.pct>0 && r.bg>0).length;
+  $('wts').textContent = formatTHB(totBg) + ' THB';
+  $('tot-claim').textContent = formatTHB(totClaim) + ' THB';
+  $('acn').textContent = rows.filter(r=>r.pct>0 && r.bg>0).length;
 }
 
+// ── PASTE ──
 function setupPaste(){
   if(window._pf)document.removeEventListener('paste',window._pf);
   window._pf=e=>{
@@ -980,19 +1100,18 @@ function setupPaste(){
   document.addEventListener('paste',window._pf);
 }
 
-// ── PURE CANVAS DRAWING ENGINE (NEVER DISAPPEARS) ──
+// ── GANTT (DYNAMIC MULTI-LINE TEXT WRAPPING + MOBILE RESPONSIVE) ──
 function renderGantt(){
-  const cv=$('cGantt');
+  const cv=$('cGantt'),sec=$('gsec');
   if(!cv||!plan)return;
-  
   const rows=D[plan].rows;
   const{start:ps,end:pe,days:td}=getRange(rows);
   const today=new Date();
   
-  // PURE MATH SIZING
   const isMob = window.innerWidth <= 768;
-  const W = Math.max(1000, 300 + (td * 4)); // Force minimum width to prevent crushing
-  const LW = 300; 
+  // STRICT MOBILE WIDTH FIX
+  const W = isMob ? window.innerWidth : Math.max(sec.getBoundingClientRect().width || sec.offsetWidth, 600);
+  const LW = Math.floor(W * (isMob ? 0.30 : 0.35)); 
   
   const HH = isMob ? 28 : 34;
   const LH = isMob ? 20 : 26;
@@ -1027,8 +1146,10 @@ function renderGantt(){
       const lbl = (r.itemNo ? r.itemNo + ' ' : '') + (r.desc || '');
       const isDesc = !!r.desc;
       const isHdr = (!r.bg || r.bg == 0) && !r.ps && !r.pe;
+      
       tmpCtx.font = (isDesc ? (isMob?'10px ':'13px ') : (isMob?'italic 9px ':'italic 12px ')) + FN;
       if (isHdr) tmpCtx.font = 'bold ' + tmpCtx.font; 
+      
       const lines = getLines(tmpCtx, lbl || ('row '+r.no), maxW);
       const rh = Math.max(baseRH, lines.length * (isMob?14:18) + 12);
       return { r, lines, rh, isDesc, isHdr };
@@ -1037,17 +1158,14 @@ function renderGantt(){
   const totalRH = rowData.reduce((sum, rd) => sum + rd.rh, 0);
   const H = HH + totalRH + LH;
   
-  cv.width = W; 
-  cv.height = H;
-  cv.style.width = W + 'px'; 
-  cv.style.height = H + 'px';
-  
+  cv.width=W;cv.height=H;cv.style.width=W+'px';cv.style.height=H+'px';
   const ctx=cv.getContext('2d');
   const BW=W-LW;
   const gx=d=>LW+(d/td)*BW;
   const dx=d=>gx(dd(ps,d));
   ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
 
+  // Month headers
   const ms=[];let mc=new Date(ps.getFullYear(),ps.getMonth(),1);
   while(mc<=pe){ms.push(new Date(mc));mc=new Date(mc.getFullYear(),mc.getMonth()+1,1);}
   ms.forEach((m,i)=>{
@@ -1061,11 +1179,18 @@ function renderGantt(){
   ctx.fillStyle='#fff';ctx.font='bold '+(isMob?'10px ':'13px ')+FN;ctx.textAlign='center';ctx.fillText('Item / Description',LW/2,HH - (isMob?8:10));
   ctx.strokeStyle='#999';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(LW,0);ctx.lineTo(LW,H);ctx.stroke();
 
+  // Draw dynamically wrapped rows
   let y = HH;
   rowData.forEach((rd, i) => {
     const r = rd.r;
     const RH = rd.rh;
-    ctx.fillStyle=rd.isHdr ? '#e8f0fb' : (i%2?'#fff':'#f7f9fb');
+    
+    if (rd.isHdr) {
+        ctx.fillStyle = '#e8f0fb';
+    } else {
+        ctx.fillStyle=i%2?'#fff':'#f7f9fb';
+    }
+    
     ctx.fillRect(0,y,W,RH);
     ctx.strokeStyle=rd.isHdr ? '#1560a8' : '#e5e5e5';
     ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(0,y+RH);ctx.lineTo(W,y+RH);ctx.stroke();
@@ -1132,6 +1257,7 @@ function renderGantt(){
   ctx.lineWidth=1;ctx.fillStyle='#333';ctx.fillText('(black=Act%)',LW+(isMob?124:148),ly+(isMob?3:2));
 }
 
+// ── S-CURVE (POWERED BY SNAPSHOT ENGINE) ──
 function buildC(rows, snapData){
   const {start:ps, days:td} = getRange(rows);
   const tw = rows.reduce((s,r)=>s+(+r.bg||0),0);
@@ -1168,11 +1294,13 @@ function buildC(rows, snapData){
         let ptIdx = 0;
         for(let d=0; d<=todD; d++){
             if (d < 0) continue; 
+            
             if (d <= snapPts[0].day) {
                 if (snapPts[0].day <= 0) ac[d] = snapPts[0].val;
                 else ac[d] = (d / snapPts[0].day) * snapPts[0].val;
             } else if (ptIdx < snapPts.length - 1 && d > snapPts[ptIdx+1].day) {
-                ptIdx++; d--; 
+                ptIdx++;
+                d--; 
             } else if (ptIdx < snapPts.length - 1) {
                 const p1 = snapPts[ptIdx], p2 = snapPts[ptIdx+1];
                 const ratio = (d - p1.day) / (p2.day - p1.day);
@@ -1189,18 +1317,15 @@ function buildC(rows, snapData){
 function drawSC(cvId,rows,snapData,pc,ac_color){
   const cv=$(cvId);if(!cv)return;
   
-  // PURE MATH SIZING: Never relies on DOM which breaks during tab switch
-  const W = 1000;
-  const H = 350;
-  cv.width = W;
-  cv.height = H;
-  cv.style.width = '100%';
-  cv.style.height = 'auto';
-  
+  const isMob = window.innerWidth <= 768;
+  const W = isMob ? window.innerWidth - 10 : (cv.parentElement.getBoundingClientRect().width||cv.parentElement.offsetWidth||400);
+  const H=parseInt(cv.getAttribute('height'))||200;
+  if(W<10)return;
+  cv.width=Math.round(W);cv.height=H;
   const ctx=cv.getContext('2d');
   ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
   
-  const PL=60,PR=40,PT=30,PB=30; // Scaled up margins for HD canvas
+  const PL=40,PR=30,PT=26,PB=28;
   const pw=W-PL-PR,ph=H-PT-PB;
   const px1=PL,py1=PT,px2=PL+pw,py2=PT+ph;
   const{pl,ac:act,td,ps}=buildC(rows, snapData); 
@@ -1214,24 +1339,24 @@ function drawSC(cvId,rows,snapData,pc,ac_color){
   const baseTitle = cvId==='cSC'?(plan==='material'?'Material S-Curve':'Installation S-Curve'):cvId==='cMat'?'Material S-Curve':'Installation S-Curve';
   const fullTitle = `${baseTitle} (Progress = ${overallAct}%)`;
   
-  ctx.fillStyle='#333';ctx.font='bold 18px '+FN;ctx.textAlign='left';ctx.fillText(fullTitle,px1,py1-10);
+  ctx.fillStyle='#333';ctx.font='bold 12px '+FN;ctx.textAlign='left';ctx.fillText(fullTitle,px1,py1-8);
   
-  ctx.fillStyle='#666';ctx.font='14px '+FN;ctx.textAlign='right';
-  ctx.fillText('As of: '+today.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}),W-10,20);
+  ctx.fillStyle='#666';ctx.font='10px '+FN;ctx.textAlign='right';
+  ctx.fillText('As of: '+today.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}),W-6,16);
 
-  const legY = py1 + 25; 
-  ctx.fillStyle=pc;ctx.fillRect(px1+5,legY-6,20,6);
-  ctx.fillStyle='#555';ctx.font='14px '+FN;ctx.textAlign='left';ctx.fillText('Plan',px1+30,legY);
-  ctx.strokeStyle=ac_color;ctx.lineWidth=3;ctx.setLineDash([6,4]);
-  ctx.beginPath();ctx.moveTo(px1+80,legY-3);ctx.lineTo(px1+100,legY-3);ctx.stroke();ctx.setLineDash([]);
-  ctx.fillStyle='#555';ctx.fillText('Actual',px1+105,legY);
+  const legY = py1 + 18; 
+  ctx.fillStyle=pc;ctx.fillRect(px1+3,legY-4,14,4);
+  ctx.fillStyle='#555';ctx.font='10px '+FN;ctx.textAlign='left';ctx.fillText('Plan',px1+20,legY);
+  ctx.strokeStyle=ac_color;ctx.lineWidth=2;ctx.setLineDash([5,3]);
+  ctx.beginPath();ctx.moveTo(px1+52,legY-2);ctx.lineTo(px1+66,legY-2);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#555';ctx.fillText('Actual',px1+69,legY);
 
   [0,20,40,60,80,100].forEach(p=>{
     const gy=py2-(p/100)*ph;
-    ctx.strokeStyle=p%100===0?'#bbb':'#eee';ctx.lineWidth=p%100===0?2:1;
-    ctx.setLineDash(p%100===0?[]:[4,4]);
+    ctx.strokeStyle=p%100===0?'#bbb':'#eee';ctx.lineWidth=p%100===0?1:.5;
+    ctx.setLineDash(p%100===0?[]:[3,3]);
     ctx.beginPath();ctx.moveTo(px1,gy);ctx.lineTo(px2,gy);ctx.stroke();
-    ctx.fillStyle='#888';ctx.font='14px '+FN;ctx.textAlign='right';ctx.fillText(p+'%',px1-5,gy+5);
+    ctx.fillStyle='#888';ctx.font='10px '+FN;ctx.textAlign='right';ctx.fillText(p+'%',px1-3,gy+3.5);
   });
   ctx.setLineDash([]);
 
@@ -1239,20 +1364,20 @@ function drawSC(cvId,rows,snapData,pc,ac_color){
   while(mc<=pen){mths.push(new Date(mc));mc=new Date(mc.getFullYear(),mc.getMonth()+1,1);}
   mths.forEach(m=>{
     const gx=px1+(dd(pst,m)/td)*pw;
-    ctx.strokeStyle='#eee';ctx.lineWidth=1;ctx.setLineDash([3,4]);
+    ctx.strokeStyle='#eee';ctx.lineWidth=.5;ctx.setLineDash([2,3]);
     ctx.beginPath();ctx.moveTo(gx,py1);ctx.lineTo(gx,py2);ctx.stroke();ctx.setLineDash([]);
-    ctx.fillStyle='#888';ctx.font='14px '+FN;ctx.textAlign='center';
-    ctx.fillText(m.toLocaleString('default',{month:'short'}),gx,py2+20);
+    ctx.fillStyle='#888';ctx.font='10px '+FN;ctx.textAlign='center';
+    ctx.fillText(m.toLocaleString('default',{month:'short'}),gx,py2+14);
   });
 
-  ctx.strokeStyle='#888';ctx.lineWidth=2;
+  ctx.strokeStyle='#888';ctx.lineWidth=1;
   ctx.beginPath();ctx.moveTo(px1,py1);ctx.lineTo(px1,py2);ctx.lineTo(px2,py2);ctx.stroke();
 
   const step=Math.max(1,Math.floor(td/300));
   const pp=[],ap=[];
   for(let d=0;d<td;d+=step){
-    pp.push([px1+(d/td)*pw, py2 - (pl[d]||0)*ph]);
-    if(d<=todD)ap.push([px1+(d/td)*pw, py2 - (act[d]||0)*ph]);
+    pp.push([px1+(d/td)*pw,py2-pl[d]*ph]);
+    if(d<=todD)ap.push([px1+(d/td)*pw,py2-act[d]*ph]);
   }
 
   if(pp.length){
@@ -1261,19 +1386,20 @@ function drawSC(cvId,rows,snapData,pc,ac_color){
     ctx.fillStyle=pc+'22';ctx.fill();
   }
 
-  const dl=(pts,col,dash)=>{if(!pts.length)return;ctx.strokeStyle=col;ctx.lineWidth=3;ctx.setLineDash(dash||[]);ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);pts.forEach(([x,y])=>ctx.lineTo(x,y));ctx.stroke();ctx.setLineDash([]);};
-  dl(pp,pc);dl(ap,ac_color,[8,4]);
+  const dl=(pts,col,dash)=>{if(!pts.length)return;ctx.strokeStyle=col;ctx.lineWidth=2;ctx.setLineDash(dash||[]);ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);pts.forEach(([x,y])=>ctx.lineTo(x,y));ctx.stroke();ctx.setLineDash([]);};
+  dl(pp,pc);dl(ap,ac_color,[6,3]);
 
-  if(pp.length){const[x,y]=pp[pp.length-1];const pct=Number(pl[Math.min(td-1,(pp.length-1)*step)]*100).toFixed(2);ctx.fillStyle=pc;ctx.font='bold 14px '+FN;ctx.textAlign='left';ctx.fillText(pct+'%',x+6,y+6);}
-  if(ap.length){const[x,y]=ap[ap.length-1];const pct=Number(act[todD]*100).toFixed(2);ctx.fillStyle=ac_color;ctx.font='bold 14px '+FN;ctx.textAlign='left';ctx.fillText(pct+'%',x+6,y+6);}
+  if(pp.length){const[x,y]=pp[pp.length-1];const pct=Number(pl[Math.min(td-1,(pp.length-1)*step)]*100).toFixed(2);ctx.fillStyle=pc;ctx.font='bold 10px '+FN;ctx.textAlign='left';ctx.fillText(pct+'%',x+4,y+4);}
+  if(ap.length){const[x,y]=ap[ap.length-1];const pct=Number(act[todD]*100).toFixed(2);ctx.fillStyle=ac_color;ctx.font='bold 10px '+FN;ctx.textAlign='left';ctx.fillText(pct+'%',x+4,y+4);}
 
   if(today>=pst&&today<=pen){
     const tx=px1+(dd(pst,today)/td)*pw;
-    ctx.strokeStyle='#c00';ctx.lineWidth=2;ctx.setLineDash([6,4]);
+    ctx.strokeStyle='#c00';ctx.lineWidth=1;ctx.setLineDash([3,3]);
     ctx.beginPath();ctx.moveTo(tx,py1);ctx.lineTo(tx,py2);ctx.stroke();ctx.setLineDash([]);
   }
 }
 
+function renderSC(){if(!plan)return;drawSC('cSC',D[plan].rows,D[plan].snap,plan==='material'?'#1560a8':'#d97706','#2a8a2a');}
 function calcP(rows){
     const tw=rows.reduce((s,r)=>s+(+r.bg||0),0);
     if(!tw)return "0.00";
