@@ -86,13 +86,13 @@ html, body {
 
 /* TABLE */
 .ts {background:#fff; width: 100%; max-width: 100%;}
-.tw {overflow-x:auto; width: 100%; max-width: 100%;}
+.tw {overflow-x:auto; width: 100%; max-width: 100%; -webkit-overflow-scrolling: touch;}
 
 table {
   border-collapse: collapse;
   font-size: 13px;
   width: 100%;
-  min-width: 1000px;
+  min-width: 1100px;
   table-layout: fixed;
 }
 
@@ -113,9 +113,9 @@ thead th {
 .col-item  { width: 100px; }
 .col-desc  { width: auto;  } 
 .col-date  { width: 135px; } 
-.col-bg    { width: 85px;  text-align: right; }
-.col-pct   { width: 65px;  text-align: center; }
-.col-claim { width: 105px; text-align: right; }
+.col-bg    { width: 105px; text-align: right; }
+.col-pct   { width: 75px;  text-align: center; }
+.col-claim { width: 120px; text-align: right; }
 
 tbody tr:nth-child(even) {background:#f7f9fb}
 tbody tr:hover {background:#eef4ff}
@@ -203,7 +203,7 @@ body:not(.ed) .ci {pointer-events:none}
 .print-mode .col-date  { width: 11% !important; text-align: center; }
 .print-mode .col-bg    { width: 8% !important; text-align: right; }
 .print-mode .col-pct   { width: 5% !important; text-align: center; }
-.print-mode .col-claim { width: 9% !important; text-align: right; }
+.print-mode .col-claim { width: 11% !important; text-align: right; }
 .print-mode th { font-size: 11px !important; padding: 6px 4px !important; white-space: normal; background: #e8edf2 !important; }
 .print-mode td { padding: 4px !important; border: 1px solid #ddd !important; }
 .print-mode .ci { font-size: 11px !important; padding: 0 !important; background: transparent !important; border: none !important; color: #000 !important; width: 100% !important; height: auto !important; min-width: 0 !important; }
@@ -229,41 +229,29 @@ body:not(.ed) .ci {pointer-events:none}
   .pb {width:100%!important}
   .hpg-r {padding:10px; width: 100%; max-width: 100%; overflow-x: hidden;}
   .hcb {width:100%; max-width: 100%; min-width:unset; padding: 5px;}
-  
   .scs {padding: 10px 5px; width: 100%; max-width: 100%;}
   .scb {width:100%; max-width: 100%; min-width:unset; padding: 5px;}
   #bar h1 {font-size:10px}
   
+  /* The table will retain normal dimensions and be fully swipeable horizontally */
   .ts { width: 100%; max-width: 100%; overflow-x: hidden; }
-  .tw { width: 100%; max-width: 100%; overflow-x: hidden; }
-  table { min-width: 100% !important; width: 100% !important; max-width: 100% !important; table-layout: fixed; }
   
-  /* STRICT MOBILE PERCENTAGES (Sum = exactly 100%) */
-  .col-no    { width: 4% !important; }
-  .col-item  { width: 8% !important; }
-  .col-desc  { width: 18% !important; }
-  .col-date  { width: 10% !important; } /* 4 columns * 10 = 40% */
-  .col-bg    { width: 9% !important; text-align: right; }
-  .col-pct   { width: 9% !important; text-align: center; }
-  .col-claim { width: 12% !important; text-align: right; }
-  
-  th { font-size: 8px !important; padding: 4px 1px !important; word-wrap: break-word; letter-spacing: -0.2px; }
-  td { padding: 1px !important; height: 26px !important; }
-  .ci { font-size: 9px !important; padding: 0 !important; height: 24px !important; letter-spacing: -0.2px;}
+  th { font-size: 11px !important; padding: 6px 4px !important; }
+  td { padding: 2px !important; height: 32px !important; }
+  .ci { font-size: 12px !important; height: 28px !important; }
   
   input[type="date"]::-webkit-inner-spin-button,
   input[type="date"]::-webkit-calendar-picker-indicator { display: none; -webkit-appearance: none; margin: 0; }
   
-  .wtb { font-size: 10px; flex-wrap: wrap; }
+  .wtb { font-size: 11px; flex-wrap: wrap; line-height:1.6; }
   .rwc input { width: 35px; font-size: 10px; padding: 2px; }
-  .btnsm { padding: 2px 5px; font-size: 10px; }
+  .btnsm { padding: 4px 7px; font-size: 11px; }
   .bil-cont { padding: 10px; }
 }
 
 @media(max-width:480px){
   #bar h1 {display:none}
   #uinfo {display:none}
-  /* Give login button space on small screens */
   #bar .tnav {flex: 1;}
 }
 </style>
@@ -468,6 +456,11 @@ const dd=(a,b)=>Math.round((b-a)/86400000);
 const fd=s=>{const d=pd(s);return d?`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`:'';}; 
 const toast=(msg,err=false)=>{const e=$('toast');e.textContent=msg;e.style.borderColor=err?'#c00':'#ccc';e.classList.add('on');setTimeout(()=>e.classList.remove('on'),2800);};
 
+function formatAmt(num) {
+  if (num === null || num === undefined || num === '') return "";
+  return Number(num).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+}
+
 function getRange(rows){
   let mn=null,mx=null;
   rows.forEach(r=>{
@@ -488,13 +481,12 @@ function recordSnap() {
   D[plan].snap[tStr] = calcP(D[plan].rows);
 }
 
-// ── EXPORT FUNCTIONS (SECURED) ──
+// ── EXPORT FUNCTIONS ──
 function exportExcel() {
   if(!plan) return;
   const rows = D[plan].rows;
   const rate = plan === 'material' ? 0.60 : 0.65;
   
-  // SECURE EXPORT: Only Admins get the Budget & Claimable column
   let csv = isEd ? 
     "\ufeffNo.,Item No.,Description,Plan Start,Plan Finish,Budget (THB),Act Start,Act Finish,Act%,Claimable (THB)\n" : 
     "\ufeffNo.,Item No.,Description,Plan Start,Plan Finish,Act Start,Act Finish,Act%\n";
@@ -589,7 +581,7 @@ window.onload=()=>{
     showPg('hpg');
   }
 
-  // FORCE MOBILE LOGIN FIX (Disabled auto_select, added itp_support)
+  // FORCE MOBILE LOGIN FIX
   google.accounts.id.initialize({
       client_id:GCI,
       callback:onLogin,
@@ -613,7 +605,7 @@ function onLogin(resp){
       showEdUI();
       setupPaste();
   } else {
-      signOut(); // Force public security protocol
+      signOut();
   }
   if(plan)renderTable();
   toast(isEd?'✓ Editor':'✓ View only');
@@ -624,7 +616,6 @@ function showEdUI(){
   $('rstBtn').style.display='inline-block';
   $('rwc').style.display='flex';
   
-  // UNHIDE CONFIDENTIAL ELEMENTS FOR ADMIN
   $('nbB').style.display='inline-block';
   $('th-bg').style.display='table-cell';
   $('th-claim').style.display='table-cell';
@@ -641,7 +632,6 @@ function signOut(){
   $('uinfo').textContent='';
   $('gBtn').style.display='block';
   
-  // HIDE CONFIDENTIAL ELEMENTS FOR PUBLIC
   ['soBtn','savBtn','rstBtn','nbB'].forEach(id=>$(id).style.display='none');
   $('rwc').style.display='none';
   $('th-bg').style.display='none';
@@ -652,7 +642,7 @@ function signOut(){
   if(plan)renderTable();
 }
 
-// ── DATA TEMPLATES (FULLY EXPANDED BOQ BUDGET BASED) ──
+// ── DATA TEMPLATES ──
 function initD(){
   const matTmpl = [
       {no:'', itemNo:'', desc:'5. ตู้ไฟฟ้า+PLC', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
@@ -935,14 +925,16 @@ function goPlan(p){
   if(isEd)showEdUI();
   showPg('ppg');
   renderTable();
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{renderGantt();renderSC();}));
+  
+  // Start polling to render charts as soon as the DOM settles
+  requestAnimationFrame(() => setTimeout(() => { renderGantt(); renderSC(); }, 100));
 }
 function goHome(){
   plan=null;
   sessionStorage.removeItem('lastPlan');
   document.querySelectorAll('.tnb').forEach(b=>b.classList.remove('on'));
   showPg('hpg');
-  requestAnimationFrame(()=>requestAnimationFrame(renderHome));
+  requestAnimationFrame(() => setTimeout(renderHome, 100));
 }
 function goBilling(){
   plan=null;
@@ -954,10 +946,10 @@ function goBilling(){
 }
 
 // ── BILLING LOGIC (EXACT TABLE MATH MATCH) ──
-function formatTHB(num) { return num.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}); }
 function updateBilling() {
   const d = new Date();
-  $('bil-date').textContent = 'Calculation Date: ' + d.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
+  const bd = $('bil-date');
+  if (bd) bd.textContent = 'Calculation Date: ' + d.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
 
   const mTot = D.material.rows.reduce((s,r)=>s+(+r.bg||0),0);
   const iTot = D.installation.rows.reduce((s,r)=>s+(+r.bg||0),0);
@@ -965,26 +957,26 @@ function updateBilling() {
   const mPct = calcP(D.material.rows);
   const iPct = calcP(D.installation.rows);
   
-  $('bil-m-pct').textContent = mPct + '% Progress';
-  $('bil-i-pct').textContent = iPct + '% Progress';
+  const bmt = $('bil-m-pct'); if(bmt) bmt.textContent = mPct + '% Progress';
+  const bit = $('bil-i-pct'); if(bit) bit.textContent = iPct + '% Progress';
   
   const mClaim = D.material.rows.reduce((a,r)=>a+((+r.bg||0) * (+r.pct||0)/100 * 0.60), 0);
   const iClaim = D.installation.rows.reduce((a,r)=>a+((+r.bg||0) * (+r.pct||0)/100 * 0.65), 0);
   
-  $('bil-m-tot').textContent = formatTHB(mTot) + ' THB';
-  $('bil-m-down').textContent = formatTHB(mTot * 0.30);
-  $('bil-m-pool').textContent = formatTHB(mTot * 0.60);
-  $('bil-m-ret').textContent  = formatTHB(mTot * 0.10);
-  $('bil-m-claim-lbl').textContent = `Current Claimable (${mPct}% × ${formatTHB(mTot * 0.60)}):`;
-  $('bil-m-claim').textContent = formatTHB(mClaim) + ' THB';
+  const bmtot = $('bil-m-tot'); if (bmtot) bmtot.textContent = formatAmt(mTot) + ' THB';
+  const bmd = $('bil-m-down'); if (bmd) bmd.textContent = formatAmt(mTot * 0.30);
+  const bmp = $('bil-m-pool'); if (bmp) bmp.textContent = formatAmt(mTot * 0.60);
+  const bmr = $('bil-m-ret'); if (bmr) bmr.textContent  = formatAmt(mTot * 0.10);
+  const bmcl = $('bil-m-claim-lbl'); if (bmcl) bmcl.textContent = `Current Claimable (${mPct}% × ${formatAmt(mTot * 0.60)}):`;
+  const bmc = $('bil-m-claim'); if (bmc) bmc.textContent = formatAmt(mClaim) + ' THB';
   
-  $('bil-i-tot').textContent = formatTHB(iTot) + ' THB';
-  $('bil-i-down').textContent = formatTHB(iTot * 0.20);
-  $('bil-i-pool').textContent = formatTHB(iTot * 0.65);
-  $('bil-i-ret1').textContent = formatTHB(iTot * 0.075);
-  $('bil-i-ret2').textContent = formatTHB(iTot * 0.075);
-  $('bil-i-claim-lbl').textContent = `Current Claimable (${iPct}% × ${formatTHB(iTot * 0.65)}):`;
-  $('bil-i-claim').textContent = formatTHB(iClaim) + ' THB';
+  const bitot = $('bil-i-tot'); if (bitot) bitot.textContent = formatAmt(iTot) + ' THB';
+  const bid = $('bil-i-down'); if (bid) bid.textContent = formatAmt(iTot * 0.20);
+  const bip = $('bil-i-pool'); if (bip) bip.textContent = formatAmt(iTot * 0.65);
+  const bir1 = $('bil-i-ret1'); if (bir1) bir1.textContent = formatAmt(iTot * 0.075);
+  const bir2 = $('bil-i-ret2'); if (bir2) bir2.textContent = formatAmt(iTot * 0.075);
+  const bicl = $('bil-i-claim-lbl'); if (bicl) bicl.textContent = `Current Claimable (${iPct}% × ${formatAmt(iTot * 0.65)}):`;
+  const bic = $('bil-i-claim'); if (bic) bic.textContent = formatAmt(iClaim) + ' THB';
 }
 
 function applyRows(){
@@ -1004,11 +996,6 @@ function resetRows(){
 }
 
 // ── TABLE ──
-function formatInt(num) {
-  if (!num) return "";
-  return parseInt(num).toLocaleString('en-US');
-}
-
 function renderTable(){
   if(!plan)return;
   const rows=D[plan].rows,ro=!isEd;
@@ -1023,11 +1010,10 @@ function renderTable(){
     const tr=document.createElement('tr');
     if(isHdr) tr.className = 'hdr';
     
-    // STRICT SECURITY: Only inject Budget & Claimable <td> if logged in as Admin
-    // Using oninput for seamless typing calculation and onblur to format nicely
-    const bgTd = isEd ? `<td><input class="ci r" value="${isHdr ? '' : formatInt(r.bg)}" ${ro||isHdr?'readonly':''} oninput="up(${i},'bg',this.value)" onblur="renderTable()"></td>` : '';
+    // REALTIME LIVE TYPING: oninput handles math, onblur formats nicely
+    const bgTd = isEd ? `<td><input class="ci r" value="${isHdr ? '' : formatAmt(r.bg)}" ${ro||isHdr?'readonly':''} oninput="up(${i},'bg',this.value)" onblur="renderTable()"></td>` : '';
     
-    const claimVal = isHdr ? '' : formatInt((r.bg||0) * (r.pct||0)/100 * rate);
+    const claimVal = isHdr ? '' : formatAmt((r.bg||0) * (r.pct||0)/100 * rate);
     const claimTd = isEd ? `<td><input class="ci r" id="clm-${i}" value="${claimVal}" readonly style="color:#2a8a2a; font-weight:700;"></td>` : '';
     
     tr.innerHTML=`
@@ -1047,32 +1033,32 @@ function renderTable(){
 }
 
 function up(i,k,v){
-  // Handle text typing securely without dropping focus
+  // LIVE UPDATE: Update data model natively without dropping cursor focus
   if(k==='bg' || k==='pct') {
       D[plan].rows[i][k] = nn(v);
   } else {
       D[plan].rows[i][k] = v;
   }
   
-  // Real-time calculation update for the specific claimable cell
+  // LIVE UPDATE: Mutate only the specific Claimable text box for instant gratification
   if(isEd && (k==='bg' || k==='pct')) {
       const rate = plan === 'material' ? 0.60 : 0.65;
       const r = D[plan].rows[i];
       const el = $('clm-'+i);
-      if(el) el.value = formatInt((r.bg||0) * (r.pct||0)/100 * rate);
+      if(el) el.value = formatAmt((r.bg||0) * (r.pct||0)/100 * rate);
   }
 
   updWt(); // Update footer totals instantly
   
-  // Debounce the heavy rendering (Gantt and SC) so typing remains perfectly smooth
+  // Heavy rendering is scheduled on a debounce so typing is smooth
   clearTimeout(window._renderTmr);
   window._renderTmr = setTimeout(() => {
       recordSnap(); 
       renderGantt();
       renderSC();
-  }, 400);
+  }, 500);
 
-  // Only fully re-render table if a date/text changes (which doesn't require live keystroke tracking)
+  // Structural changes require a full DOM rebuild
   if(k !== 'bg' && k !== 'pct') renderTable(); 
 }
 
@@ -1095,9 +1081,9 @@ function updWt(){
   const totBg = rows.reduce((a,r)=>a+(+r.bg||0),0);
   const totClaim = rows.reduce((a,r)=>a+((+r.bg||0) * (+r.pct||0)/100 * rate),0);
   
-  $('wts').textContent = formatTHB(totBg) + ' THB';
-  $('tot-claim').textContent = formatTHB(totClaim) + ' THB';
-  $('acn').textContent = rows.filter(r=>r.pct>0 && r.bg>0).length;
+  const wts = $('wts'); if (wts) wts.textContent = formatAmt(totBg) + ' THB';
+  const tc = $('tot-claim'); if (tc) tc.textContent = formatAmt(totClaim) + ' THB';
+  const acn = $('acn'); if (acn) acn.textContent = rows.filter(r=>r.pct>0 && r.bg>0).length;
 }
 
 // ── PASTE ──
@@ -1134,16 +1120,24 @@ function setupPaste(){
   document.addEventListener('paste',window._pf);
 }
 
-// ── GANTT (DYNAMIC MULTI-LINE TEXT WRAPPING + MOBILE RESPONSIVE) ──
+// ── GANTT ──
 function renderGantt(){
   const cv=$('cGantt'),sec=$('gsec');
   if(!cv||!plan)return;
+  
+  // BULLETPROOF LAYOUT POLLING: Wait until visible
+  let secW = sec.getBoundingClientRect().width;
+  if (!secW || secW < 10) {
+      setTimeout(renderGantt, 50);
+      return;
+  }
+
   const rows=D[plan].rows;
   const{start:ps,end:pe,days:td}=getRange(rows);
   const today=new Date();
   
   const isMob = window.innerWidth <= 768;
-  const W = isMob ? window.innerWidth : Math.max(sec.getBoundingClientRect().width || sec.offsetWidth, 600);
+  const W = isMob ? window.innerWidth : Math.max(secW, 600);
   const LW = Math.floor(W * (isMob ? 0.30 : 0.35)); 
   
   const HH = isMob ? 28 : 34;
@@ -1347,17 +1341,15 @@ function buildC(rows, snapData){
 function drawSC(cvId,rows,snapData,pc,ac_color){
   const cv=$(cvId);if(!cv)return;
   
-  // BULLETPROOF WIDTH CALCULATION
-  let PW = cv.parentElement.clientWidth;
-  if (!PW || PW < 50) {
-      const isMob = window.innerWidth <= 768;
-      if (cvId === 'cSC') PW = isMob ? window.innerWidth - 10 : Math.max(360, window.innerWidth * 0.5);
-      else PW = isMob ? window.innerWidth - 10 : Math.max(300, window.innerWidth * 0.65);
+  // BULLETPROOF LAYOUT POLLING: Wait until visible
+  let PW = cv.parentElement.getBoundingClientRect().width;
+  if (!PW || PW < 10) {
+      setTimeout(() => drawSC(cvId, rows, snapData, pc, ac_color), 50);
+      return;
   }
   
   const W = PW;
   const H=parseInt(cv.getAttribute('height'))||200;
-  if(W<10)return; // Absolute fallback
   
   cv.width=Math.round(W);cv.height=H;
   const ctx=cv.getContext('2d');
