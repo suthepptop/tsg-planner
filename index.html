@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 
 <style>
-/* ROOT LOCK TO PREVENT HORIZONTAL SCROLL IN LINE BROWSER */
+/* ROOT LOCK & PADDING FOR FIXED MENUS */
 * {box-sizing:border-box;margin:0;padding:0;font-family:Sarabun,sans-serif}
 html, body {
   width: 100%; 
@@ -20,22 +20,17 @@ html, body {
   background:#f4f6f8;
   color:#222;
   overscroll-behavior-x: none;
-  padding-bottom: 45px; /* Room for fixed footer */
+  padding-top: 44px; /* Space for Top Fixed Bar */
+  padding-bottom: 45px; /* Space for Bottom Fixed Footer */
 }
 
-/* CASCADING STICKY HEADERS */
-#bar {position:sticky;top:0;z-index:300;display:flex;align-items:center;gap:8px;padding:0 12px;min-height:44px;background:#1560a8;border-bottom:2px solid #0f4a8a;flex-wrap:wrap; width: 100%;}
+/* 1. FIXED TOP MENU */
+#bar {position:fixed;top:0;left:0;right:0;z-index:400;display:flex;align-items:center;gap:8px;padding:0 12px;height:44px;background:#1560a8;border-bottom:2px solid #0f4a8a;flex-wrap:nowrap;}
 #bar h1 {font-size:13px;font-weight:700;color:#fff;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #bar .r {display:flex;align-items:center;gap:6px}
 #uinfo {font-size:11px;color:rgba(255,255,255,.85)}
 
-.ptb {position:sticky;top:44px;z-index:250;display:flex;align-items:center;gap:7px;padding:6px 13px;background:#f0f2f5;border-bottom:1px solid #ddd;flex-wrap:wrap; width: 100%;}
-thead th { position: sticky; top: 80px; z-index: 200; box-shadow: 0 2px 4px rgba(0,0,0,0.1); background: #e8edf2; }
-
-/* FIXED FLOATING FOOTER */
-.wtb { position: fixed; bottom: 0; left: 0; right: 0; z-index: 300; background: #f4f6f8; border-top: 2px solid #1560a8; padding: 6px 13px; font-size: 13px; color: #333; display: flex; gap: 18px; font-weight: 700; flex-wrap: wrap; box-shadow: 0 -3px 10px rgba(0,0,0,0.15); }
-
-.tnav {display:flex;gap:4px;flex-wrap:wrap}
+.tnav {display:flex;gap:4px;}
 .tnb {padding:3px 9px;border-radius:4px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.15);color:#fff;font-size:11px;cursor:pointer;font-family:Sarabun,sans-serif;white-space:nowrap}
 .tnb:hover {background:rgba(255,255,255,.3)}
 .tnb.on {background:rgba(255,255,255,.9);color:#1560a8;font-weight:700}
@@ -76,14 +71,15 @@ thead th { position: sticky; top: 80px; z-index: 200; box-shadow: 0 2px 4px rgba
 .prfm {height:5px;background:#1560a8;border-radius:3px;transition:width .4s}
 .prfi {height:5px;background:#d97706;border-radius:3px;transition:width .4s}
 
-/* PLAN PAGE */
+/* 2. FIXED TOOLBAR FOR PLAN PAGE */
+.ptb {position:fixed;top:44px;left:0;right:0;z-index:350;display:flex;align-items:center;gap:7px;padding:6px 13px;background:#f0f2f5;border-bottom:1px solid #ddd;flex-wrap:wrap; height: 40px;}
 .ptit {font-size:14px;font-weight:700;color:#1560a8}
 .sp {flex:1}
 .rwc {display:flex;align-items:center;gap:5px;font-size:12px;color:#666}
 .rwc input {width:50px;padding:3px 5px;border:1px solid #ccc;border-radius:3px;font-size:12px;text-align:center;font-family:Sarabun,sans-serif}
 
-/* S-CURVE */
-.scs {display:flex;justify-content:center;padding:13px 0 9px;background:#fff;border-bottom:1px solid #ddd; width: 100%;}
+/* S-CURVE PUSHED DOWN FOR FIXED TOOLBAR */
+.scs {display:flex;justify-content:center;padding:10px 0;background:#fff;border-bottom:1px solid #ddd; width: 100%; margin-top: 40px;}
 .scb {width:50%;min-width:360px;background:#fff;border:1px solid #ddd;border-radius:6px;padding:8px; max-width: 100%;}
 .scb canvas {display:block;width:100%}
 
@@ -105,9 +101,14 @@ table {
 
 thead th {
   padding: 8px 10px;
+  background: #e8edf2;
+  border: 1px solid #bbb;
   font-size: 12px;
   font-weight: 700;
   color: #333;
+  position: sticky;
+  top: 84px; /* Stays below Bar + Toolbar */
+  z-index: 200;
   text-align: left;
 }
 
@@ -159,6 +160,8 @@ body.ed .ci:not([readonly]) {
 }
 body:not(.ed) .ci {pointer-events:none}
 
+/* 3. FIXED BOTTOM FOOTER */
+.wtb {position:fixed;bottom:0;left:0;right:0;z-index:400;padding:6px 13px;background:#f4f6f8;border-top:2px solid #1560a8;font-size:13px;color:#333;display:flex;gap:18px;font-weight:700;flex-wrap:wrap;box-shadow:0 -2px 10px rgba(0,0,0,.1);}
 .ok {color:#2a8a2a;font-weight:700}
 .wn {color:#c00;font-weight:700}
 
@@ -177,39 +180,6 @@ body:not(.ed) .ci {pointer-events:none}
 .b-hl .b-lbl { color: #166534; font-weight: 700; font-size: 15px; }
 .b-hl .b-val { color: #15803d; font-size: 18px; }
 
-/* PRINT MODE FOR 100% WIDTH A4 CONTINUOUS PDF EXPORT */
-.print-mode {
-  width: 1000px !important;
-  max-width: 1000px !important;
-  min-width: 1000px !important;
-  margin: 0 !important;
-  padding: 20px !important; 
-  background: #fff !important;
-  height: auto !important;
-  overflow: visible !important;
-  position: absolute !important; 
-  top: 0 !important;
-  left: 0 !important;
-  z-index: 9999 !important;
-}
-.print-mode .scs { padding: 0 0 20px 0 !important; border-bottom: none !important; display: block; }
-.print-mode .scb { width: 100% !important; min-width: 100% !important; border: none !important; padding: 0 !important; box-shadow: none !important; }
-.print-mode .gs { overflow: visible !important; width: 100% !important; min-width: 100% !important; border-bottom: none !important; margin-bottom: 20px !important; }
-.print-mode .ts { overflow: visible !important; width: 100% !important; min-width: 100% !important; }
-.print-mode .tw { overflow: visible !important; width: 100% !important; min-width: 100% !important; }
-.print-mode table { width: 100% !important; min-width: 100% !important; table-layout: fixed !important; border-collapse: collapse !important; }
-.print-mode .col-no    { width: 4% !important; text-align: center; }
-.print-mode .col-item  { width: 8% !important; }
-.print-mode .col-desc  { width: auto !important; } 
-.print-mode .col-date  { width: 11% !important; text-align: center; }
-.print-mode .col-bg    { width: 8% !important; text-align: right; }
-.print-mode .col-pct   { width: 5% !important; text-align: center; }
-.print-mode .col-claim { width: 9% !important; text-align: right; }
-.print-mode th { font-size: 11px !important; padding: 6px 4px !important; white-space: normal; background: #e8edf2 !important; }
-.print-mode td { padding: 4px !important; border: 1px solid #ddd !important; }
-.print-mode .ci { font-size: 11px !important; padding: 0 !important; background: transparent !important; border: none !important; color: #000 !important; width: 100% !important; height: auto !important; min-width: 0 !important; }
-.print-mode .wtb { display: none !important; } 
-
 /* MODAL */
 .mo {display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center}
 .mo.on {display:flex}
@@ -220,11 +190,16 @@ body:not(.ed) .ci {pointer-events:none}
 .md input {width:100%;padding:6px 9px;border:1px solid #ccc;border-radius:4px;font-size:12px;margin-bottom:10px;font-family:Sarabun,sans-serif}
 .ma {display:flex;gap:7px;justify-content:flex-end;margin-top:7px}
 
-#toast {position:fixed;bottom:18px;right:18px;background:#fff;border:1px solid #ccc;border-radius:5px;padding:7px 14px;font-size:12px;color:#222;box-shadow:0 2px 10px rgba(0,0,0,.12);opacity:0;transition:opacity .3s;pointer-events:none;z-index:999}
+#toast {position:fixed;bottom:50px;right:18px;background:#fff;border:1px solid #ccc;border-radius:5px;padding:7px 14px;font-size:12px;color:#222;box-shadow:0 2px 10px rgba(0,0,0,.12);opacity:0;transition:opacity .3s;pointer-events:none;z-index:999}
 #toast.on {opacity:1}
 
-/* MOBILE BROWSER OPTIMIZATIONS (Max Width 768px) */
+/* 4. MOBILE BROWSER OPTIMIZATIONS (STRICT 95% WIDTH) */
 @media(max-width:768px){
+  body { padding-top: 84px; } /* Header + subheader */
+  #bar { height: auto; padding: 5px; flex-wrap: wrap; }
+  .ptb { top: 54px; height: auto; padding: 4px; }
+  .scs { margin-top: 20px; }
+  
   #hpg.on {flex-direction:column!important;height:auto!important;overflow-y:auto; width: 100%;}
   .hsb {width:100%!important;border-right:none;border-bottom:1px solid #ddd}
   .pb {width:100%!important}
@@ -234,37 +209,48 @@ body:not(.ed) .ci {pointer-events:none}
   .scs {padding: 10px 5px; width: 100%; max-width: 100%;}
   .scb {width:100%; max-width: 100%; min-width:unset; padding: 5px;}
   #bar h1 {font-size:10px}
-  thead th { top: 76px; } /* Sticky adjustment for mobile */
+  thead th { top: 90px; } 
   
-  .ts { width: 100%; max-width: 100%; overflow-x: hidden; }
-  .tw { width: 100%; max-width: 100%; overflow-x: auto; }
-  /* Allow table to naturally exceed screen width on mobile so content isn't squished */
-  table { min-width: 900px !important; width: 100% !important; table-layout: fixed; }
+  /* FORCE 95% WIDTH CONTAINERS */
+  .ts { width: 95%; margin: 0 auto; overflow-x: hidden; }
+  .tw { width: 100%; overflow-x: hidden; }
   
-  th { font-size: 11px !important; padding: 6px 4px !important; }
-  td { padding: 2px !important; height: 32px !important; }
-  .ci { font-size: 12px !important; height: 28px !important; }
+  /* PERFECT 100% SUM CONSTRAINTS */
+  table { width: 100% !important; min-width: 100% !important; max-width: 100% !important; table-layout: fixed; }
+  .col-no    { width: 4% !important; }
+  .col-item  { width: 7% !important; }
+  .col-desc  { width: 15% !important; }
+  .col-date  { width: 11% !important; } /* ps, pe, as, ae = 44% */
+  .col-bg    { width: 11% !important; text-align: right; }
+  .col-pct   { width: 7% !important; text-align: center; }
+  .col-claim { width: 11% !important; text-align: right; }
+  /* Sum: 4+7+15 + 44 + 11 + 7 + 11 = 99% + padding buffer */
   
+  th, td { padding: 1px !important; height: 26px !important; border: 1px solid #ccc; word-wrap: break-word;}
+  th { font-size: 7px !important; letter-spacing: -0.5px; line-height: 1; }
+  
+  .ci { font-size: 7px !important; height: 20px !important; padding: 0 !important; letter-spacing: -0.3px;}
+  
+  /* Hide calendar icon completely to save space */
   input[type="date"]::-webkit-inner-spin-button,
   input[type="date"]::-webkit-calendar-picker-indicator { display: none; -webkit-appearance: none; margin: 0; }
   
-  .wtb { font-size: 11px; flex-wrap: wrap; padding: 6px; }
+  .wtb { font-size: 10px; padding: 5px; gap: 8px;}
   .rwc input { width: 35px; font-size: 10px; padding: 2px; }
-  .btnsm { padding: 4px 7px; font-size: 11px; }
-  .bil-cont { padding: 10px; }
+  .btnsm { padding: 2px 5px; font-size: 9px; }
 }
 
 @media(max-width:480px){
   #bar h1 {display:none}
   #uinfo {display:none}
-  #bar .tnav {flex: 1;}
+  #bar .tnav {flex: 1; justify-content: center;}
 }
 </style>
 </head>
 <body>
 
 <div id="bar">
-  <h1>TSG PROJECT PLANNER</h1>
+  <h1>TSG PLANNER</h1>
   <div class="tnav">
     <button class="tnb" id="nbM" onclick="goPlan('material')">📦 Material</button>
     <button class="tnb" id="nbI" onclick="goPlan('installation')">🔧 Installation</button>
@@ -373,7 +359,6 @@ body:not(.ed) .ci {pointer-events:none}
 
 <div class="pg" id="ppg">
   <div class="ptb" id="planToolbar">
-    <button class="btn btnsm" onclick="goHome()">← Home</button>
     <span class="ptit" id="ptit"></span>
     
     <button class="btn btnsm" style="margin-left:8px; border-color:#d97706; color:#d97706;" onclick="exportPDF()">📄 PDF</button>
@@ -400,19 +385,19 @@ body:not(.ed) .ci {pointer-events:none}
           <th class="col-desc">Description</th>
           <th class="col-date">Plan Start</th>
           <th class="col-date">Plan Finish</th>
-          <th class="col-bg" id="th-bg" style="display:none;">Budget (THB)</th>
+          <th class="col-bg" id="th-bg" style="display:none;">Budget</th>
           <th class="col-date">Act Start</th>
           <th class="col-date">Act Finish</th>
           <th class="col-pct">Act%</th>
-          <th class="col-claim" id="th-claim" style="display:none;">Claimable (THB)</th>
+          <th class="col-claim" id="th-claim" style="display:none;">Claimable</th>
         </tr></thead>
         <tbody id="tb"></tbody>
       </table>
     </div>
     <div class="wtb">
-        <span id="foot-bg" style="display:none;">Total Budget: <span id="wts" style="color:#1560a8;">0.00 THB</span> &nbsp;|&nbsp; </span>
-        <span id="foot-claim" style="display:none;">Total Claimable: <span id="tot-claim" style="color:#2a8a2a;">0.00 THB</span> &nbsp;|&nbsp; </span>
-        Tasks in Progress: <span id="acn">0</span>
+        <span id="foot-bg" style="display:none;">Plan Budget: <span id="wts" style="color:#1560a8;">0.00 THB</span> &nbsp;|&nbsp; </span>
+        <span id="foot-claim" style="display:none;">Claimable: <span id="tot-claim" style="color:#2a8a2a;">0.00 THB</span> &nbsp;|&nbsp; </span>
+        Tasks: <span id="acn">0</span>
     </div>
   </div>
 </div>
@@ -440,7 +425,6 @@ let D={material:{rows:[], snap:{}},installation:{rows:[], snap:{}}};
 const $=id=>document.getElementById(id);
 const FN='Sarabun,sans-serif';
 
-// ── HELPERS ──
 const pd=s=>{
   if(!s)return null;s=s.trim();
   const m=s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
@@ -469,7 +453,7 @@ function formatAmt(num) {
 function getRange(rows){
   let mn=null,mx=null;
   rows.forEach(r=>{
-      if(!r.ps && !r.pe && (!r.bg || r.bg == 0)) return; // Ignore headers
+      if(!r.ps && !r.pe && (!r.bg || r.bg == 0)) return; 
       const s=pd(r.ps),e=pd(r.pe);
       if(s&&(!mn||s<mn))mn=s;if(e&&(!mx||e>mx))mx=e;
   });
@@ -477,7 +461,6 @@ function getRange(rows){
   return{start:mn,end:mx,days:dd(mn,mx)+1};
 }
 
-// ── SNAPSHOT ENGINE ──
 function recordSnap() {
   if(!plan) return;
   if(!D[plan].snap) D[plan].snap = {};
@@ -486,7 +469,6 @@ function recordSnap() {
   D[plan].snap[tStr] = calcP(D[plan].rows);
 }
 
-// ── EXPORT FUNCTIONS ──
 function exportExcel() {
   if(!plan) return;
   const rows = D[plan].rows;
@@ -514,50 +496,6 @@ function exportExcel() {
   toast('✓ Excel (CSV) Exported');
 }
 
-function exportPDF() {
-  if(!plan) return;
-  toast('Generating continuous 100% A4-width PDF...');
-  
-  const element = document.getElementById('ppg');
-  const toolbar = document.getElementById('planToolbar');
-  
-  toolbar.style.display = 'none';
-  element.classList.add('print-mode');
-  
-  renderGantt();
-  renderSC();
-  
-  setTimeout(() => {
-    const w = element.offsetWidth; 
-    const h = element.offsetHeight;
-    const mmWidth = 210;
-    const mmHeight = (h / w) * mmWidth;
-    
-    const opt = {
-      margin:       0, 
-      filename:     `TSG_${plan}_plan.pdf`,
-      image:        { type: 'jpeg', quality: 1.0 },
-      html2canvas:  { scale: 2, useCORS: true, windowWidth: w, width: w, height: h, scrollY: 0 },
-      jsPDF:        { unit: 'mm', format: [mmWidth, mmHeight], orientation: 'portrait' } 
-    };
-    
-    html2pdf().set(opt).from(element).save().then(() => {
-      toolbar.style.display = 'flex'; 
-      element.classList.remove('print-mode');
-      renderGantt();
-      renderSC();
-      toast('✓ PDF Exported Successfully');
-    }).catch((err) => {
-      toolbar.style.display = 'flex'; 
-      element.classList.remove('print-mode');
-      renderGantt();
-      renderSC();
-      toast('✗ PDF generation failed', true);
-    });
-  }, 500);
-}
-
-// ── SESSION RESTORE ──
 function restoreSession() {
   const storedEd = sessionStorage.getItem('isEd');
   const storedEmail = sessionStorage.getItem('email');
@@ -572,7 +510,6 @@ function restoreSession() {
   }
 }
 
-// ── AUTH ──
 window.onload=()=>{
   restoreSession(); 
   
@@ -580,13 +517,12 @@ window.onload=()=>{
   if(lp) {
     plan = lp;
     showPg('ppg');
-    $('ptit').textContent=lp==='material'?'📦 Material Plan':'🔧 Installation Plan';
+    $('ptit').textContent=lp==='material'?'📦 Material':'🔧 Installation';
     $(lp==='material'?'nbM':'nbI').classList.add('on');
   } else {
     showPg('hpg');
   }
 
-  // FORCE MOBILE LOGIN FIX (Disabled auto_select, added itp_support)
   google.accounts.id.initialize({
       client_id:GCI,
       callback:onLogin,
@@ -647,7 +583,6 @@ function signOut(){
   if(plan)renderTable();
 }
 
-// ── DATA TEMPLATES ──
 function initD(){
   const matTmpl = [
       {no:'', itemNo:'', desc:'5. ตู้ไฟฟ้า+PLC', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
@@ -831,26 +766,9 @@ async function loadData() {
     const bytes = Uint8Array.from(raw, c => c.charCodeAt(0));
     const txt = new TextDecoder('utf-8').decode(bytes);
     const d = JSON.parse(txt);
-    
-    const migrate = (arr, totalBase) => {
-        arr.forEach(r => {
-            if (r.wt !== undefined && r.bg === undefined) {
-                r.bg = Math.round((r.wt / 100) * totalBase);
-                delete r.wt;
-            }
-        });
-    };
 
-    if (d.material) { 
-        D.material.rows = d.material.rows || []; 
-        migrate(D.material.rows, 2150000);
-        D.material.snap = d.material.snap || {}; 
-    }
-    if (d.installation) { 
-        D.installation.rows = d.installation.rows || []; 
-        migrate(D.installation.rows, 3100000); 
-        D.installation.snap = d.installation.snap || {}; 
-    }
+    if (d.material) { D.material.rows = d.material.rows || []; D.material.snap = d.material.snap || {}; }
+    if (d.installation) { D.installation.rows = d.installation.rows || []; D.installation.snap = d.installation.snap || {}; }
     toast('✓ Data loaded');
   } catch(e) { 
     initD(); 
@@ -910,16 +828,11 @@ function confirmPAT(){
     if(!v) return;
     sessionStorage.setItem('ghPAT',v);
     $('patMo').classList.remove('on');
-    
-    if (patAction === 'save') {
-        saveData();
-    } else {
-        loadData(); 
-    }
+    if (patAction === 'save') saveData(); else loadData(); 
 }
 
-// ── NAV ──
 function showPg(id){document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));$(id).classList.add('on');}
+
 function goPlan(p){
   plan=p;
   sessionStorage.setItem('lastPlan',p);
@@ -931,16 +844,18 @@ function goPlan(p){
   showPg('ppg');
   renderTable();
   
-  // Secure rendering interval
-  setTimeout(()=>{renderGantt();renderSC();}, 100);
+  // Strict timeout to ensure DOM layout calculates before canvas renders
+  setTimeout(()=>{renderGantt();renderSC();}, 150);
 }
+
 function goHome(){
   plan=null;
   sessionStorage.removeItem('lastPlan');
   document.querySelectorAll('.tnb').forEach(b=>b.classList.remove('on'));
   showPg('hpg');
-  setTimeout(renderHome, 100);
+  setTimeout(renderHome, 150);
 }
+
 function goBilling(){
   plan=null;
   sessionStorage.removeItem('lastPlan');
@@ -950,7 +865,6 @@ function goBilling(){
   updateBilling();
 }
 
-// ── BILLING LOGIC ──
 function updateBilling() {
   const d = new Date();
   const bd = $('bil-date');
@@ -992,6 +906,7 @@ function applyRows(){
   if(rows.length>n)rows.splice(n);
   renderTable(); recordSnap(); renderGantt(); renderSC();
 }
+
 function resetRows(){
   if(!isEd||!confirm('Reset to Default Template? ALL CURRENT DATA WILL BE LOST.'))return;
   D[plan].rows = [];
@@ -1000,7 +915,6 @@ function resetRows(){
   renderTable(); recordSnap(); renderGantt(); renderSC(); toast('✓ Template Loaded');
 }
 
-// ── TABLE ──
 function renderTable(){
   if(!plan)return;
   const rows=D[plan].rows,ro=!isEd;
@@ -1015,6 +929,7 @@ function renderTable(){
     const tr=document.createElement('tr');
     if(isHdr) tr.className = 'hdr';
     
+    // Live typing triggers math calculation without re-rendering whole table
     const bgStr = isHdr ? '' : (r.bg ? formatAmt(r.bg) : '0.00');
     const bgTd = isEd ? `<td><input class="ci r" value="${bgStr}" ${ro||isHdr?'readonly':''} onfocus="if(this.value==='0.00'||this.value==='0'||this.value==='')this.value='';" onblur="if(this.value==='')this.value='0.00'; renderTable();" oninput="up(${i},'bg',this.value)"></td>` : '';
     
@@ -1040,7 +955,6 @@ function renderTable(){
 }
 
 function up(i,k,v){
-  // LIVE UPDATE
   if(k==='bg' || k==='pct') {
       D[plan].rows[i][k] = nn(v);
   } else {
@@ -1090,7 +1004,6 @@ function updWt(){
   const acn = $('acn'); if (acn) acn.textContent = rows.filter(r=>r.pct>0 && r.bg>0).length;
 }
 
-// ── PASTE ──
 function setupPaste(){
   if(window._pf)document.removeEventListener('paste',window._pf);
   window._pf=e=>{
@@ -1124,18 +1037,24 @@ function setupPaste(){
   document.addEventListener('paste',window._pf);
 }
 
-// ── GANTT ──
 function renderGantt(){
   const cv=$('cGantt'),sec=$('gsec');
   if(!cv||!plan)return;
-  
-  const isMob = window.innerWidth <= 768;
-  const W = isMob ? window.innerWidth : window.innerWidth;
-  const LW = Math.floor(W * (isMob ? 0.30 : 0.35)); 
-  
+
+  // LAYOUT WAIT FIX
+  let secW = sec.clientWidth;
+  if (!secW || secW < 50) {
+      setTimeout(renderGantt, 50);
+      return;
+  }
+
   const rows=D[plan].rows;
   const{start:ps,end:pe,days:td}=getRange(rows);
   const today=new Date();
+  
+  const isMob = window.innerWidth <= 768;
+  const W = isMob ? window.innerWidth : Math.max(secW, 600);
+  const LW = Math.floor(W * (isMob ? 0.30 : 0.35)); 
   
   const HH = isMob ? 28 : 34;
   const LH = isMob ? 20 : 26;
@@ -1279,7 +1198,6 @@ function renderGantt(){
   ctx.lineWidth=1;ctx.fillStyle='#333';ctx.fillText('(black=Act%)',LW+(isMob?124:148),ly+(isMob?3:2));
 }
 
-// ── S-CURVE ──
 function buildC(rows, snapData){
   const {start:ps, days:td} = getRange(rows);
   const tw = rows.reduce((s,r)=>s+(+r.bg||0),0);
@@ -1339,20 +1257,20 @@ function buildC(rows, snapData){
 function drawSC(cvId,rows,snapData,pc,ac_color){
   const cv=$(cvId);if(!cv)return;
   
-  // BULLETPROOF MATHEMATICAL WIDTH
+  // STRICT MATHEMATICAL WIDTH: Ignores broken DOM states entirely
   const isMob = window.innerWidth <= 768;
   let W = window.innerWidth;
   
   if (cvId === 'cSC') {
-      // Plan Page S-Curve
-      W = isMob ? W - 10 : Math.max(360, W * 0.5 - 20);
+      W = isMob ? W * 0.95 : Math.max(360, W * 0.5);
   } else {
-      // Home Page S-Curves
-      W = isMob ? W - 10 : Math.max(300, W * 0.65 - 20);
+      W = isMob ? W * 0.95 : Math.max(300, W * 0.65);
   }
   
   const H=parseInt(cv.getAttribute('height'))||200;
-  cv.width=Math.round(W);cv.height=H;
+  cv.style.width = W + 'px';
+  cv.width=Math.round(W);
+  cv.height=H;
   
   const ctx=cv.getContext('2d');
   ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
