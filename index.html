@@ -263,6 +263,8 @@ body:not(.ed) .ci {pointer-events:none}
 @media(max-width:480px){
   #bar h1 {display:none}
   #uinfo {display:none}
+  /* Give login button space on small screens */
+  #bar .tnav {flex: 1;}
 }
 </style>
 </head>
@@ -1106,17 +1108,24 @@ function setupPaste(){
   document.addEventListener('paste',window._pf);
 }
 
-// ── GANTT (DYNAMIC MULTI-LINE TEXT WRAPPING + MOBILE RESPONSIVE) ──
+// ── GANTT ──
 function renderGantt(){
   const cv=$('cGantt'),sec=$('gsec');
   if(!cv||!plan)return;
+
+  // LAYOUT WAIT FIX
+  let secW = sec.clientWidth;
+  if (!secW || secW < 50) {
+      setTimeout(renderGantt, 50);
+      return;
+  }
+
   const rows=D[plan].rows;
   const{start:ps,end:pe,days:td}=getRange(rows);
   const today=new Date();
   
   const isMob = window.innerWidth <= 768;
-  const secW = sec.getBoundingClientRect().width || sec.offsetWidth || window.innerWidth;
-  const W = isMob ? secW : Math.max(secW, 600);
+  const W = isMob ? window.innerWidth : Math.max(secW, 600);
   const LW = Math.floor(W * (isMob ? 0.30 : 0.35)); 
   
   const HH = isMob ? 28 : 34;
@@ -1171,7 +1180,6 @@ function renderGantt(){
   const dx=d=>gx(dd(ps,d));
   ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
 
-  // Month headers
   const ms=[];let mc=new Date(ps.getFullYear(),ps.getMonth(),1);
   while(mc<=pe){ms.push(new Date(mc));mc=new Date(mc.getFullYear(),mc.getMonth()+1,1);}
   ms.forEach((m,i)=>{
@@ -1185,7 +1193,6 @@ function renderGantt(){
   ctx.fillStyle='#fff';ctx.font='bold '+(isMob?'10px ':'13px ')+FN;ctx.textAlign='center';ctx.fillText('Item / Description',LW/2,HH - (isMob?8:10));
   ctx.strokeStyle='#999';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(LW,0);ctx.lineTo(LW,H);ctx.stroke();
 
-  // Draw dynamically wrapped rows
   let y = HH;
   rowData.forEach((rd, i) => {
     const r = rd.r;
@@ -1263,7 +1270,6 @@ function renderGantt(){
   ctx.lineWidth=1;ctx.fillStyle='#333';ctx.fillText('(black=Act%)',LW+(isMob?124:148),ly+(isMob?3:2));
 }
 
-// ── S-CURVE (POWERED BY SNAPSHOT ENGINE) ──
 function buildC(rows, snapData){
   const {start:ps, days:td} = getRange(rows);
   const tw = rows.reduce((s,r)=>s+(+r.bg||0),0);
@@ -1323,14 +1329,15 @@ function buildC(rows, snapData){
 function drawSC(cvId,rows,snapData,pc,ac_color){
   const cv=$(cvId);if(!cv)return;
   
-  // BULLETPROOF WIDTH FIX: Strictly retrieve parent width, safely fallback to 400 if hidden
-  let PW = cv.parentElement.getBoundingClientRect().width || cv.parentElement.offsetWidth;
-  if (!PW || PW < 10) PW = window.innerWidth > 768 ? 400 : window.innerWidth - 10;
+  // LAYOUT WAIT FIX
+  let PW = cv.parentElement.clientWidth;
+  if (!PW || PW < 50) {
+      setTimeout(() => drawSC(cvId, rows, snapData, pc, ac_color), 50);
+      return;
+  }
   
   const W = PW;
   const H = parseInt(cv.getAttribute('height'))||200;
-  
-  if(W<10)return; // Extreme safeguard
   
   cv.width=Math.round(W);cv.height=H;
   const ctx=cv.getContext('2d');
