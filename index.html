@@ -197,7 +197,7 @@ body:not(.ed) .ci {pointer-events:none}
 .print-mode table { width: 100% !important; min-width: 100% !important; table-layout: fixed !important; border-collapse: collapse !important; }
 .print-mode .col-no    { width: 4% !important; text-align: center; }
 .print-mode .col-item  { width: 8% !important; }
-.print-mode .col-desc  { width: auto !important; } /* Let it automatically fill space */
+.print-mode .col-desc  { width: auto !important; } 
 .print-mode .col-date  { width: 11% !important; text-align: center; }
 .print-mode .col-bg    { width: 8% !important; text-align: right; }
 .print-mode .col-pct   { width: 5% !important; text-align: center; }
@@ -595,7 +595,7 @@ function onLogin(resp){
       showEdUI();
       setupPaste();
   } else {
-      // If someone else logs in, ensure sensitive fields remain hidden
+      // Ensure sensitive data is hidden if another user logs in
       signOut(); 
   }
   if(plan)renderTable();
@@ -608,9 +608,9 @@ function showEdUI(){
   $('rwc').style.display='flex';
   
   // UNHIDE CONFIDENTIAL ELEMENTS FOR ADMIN
-  $('nbB').style.display='inline-block'; // Show Billing Button
-  $('th-bg').style.display='table-cell'; // Show Table Budget Header
-  $('foot-bg').style.display='inline';   // Show Footer Total Budget
+  $('nbB').style.display='inline-block';
+  $('th-bg').style.display='table-cell';
+  $('foot-bg').style.display='inline';
 }
 
 function signOut(){
@@ -622,7 +622,7 @@ function signOut(){
   $('uinfo').textContent='';
   $('gBtn').style.display='block';
   
-  // HIDE CONFIDENTIAL ELEMENTS
+  // HIDE CONFIDENTIAL ELEMENTS FOR PUBLIC
   ['soBtn','savBtn','rstBtn','nbB'].forEach(id=>$(id).style.display='none');
   $('rwc').style.display='none';
   $('th-bg').style.display='none';
@@ -993,6 +993,7 @@ function renderTable(){
     const tr=document.createElement('tr');
     if(isHdr) tr.className = 'hdr';
     
+    // STRICT SECURITY: Only inject the Budget <td> if logged in as Admin
     const bgTd = isEd ? `<td><input class="ci r" value="${isHdr ? '' : formatInt(r.bg)}" ${ro||isHdr?'readonly':''} onchange="up(${i},'bg',nn(this.value))"></td>` : '';
     
     tr.innerHTML=`
