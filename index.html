@@ -242,10 +242,10 @@ body:not(.ed) .ci {pointer-events:none}
   .col-no    { width: 4% !important; }
   .col-item  { width: 8% !important; }
   .col-desc  { width: 18% !important; }
-  .col-date  { width: 11% !important; }
+  .col-date  { width: 10% !important; } /* 4 columns * 10 = 40% */
   .col-bg    { width: 9% !important; text-align: right; }
-  .col-pct   { width: 6% !important; text-align: center; }
-  .col-claim { width: 11% !important; text-align: right; }
+  .col-pct   { width: 9% !important; text-align: center; }
+  .col-claim { width: 12% !important; text-align: right; }
   
   th { font-size: 8px !important; padding: 4px 1px !important; word-wrap: break-word; letter-spacing: -0.2px; }
   td { padding: 1px !important; height: 26px !important; }
@@ -1023,10 +1023,12 @@ function renderTable(){
     const tr=document.createElement('tr');
     if(isHdr) tr.className = 'hdr';
     
-    const bgTd = isEd ? `<td><input class="ci r" value="${isHdr ? '' : formatInt(r.bg)}" ${ro||isHdr?'readonly':''} onchange="up(${i},'bg',nn(this.value))"></td>` : '';
+    // STRICT SECURITY: Only inject Budget & Claimable <td> if logged in as Admin
+    // Using oninput for seamless typing calculation and onblur to format nicely
+    const bgTd = isEd ? `<td><input class="ci r" value="${isHdr ? '' : formatInt(r.bg)}" ${ro||isHdr?'readonly':''} oninput="up(${i},'bg',this.value)" onblur="renderTable()"></td>` : '';
     
     const claimVal = isHdr ? '' : formatInt((r.bg||0) * (r.pct||0)/100 * rate);
-    const claimTd = isEd ? `<td><input class="ci r" value="${claimVal}" readonly style="color:#2a8a2a; font-weight:700;"></td>` : '';
+    const claimTd = isEd ? `<td><input class="ci r" id="clm-${i}" value="${claimVal}" readonly style="color:#2a8a2a; font-weight:700;"></td>` : '';
     
     tr.innerHTML=`
       <td><input class="ci r" value="${r.no}" ${ro?'readonly':''} onchange="up(${i},'no',this.value)"></td>
@@ -1037,20 +1039,43 @@ function renderTable(){
       ${bgTd}
       <td><input class="ci" type="${dateType}" value="${toI(r.as||r.ps)}" ${ro||isHdr?'readonly':''} onchange="up(${i},'as',frI(this.value))"></td>
       <td><input class="ci" type="${dateType}" value="${toI(r.ae||r.pe)}" ${ro||isHdr?'readonly':''} onchange="up(${i},'ae',frI(this.value))"></td>
-      <td><input class="ci r" value="${isHdr ? '' : Number(r.pct||0).toFixed(2)}" ${ro||isHdr?'readonly':''} onchange="up(${i},'pct',nn(this.value))"></td>
+      <td><input class="ci r" value="${isHdr ? '' : Number(r.pct||0).toFixed(2)}" ${ro||isHdr?'readonly':''} oninput="up(${i},'pct',this.value)" onblur="renderTable()"></td>
       ${claimTd}`;
     tb.appendChild(tr);
   });
   updWt();
 }
+
 function up(i,k,v){
-  D[plan].rows[i][k]=v;
-  updWt();
-  recordSnap(); 
-  renderGantt();
-  renderSC();
-  if(k==='bg' || k==='ps' || k==='pe' || k==='pct') renderTable(); 
+  // Handle text typing securely without dropping focus
+  if(k==='bg' || k==='pct') {
+      D[plan].rows[i][k] = nn(v);
+  } else {
+      D[plan].rows[i][k] = v;
+  }
+  
+  // Real-time calculation update for the specific claimable cell
+  if(isEd && (k==='bg' || k==='pct')) {
+      const rate = plan === 'material' ? 0.60 : 0.65;
+      const r = D[plan].rows[i];
+      const el = $('clm-'+i);
+      if(el) el.value = formatInt((r.bg||0) * (r.pct||0)/100 * rate);
+  }
+
+  updWt(); // Update footer totals instantly
+  
+  // Debounce the heavy rendering (Gantt and SC) so typing remains perfectly smooth
+  clearTimeout(window._renderTmr);
+  window._renderTmr = setTimeout(() => {
+      recordSnap(); 
+      renderGantt();
+      renderSC();
+  }, 400);
+
+  // Only fully re-render table if a date/text changes (which doesn't require live keystroke tracking)
+  if(k !== 'bg' && k !== 'pct') renderTable(); 
 }
+
 function upd(i,k,v){
   D[plan].rows[i][k]=v;
   const r=D[plan].rows[i];
@@ -1061,6 +1086,7 @@ function upd(i,k,v){
   renderSC();
   renderTable();
 }
+
 function updWt(){
   if(!plan)return;
   const rows=D[plan].rows;
@@ -1108,24 +1134,16 @@ function setupPaste(){
   document.addEventListener('paste',window._pf);
 }
 
-// ── GANTT ──
+// ── GANTT (DYNAMIC MULTI-LINE TEXT WRAPPING + MOBILE RESPONSIVE) ──
 function renderGantt(){
   const cv=$('cGantt'),sec=$('gsec');
   if(!cv||!plan)return;
-
-  // LAYOUT WAIT FIX
-  let secW = sec.clientWidth;
-  if (!secW || secW < 50) {
-      setTimeout(renderGantt, 50);
-      return;
-  }
-
   const rows=D[plan].rows;
   const{start:ps,end:pe,days:td}=getRange(rows);
   const today=new Date();
   
   const isMob = window.innerWidth <= 768;
-  const W = isMob ? window.innerWidth : Math.max(secW, 600);
+  const W = isMob ? window.innerWidth : Math.max(sec.getBoundingClientRect().width || sec.offsetWidth, 600);
   const LW = Math.floor(W * (isMob ? 0.30 : 0.35)); 
   
   const HH = isMob ? 28 : 34;
@@ -1329,15 +1347,17 @@ function buildC(rows, snapData){
 function drawSC(cvId,rows,snapData,pc,ac_color){
   const cv=$(cvId);if(!cv)return;
   
-  // LAYOUT WAIT FIX
+  // BULLETPROOF WIDTH CALCULATION
   let PW = cv.parentElement.clientWidth;
   if (!PW || PW < 50) {
-      setTimeout(() => drawSC(cvId, rows, snapData, pc, ac_color), 50);
-      return;
+      const isMob = window.innerWidth <= 768;
+      if (cvId === 'cSC') PW = isMob ? window.innerWidth - 10 : Math.max(360, window.innerWidth * 0.5);
+      else PW = isMob ? window.innerWidth - 10 : Math.max(300, window.innerWidth * 0.65);
   }
   
   const W = PW;
-  const H = parseInt(cv.getAttribute('height'))||200;
+  const H=parseInt(cv.getAttribute('height'))||200;
+  if(W<10)return; // Absolute fallback
   
   cv.width=Math.round(W);cv.height=H;
   const ctx=cv.getContext('2d');
