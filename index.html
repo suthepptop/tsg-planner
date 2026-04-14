@@ -7,270 +7,395 @@
 <title>TSG Project Planner</title>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 
 <style>
-/* =======================================================
-   1. CSS VARIABLES (EASY THEMING)
-======================================================= */
-:root {
-  --primary: #2563eb;       
-  --primary-hover: #1d4ed8;
-  --actual: #f59e0b;        
-  --bg-main: #f8fafc;       
-  --surface: #ffffff;       
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --border: #e2e8f0;
-  --danger: #ef4444;
-  --success: #10b981;
-  --header-bg: #cbd5e1;     /* Color for Group Headers */
-  --radius: 8px;
-  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --font: 'Sarabun', sans-serif;
-}
-
-/* =======================================================
-   2. GLOBAL STYLES
-======================================================= */
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font); }
+/* ROOT LOCK TO PREVENT HORIZONTAL SCROLL IN LINE BROWSER */
+* {box-sizing:border-box;margin:0;padding:0;font-family:Sarabun,sans-serif}
 html, body {
-  width: 100%; max-width: 100%; overflow-x: hidden; position: relative;
-  background-color: var(--bg-main); color: var(--text-main); overscroll-behavior-x: none;
+  width: 100%; 
+  max-width: 100%; 
+  overflow-x: hidden; 
+  position: relative; 
+  background:#f4f6f8;
+  color:#222;
+  overscroll-behavior-x: none;
 }
 
-/* =======================================================
-   3. MODERN APP HEADER
-======================================================= */
-#bar {
-  position: sticky; top: 0; z-index: 200; width: 100%;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 20px; height: 60px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+#bar {position:sticky;top:0;z-index:200;display:flex;align-items:center;gap:8px;padding:0 12px;min-height:44px;background:#1560a8;border-bottom:2px solid #0f4a8a;flex-wrap:wrap; width: 100%;}
+#bar h1 {font-size:13px;font-weight:700;color:#fff;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#bar .r {display:flex;align-items:center;gap:6px}
+#uinfo {font-size:11px;color:rgba(255,255,255,.85)}
+
+.tnav {display:flex;gap:4px;flex-wrap:wrap}
+.tnb {padding:3px 9px;border-radius:4px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.15);color:#fff;font-size:11px;cursor:pointer;font-family:Sarabun,sans-serif;white-space:nowrap}
+.tnb:hover {background:rgba(255,255,255,.3)}
+.tnb.on {background:rgba(255,255,255,.9);color:#1560a8;font-weight:700}
+
+.btn {padding:5px 13px;border-radius:4px;border:1px solid #aaa;background:#fff;color:#222;font-size:12px;font-family:Sarabun,sans-serif;cursor:pointer}
+.btn:hover {background:#f0f0f0}
+.btnp {background:#1560a8;border-color:#1560a8;color:#fff}
+.btnp:hover {background:#0f4a8a}
+.btnd {border-color:#c00;color:#c00}
+.btnsm {padding:3px 9px;font-size:11px}
+
+.pg {display:none; width: 100%; max-width: 100%;}
+.pg.on {display:block}
+#hpg.on {display:flex;height:calc(100vh - 44px);overflow:hidden; width: 100%; background:#fff;}
+
+/* HOME */
+.hsb {width:190px;min-width:190px;background:#f4f6f8;border-right:1px solid #ddd;display:flex;flex-direction:column;padding:14px 12px;gap:10px;overflow-y:auto}
+.hslb {font-size:10px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.pb {width:100%;padding:10px;border-radius:6px;border:1px solid #ddd;background:#fff;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px;font-family:Sarabun,sans-serif}
+.pb:hover {border-color:#1560a8;background:#eef4ff}
+.pbic {width:30px;height:30px;border-radius:4px;flex-shrink:0}
+.pbm {background:#e8f0fb;border:1.5px solid #1560a8}
+.pbi {background:#fef3e2;border:1.5px solid #d97706}
+.pbt {font-size:12px;font-weight:700;color:#222;margin-bottom:1px}
+.pbs {font-size:9px;color:#888}
+
+.hpg-r {flex:1;display:flex;flex-direction:column;padding:14px;gap:12px;background:#f9f9f9;overflow-y:auto;align-items:center; max-width: 100%;}
+.hcb {width:65%;min-width:300px;background:#fff;border:1px solid #ddd;border-radius:6px;padding:10px; max-width: 100%;}
+.hcb canvas {display:block;width:100%}
+
+.prbox {margin-top:4px;border-top:1px solid #ddd;padding-top:10px;display:flex;flex-direction:column;gap:3px}
+.prlb {font-size:10px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+.prrow {display:flex;justify-content:space-between}
+.prn {font-size:11px;color:#555}
+.prm {font-size:11px;font-weight:700;color:#1560a8}
+.pri {font-size:11px;font-weight:700;color:#d97706}
+.prbg {height:5px;background:#e0e0e0;border-radius:3px;margin-top:2px}
+.prfm {height:5px;background:#1560a8;border-radius:3px;transition:width .4s}
+.prfi {height:5px;background:#d97706;border-radius:3px;transition:width .4s}
+
+/* PLAN PAGE */
+.ptb {position:sticky;top:44px;z-index:100;display:flex;align-items:center;gap:7px;padding:6px 13px;background:#f0f2f5;border-bottom:1px solid #ddd;flex-wrap:wrap; width: 100%;}
+.ptit {font-size:14px;font-weight:700;color:#1560a8}
+.sp {flex:1}
+.rwc {display:flex;align-items:center;gap:5px;font-size:12px;color:#666}
+.rwc input {width:50px;padding:3px 5px;border:1px solid #ccc;border-radius:3px;font-size:12px;text-align:center;font-family:Sarabun,sans-serif}
+
+/* S-CURVE */
+.scs {display:flex;justify-content:center;padding:13px 0 9px;background:#fff;border-bottom:1px solid #ddd; width: 100%;}
+.scb {width:50%;min-width:360px;background:#fff;border:1px solid #ddd;border-radius:6px;padding:8px; max-width: 100%;}
+.scb canvas {display:block;width:100%}
+
+/* GANTT */
+.gs {background:#fff;border-bottom:1px solid #ddd;overflow-x:hidden; width: 100%; max-width: 100%;}
+.gs canvas {display:block; max-width: 100%;}
+
+/* TABLE */
+.ts {background:#fff; width: 100%; max-width: 100%;}
+.tw {overflow-x:auto; width: 100%; max-width: 100%;}
+
+table {
+  border-collapse: collapse;
+  font-size: 13px;
+  width: 100%;
+  min-width: 1000px;
+  table-layout: fixed;
 }
-.brand { display: flex; align-items: center; gap: 20px; }
-#bar h1 { font-size: 16px; font-weight: 700; color: var(--primary); letter-spacing: 0.5px; }
 
-.tnav { display: flex; gap: 8px; background: var(--bg-main); padding: 4px; border-radius: var(--radius); border: 1px solid var(--border); }
-.tnb { 
-  padding: 6px 14px; border-radius: 6px; border: none; background: transparent; 
-  color: var(--text-muted); font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;
-}
-.tnb:hover { color: var(--text-main); }
-.tnb.on { background: var(--surface); color: var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-
-.user-area { display: flex; align-items: center; gap: 12px; }
-#uinfo { font-size: 12px; color: var(--text-muted); font-weight: 500; }
-
-.btn {
-  padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600;
-  cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
-}
-.btn-outline { background: var(--surface); border: 1px solid var(--border); color: var(--text-main); }
-.btn-outline:hover { background: var(--bg-main); border-color: #94a3b8; }
-.btn-primary { background: var(--primary); border: 1px solid var(--primary); color: #fff; }
-.btn-primary:hover { background: var(--primary-hover); }
-.btn-danger { background: transparent; border: 1px solid var(--danger); color: var(--danger); }
-.btn-danger:hover { background: #fef2f2; }
-
-/* =======================================================
-   4. LAYOUT & CARDS
-======================================================= */
-.pg { display: none; width: 100%; max-width: 100%; animation: fadeIn 0.3s ease; }
-.pg.on { display: block; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
-#hpg.on { display: flex; height: calc(100vh - 60px); overflow: hidden; width: 100%; }
-.hsb { width: 260px; min-width: 260px; background: var(--surface); border-right: 1px solid var(--border); padding: 24px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; }
-.hslb { font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
-
-.pb { width: 100%; padding: 12px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--bg-main); cursor: pointer; text-align: left; display: flex; align-items: center; gap: 12px; transition: all 0.2s; }
-.pb:hover { border-color: var(--primary); background: #eff6ff; transform: translateY(-1px); }
-.pbic { width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 16px; }
-.pbm { background: #dbeafe; color: var(--primary); }
-.pbi { background: #fef3c7; color: var(--actual); }
-.pbt { font-size: 13px; font-weight: 700; color: var(--text-main); margin-bottom: 2px; }
-.pbs { font-size: 11px; color: var(--text-muted); }
-
-.hpg-r { flex: 1; padding: 24px; gap: 20px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); align-content: start; }
-.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); width: 100%; }
-.card canvas { display: block; width: 100%; }
-
-.ptb {
-  position: sticky; top: 60px; z-index: 100; display: flex; align-items: center; gap: 12px;
-  padding: 12px 24px; background: rgba(248, 250, 252, 0.95); backdrop-filter: blur(8px);
-  border-bottom: 1px solid var(--border); width: 100%;
-}
-.ptit { font-size: 18px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
-
-/* =======================================================
-   5. SEAMLESS DATA TABLE
-======================================================= */
-.table-container { background: var(--surface); margin: 0 24px 24px 24px; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); overflow: hidden; }
-.tw { overflow-x: auto; width: 100%; }
-
-table { border-collapse: collapse; width: 100%; min-width: 1000px; table-layout: fixed; }
 thead th {
-  padding: 12px 10px; background: #f1f5f9; border-bottom: 2px solid var(--border);
-  font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;
-  position: sticky; top: 0; z-index: 5; text-align: left;
+  padding: 8px 10px;
+  background: #e8edf2;
+  border: 1px solid #bbb;
+  font-size: 12px;
+  font-weight: 700;
+  color: #333;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  text-align: left;
 }
 
-.col-no { width: 50px; text-align: center; } .col-item { width: 110px; } .col-desc { width: auto; } 
-.col-date { width: 135px; } .col-pct { width: 70px; text-align: center; }
+.col-no    { width: 45px;  text-align: center; }
+.col-item  { width: 100px; }
+.col-desc  { width: auto;  } 
+.col-date  { width: 135px; } 
+.col-pct   { width: 60px;  text-align: center; }
 
-tbody tr { border-bottom: 1px solid var(--border); transition: background 0.2s; }
-tbody tr:hover { background: #f8fafc; }
+tbody tr:nth-child(even) {background:#f7f9fb}
+tbody tr:hover {background:#eef4ff}
 
-/* 🌟 NEW: GROUP HEADER ROW STYLE */
-tbody tr.is-group { background: var(--header-bg) !important; border-bottom: 1px solid #94a3b8; }
-tbody tr.is-group:hover { background: #94a3b8 !important; }
-tbody tr.is-group .ci { font-weight: 700; color: #0f172a; }
+/* SMART HEADER ROW STYLING */
+tr.hdr td { background: #e8f0fb !important; border-top: 2px solid #1560a8 !important; border-bottom: 1px solid #1560a8 !important; }
+tr.hdr .ci { font-weight: 700; color: #1560a8; background: transparent !important; }
+tr.hdr .ci[readonly] { color: #1560a8; }
+tr.hdr:hover td { background: #dce7f8 !important; }
 
-td { padding: 4px; vertical-align: middle; height: 40px; }
+td {
+  border: 1px solid #ddd;
+  padding: 2px 4px;
+  height: 34px;
+  vertical-align: middle;
+}
 
 .ci {
-  width: 100%; height: 32px; border: 1px solid transparent; background: transparent;
-  font-size: 13px; color: var(--text-main); padding: 4px 8px; border-radius: 4px;
-  transition: all 0.2s;
+  width: 100%;
+  height: 28px;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-family: Sarabun, sans-serif;
+  color: #222;
+  padding: 2px 6px;
+  border-radius: 2px;
 }
-.ci.r { text-align: right; font-weight: 500; }
-.ci[readonly] { color: var(--text-muted); cursor: default; }
 
-body.ed .ci:not([readonly]):hover { border-color: var(--border); background: var(--bg-main); }
-body.ed .ci:not([readonly]):focus { outline: none; border-color: var(--primary); background: var(--surface); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
-body:not(.ed) .ci { pointer-events: none; }
+.ci:focus {outline:2px solid #1560a8;outline-offset:-1px;background:#fff}
+.ci[readonly] {color:#888;cursor:default}
+.ci.r {text-align:right}
 
-.wtb { padding: 12px 20px; background: #f8fafc; font-size: 13px; font-weight: 500; color: var(--text-muted); display: flex; gap: 24px; border-top: 1px solid var(--border); }
-.ok { color: var(--success); font-weight: 700; } .wn { color: var(--danger); font-weight: 700; }
+body.ed .ci:not([readonly]) {
+  background:#fffef0;
+  cursor:text;
+  pointer-events:all;
+  border: 1px solid #e0e0e0;
+}
+body:not(.ed) .ci {pointer-events:none}
 
-.rwc { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); font-weight: 500; }
-.rwc input { width: 60px; padding: 6px; border: 1px solid var(--border); border-radius: 4px; text-align: center; font-size: 13px; outline: none; }
-.rwc input:focus { border-color: var(--primary); }
+.wtb {padding:5px 13px;background:#f4f6f8;border-top:1px solid #ddd;font-size:12px;color:#555;display:flex;gap:18px; width: 100%;}
+.ok {color:#2a8a2a;font-weight:700}
+.wn {color:#c00;font-weight:700}
 
-/* =======================================================
-   6. PDF PRINT MODE & MOBILE
-======================================================= */
+/* BILLING DASHBOARD */
+.bil-cont { padding: 20px; display: flex; flex-direction: column; gap: 20px; align-items: center; }
+.b-card { background: #fff; border: 1px solid #ddd; border-radius: 8px; width: 100%; max-width: 600px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden; }
+.b-head { background: #1560a8; color: #fff; padding: 12px 20px; font-weight: 700; font-size: 16px; display: flex; justify-content: space-between; }
+.b-head.inst { background: #d97706; }
+.b-body { padding: 20px; }
+.b-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; font-size: 14px; }
+.b-row:last-child { border-bottom: none; }
+.b-lbl { color: #555; }
+.b-val { font-weight: 700; color: #222; }
+.b-input { padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; font-weight: 700; text-align: right; font-family: Sarabun; width: 150px; }
+.b-input:focus { border-color: #1560a8; outline: none; }
+.b-hl { background: #f0fdf4; padding: 15px; border-radius: 6px; border: 1px solid #bbf7d0; margin-top: 15px; }
+.b-hl .b-lbl { color: #166534; font-weight: 700; font-size: 15px; }
+.b-hl .b-val { color: #15803d; font-size: 18px; }
+
+/* PRINT MODE FOR 100% WIDTH A4 CONTINUOUS PDF EXPORT */
 .print-mode {
-  width: 1000px !important; max-width: 1000px !important; min-width: 1000px !important;
-  margin: 0 !important; padding: 20px !important; background: #fff !important;
-  height: auto !important; overflow: visible !important; position: absolute !important; 
-  top: 0 !important; left: 0 !important; z-index: 9999 !important;
+  width: 1000px !important;
+  max-width: 1000px !important;
+  min-width: 1000px !important;
+  margin: 0 !important;
+  padding: 20px !important; 
+  background: #fff !important;
+  height: auto !important;
+  overflow: visible !important;
+  position: absolute !important; 
+  top: 0 !important;
+  left: 0 !important;
+  z-index: 9999 !important;
 }
-.print-mode .card, .print-mode .table-container { box-shadow: none !important; border: none !important; border-radius: 0 !important; margin: 0 0 20px 0 !important; padding: 0 !important;}
-.print-mode .ptb, .print-mode .wtb { display: none !important; }
-.print-mode table { width: 100% !important; min-width: 100% !important; border-collapse: collapse !important; }
-.print-mode .col-no { width: 4% !important;} .print-mode .col-item { width: 8% !important; }
-.print-mode .col-desc { width: 34% !important; } .print-mode .col-date { width: 11% !important;} .print-mode .col-pct { width: 5% !important;}
-.print-mode th { background: #f1f5f9 !important; border: 1px solid #ddd !important; }
-.print-mode td { border: 1px solid #ddd !important; }
-.print-mode tr.is-group { background: #cbd5e1 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.print-mode .scs { padding: 0 0 20px 0 !important; border-bottom: none !important; display: block; }
+.print-mode .scb { width: 100% !important; min-width: 100% !important; border: none !important; padding: 0 !important; box-shadow: none !important; }
+.print-mode .gs { overflow: visible !important; width: 100% !important; min-width: 100% !important; border-bottom: none !important; margin-bottom: 20px !important; }
+.print-mode .ts { overflow: visible !important; width: 100% !important; min-width: 100% !important; }
+.print-mode .tw { overflow: visible !important; width: 100% !important; min-width: 100% !important; }
+.print-mode table { width: 100% !important; min-width: 100% !important; table-layout: fixed !important; border-collapse: collapse !important; }
+.print-mode .col-no    { width: 4% !important; text-align: center; }
+.print-mode .col-item  { width: 8% !important; }
+.print-mode .col-desc  { width: 34% !important; }
+.print-mode .col-date  { width: 11% !important; text-align: center; }
+.print-mode .col-pct   { width: 5% !important; text-align: center; }
+.print-mode th { font-size: 11px !important; padding: 6px 4px !important; white-space: normal; background: #e8edf2 !important; }
+.print-mode td { padding: 4px !important; border: 1px solid #ddd !important; }
+.print-mode .ci { font-size: 11px !important; padding: 0 !important; background: transparent !important; border: none !important; color: #000 !important; width: 100% !important; height: auto !important; min-width: 0 !important; }
+.print-mode .wtb { display: none !important; } 
 
-@media(max-width:768px){
-  #bar { padding: 0 10px; height: 50px; }
-  .brand h1 { display: none; }
-  .ptb { top: 50px; padding: 10px; flex-wrap: wrap; }
-  #hpg.on { flex-direction: column; height: auto; overflow-y: auto; }
-  .hsb { width: 100%; min-width: unset; border-right: none; border-bottom: 1px solid var(--border); padding: 15px; flex-direction: row; flex-wrap: wrap; }
-  .pb { width: calc(50% - 5px); }
-  .hpg-r { grid-template-columns: 1fr; padding: 15px; }
-  
-  .table-container { margin: 10px; border-radius: 4px; }
-  table { min-width: 100% !important; }
-  .col-no { width: 6% !important; } .col-item { width: 12% !important; } .col-desc { width: 28% !important; }
-  .col-date { width: 14% !important; } .col-pct { width: 6% !important; }
-  th { font-size: 9px !important; padding: 6px 2px !important; letter-spacing: -0.2px; }
-  td { padding: 1px !important; height: 28px; }
-  .ci { font-size: 10px !important; padding: 0 2px !important; height: 26px !important; }
-  input[type="date"]::-webkit-inner-spin-button, input[type="date"]::-webkit-calendar-picker-indicator { display: none; margin: 0; }
-}
-
-.mo {display:none;position:fixed;inset:0;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);z-index:500;align-items:center;justify-content:center}
+/* MODAL */
+.mo {display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center}
 .mo.on {display:flex}
-.md {background:var(--surface);border-radius:12px;padding:30px;min-width:340px;box-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1)}
-.md h2 {font-size:18px;font-weight:700;margin-bottom:8px;color:var(--text-main)}
-.md p {font-size:13px;color:var(--text-muted);margin-bottom:20px;}
-.md input {width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;margin-bottom:20px;outline:none;transition:border 0.2s;}
-.md input:focus { border-color:var(--primary); }
-.ma {display:flex;gap:10px;justify-content:flex-end;}
+.md {background:#fff;border-radius:8px;padding:22px 26px;min-width:320px;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+.md h2 {font-size:14px;margin-bottom:7px}
+.md p {font-size:12px;color:#666;margin-bottom:14px;line-height:1.6}
+.md label {font-size:11px;color:#666;display:block;margin-bottom:3px}
+.md input {width:100%;padding:6px 9px;border:1px solid #ccc;border-radius:4px;font-size:12px;margin-bottom:10px;font-family:Sarabun,sans-serif}
+.ma {display:flex;gap:7px;justify-content:flex-end;margin-top:7px}
 
-#toast {position:fixed;bottom:24px;right:24px;background:var(--text-main);border-radius:8px;padding:12px 20px;font-size:13px;font-weight:500;color:#fff;box-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1);opacity:0;transform:translateY(10px);transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1);pointer-events:none;z-index:999}
-#toast.on {opacity:1;transform:translateY(0);}
+#toast {position:fixed;bottom:18px;right:18px;background:#fff;border:1px solid #ccc;border-radius:5px;padding:7px 14px;font-size:12px;color:#222;box-shadow:0 2px 10px rgba(0,0,0,.12);opacity:0;transition:opacity .3s;pointer-events:none;z-index:999}
+#toast.on {opacity:1}
+
+/* MOBILE BROWSER OPTIMIZATIONS (Max Width 768px) */
+@media(max-width:768px){
+  #hpg.on {flex-direction:column!important;height:auto!important;overflow-y:auto; width: 100%;}
+  .hsb {width:100%!important;border-right:none;border-bottom:1px solid #ddd}
+  .pb {width:100%!important}
+  .hpg-r {padding:10px; width: 100%; max-width: 100%; overflow-x: hidden;}
+  .hcb {width:100%; max-width: 100%; min-width:unset; padding: 5px;}
+  
+  .scs {padding: 10px 5px; width: 100%; max-width: 100%;}
+  .scb {width:100%; max-width: 100%; min-width:unset; padding: 5px;}
+  #bar h1 {font-size:10px}
+  
+  .ts { width: 100%; max-width: 100%; overflow-x: hidden; }
+  .tw { width: 100%; max-width: 100%; overflow-x: hidden; }
+  table { min-width: 100% !important; width: 100% !important; max-width: 100% !important; table-layout: fixed; }
+  
+  .col-no { width: 6% !important; }
+  .col-item { width: 12% !important; }
+  .col-desc { width: 28% !important; }
+  .col-date { width: 14% !important; }
+  .col-pct { width: 6% !important; }
+  
+  th { font-size: 8px !important; padding: 4px 1px !important; word-wrap: break-word; letter-spacing: -0.2px; }
+  td { padding: 1px !important; height: 26px !important; }
+  .ci { font-size: 9px !important; padding: 0 !important; height: 24px !important; letter-spacing: -0.2px;}
+  
+  input[type="date"]::-webkit-inner-spin-button,
+  input[type="date"]::-webkit-calendar-picker-indicator { display: none; -webkit-appearance: none; margin: 0; }
+  
+  .wtb { font-size: 10px; flex-wrap: wrap; }
+  .rwc input { width: 35px; font-size: 10px; padding: 2px; }
+  .btnsm { padding: 2px 5px; font-size: 10px; }
+  .bil-cont { padding: 10px; }
+}
+
+@media(max-width:480px){
+  #bar h1 {display:none}
+  #uinfo {display:none}
+}
 </style>
 </head>
 <body>
 
 <div id="bar">
-  <div class="brand">
-    <h1>TSG PROJECT PLANNER</h1>
-    <div class="tnav">
-      <button class="tnb" id="nbM" onclick="goPlan('material')">📦 Material</button>
-      <button class="tnb" id="nbI" onclick="goPlan('installation')">🔧 Installation</button>
-    </div>
+  <h1>TSG PROJECT PLANNER</h1>
+  <div class="tnav">
+    <button class="tnb" id="nbM" onclick="goPlan('material')">📦 Material</button>
+    <button class="tnb" id="nbI" onclick="goPlan('installation')">🔧 Installation</button>
+    <button class="tnb" id="nbB" style="display:none;" onclick="goBilling()">💰 Billing</button>
   </div>
-  <div class="user-area">
+  <div class="r">
     <span id="uinfo"></span>
     <div id="gBtn"></div>
-    <button class="btn btn-outline" id="soBtn" style="display:none;" onclick="signOut()">Sign Out</button>
+    <button class="btn btnsm" id="soBtn" style="display:none;color:#fff;background:transparent;border-color:rgba(255,255,255,.5)" onclick="signOut()">Sign Out</button>
   </div>
 </div>
 
 <div class="pg" id="hpg">
   <div class="hsb">
-    <div class="hslb">Select Dashboard</div>
+    <div class="hslb">Select Plan</div>
     <button class="pb" onclick="goPlan('material')">
-      <div class="pbic pbm">📦</div>
-      <div><div class="pbt">Material Plan</div><div class="pbs">Procurement</div></div>
+      <div class="pbic pbm"></div>
+      <div><div class="pbt">Material Plan</div><div class="pbs">Procurement &amp; delivery</div></div>
     </button>
     <button class="pb" onclick="goPlan('installation')">
-      <div class="pbic pbi">🔧</div>
-      <div><div class="pbt">Installation Plan</div><div class="pbs">Commissioning</div></div>
+      <div class="pbic pbi"></div>
+      <div><div class="pbt">Installation Plan</div><div class="pbs">Installation &amp; commissioning</div></div>
     </button>
-    <div style="margin-top: 10px;">
-      <div class="hslb" style="margin-bottom: 8px;">Overall Progress</div>
+    <div class="prbox">
+      <div class="prlb">Actual Progress</div>
       <div class="prrow"><span class="prn">Material</span><span class="prm" id="hmp">0%</span></div>
-      <div class="prbg"><div class="prfm" id="hmb" style="width:0%; background:var(--primary);"></div></div>
-      <div class="prrow" style="margin-top:12px"><span class="prn">Installation</span><span class="pri" id="hip" style="color:var(--actual);">0%</span></div>
-      <div class="prbg"><div class="prfi" id="hib" style="width:0%; background:var(--actual);"></div></div>
+      <div class="prbg"><div class="prfm" id="hmb" style="width:0%"></div></div>
+      <div class="prrow" style="margin-top:7px"><span class="prn">Installation</span><span class="pri" id="hip">0%</span></div>
+      <div class="prbg"><div class="prfi" id="hib" style="width:0%"></div></div>
     </div>
   </div>
   <div class="hpg-r">
-    <div class="card"><canvas id="cMat" height="240"></canvas></div>
-    <div class="card"><canvas id="cInst" height="240"></canvas></div>
+    <div class="hcb"><canvas id="cMat" height="200"></canvas></div>
+    <div class="hcb"><canvas id="cInst" height="200"></canvas></div>
+  </div>
+</div>
+
+<div class="pg" id="bpg">
+  <div class="bil-cont">
+    
+    <div class="b-card">
+      <div class="b-head">
+        <span>📦 Material & Equipment (30 / 60 / 10)</span>
+        <span id="bil-m-pct">0% Progress</span>
+      </div>
+      <div class="b-body">
+        <div class="b-row">
+          <span class="b-lbl">Total Contract Budget (THB):</span>
+          <input type="number" id="b-m-tot" class="b-input" value="2150000" onchange="updateBilling()">
+        </div>
+        <div class="b-row">
+          <span class="b-lbl">Down Payment (30%):</span>
+          <span class="b-val" id="bil-m-down">0.00</span>
+        </div>
+        <div class="b-row">
+          <span class="b-lbl">Total Progress Pool (60%):</span>
+          <span class="b-val" id="bil-m-pool">0.00</span>
+        </div>
+        <div class="b-row">
+          <span class="b-lbl">After Cold Test (10%):</span>
+          <span class="b-val" id="bil-m-ret">0.00</span>
+        </div>
+        <div class="b-row b-hl">
+          <span class="b-lbl">Current Claimable (Progress × Pool):</span>
+          <span class="b-val" id="bil-m-claim">0.00 THB</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="b-card">
+      <div class="b-head inst">
+        <span>🔧 Design & Installation (20 / 65 / 7.5 / 7.5)</span>
+        <span id="bil-i-pct">0% Progress</span>
+      </div>
+      <div class="b-body">
+        <div class="b-row">
+          <span class="b-lbl">Total Contract Budget (THB):</span>
+          <input type="number" id="b-i-tot" class="b-input" value="1000000" onchange="updateBilling()">
+        </div>
+        <div class="b-row">
+          <span class="b-lbl">Down Payment (20%):</span>
+          <span class="b-val" id="bil-i-down">0.00</span>
+        </div>
+        <div class="b-row">
+          <span class="b-lbl">Total Progress Pool (65%):</span>
+          <span class="b-val" id="bil-i-pool">0.00</span>
+        </div>
+        <div class="b-row">
+          <span class="b-lbl">Punch List (7.5%):</span>
+          <span class="b-val" id="bil-i-ret1">0.00</span>
+        </div>
+        <div class="b-row">
+          <span class="b-lbl">After Commissioning (7.5%):</span>
+          <span class="b-val" id="bil-i-ret2">0.00</span>
+        </div>
+        <div class="b-row b-hl">
+          <span class="b-lbl">Current Claimable (Progress × Pool):</span>
+          <span class="b-val" id="bil-i-claim">0.00 THB</span>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
 <div class="pg" id="ppg">
   <div class="ptb" id="planToolbar">
-    <button class="btn btn-outline" onclick="goHome()">← Home</button>
+    <button class="btn btnsm" onclick="goHome()">← Home</button>
     <span class="ptit" id="ptit"></span>
-    <div style="flex:1"></div>
     
-    <button class="btn btn-outline" style="color: var(--text-main);" onclick="exportPDF()">📄 PDF</button>
-    <button class="btn btn-outline" style="color: var(--success); border-color: var(--success);" onclick="exportExcel()">📊 Excel</button>
+    <button class="btn btnsm" style="margin-left:8px; border-color:#d97706; color:#d97706;" onclick="exportPDF()">📄 PDF</button>
+    <button class="btn btnsm" style="border-color:#2a8a2a; color:#2a8a2a;" onclick="exportExcel()">📊 Excel</button>
     
-    <div class="rwc" id="rwc" style="display:none; margin-left: 12px; padding-left: 12px; border-left: 1px solid var(--border);">
-      Rows: <input type="number" id="rwn" min="1" max="300" value="16">
-      <button class="btn btn-outline" onclick="applyRows()">Apply</button>
+    <div class="sp"></div>
+    <div class="rwc" id="rwc" style="display:none">
+      Rows:<input type="number" id="rwn" min="1" max="300" value="16">
+      <button class="btn btnsm" onclick="applyRows()">Apply</button>
     </div>
-    <button class="btn btn-danger" id="rstBtn" style="display:none" onclick="resetRows()">Reset</button>
-    <button class="btn btn-primary" id="savBtn" style="display:none" onclick="saveData()">💾 Save to Cloud</button>
+    <button class="btn btnsm btnd" id="rstBtn" style="display:none" onclick="resetRows()">✕ Reset Template</button>
+    <button class="btn btnsm btnp" id="savBtn" style="display:none" onclick="saveData()">💾 Save</button>
   </div>
   
-  <div style="padding: 24px 24px 0 24px; display: flex; flex-direction: column; gap: 24px;">
-    <div class="card"><canvas id="cSC" height="280"></canvas></div>
-    <div class="card" style="padding: 0; overflow: hidden;" id="gsec"><canvas id="cGantt"></canvas></div>
-  </div>
+  <div class="scs"><div class="scb"><canvas id="cSC" height="260"></canvas></div></div>
+  <div class="gs" id="gsec"><canvas id="cGantt"></canvas></div>
   
-  <div class="table-container" style="margin-top: 24px;">
+  <div class="ts">
     <div class="tw">
       <table>
         <thead><tr>
           <th class="col-no">No.</th>
           <th class="col-item">Item No.</th>
-          <th class="col-desc">Technical Description</th>
+          <th class="col-desc">Description</th>
           <th class="col-date">Plan Start</th>
           <th class="col-date">Plan Finish</th>
           <th class="col-pct">Wt%</th>
@@ -281,21 +406,19 @@ body:not(.ed) .ci { pointer-events: none; }
         <tbody id="tb"></tbody>
       </table>
     </div>
-    <div class="wtb">
-      <span>Total Weight: <span id="wts" class="wn">0%</span></span>
-      <span>Tasks with Progress: <span id="acn" style="color:var(--text-main); font-weight:700;">0</span></span>
-    </div>
+    <div class="wtb">Weight: <span id="wts" class="wn">0%</span> &nbsp;|&nbsp; With actual: <span id="acn">0</span></div>
   </div>
 </div>
 
 <div class="mo" id="patMo">
   <div class="md">
-    <h2>Secure Cloud Sync</h2>
-    <p>Please enter your GitHub Personal Access Token (PAT) to load or save data to the private repository.</p>
-    <input type="password" id="patIn" placeholder="ghp_xxxxxxxxxxxxxx...">
+    <h2>GitHub Access Token</h2>
+    <p>Enter your PAT to load or save data. Stored in session.</p>
+    <label>Token</label>
+    <input type="password" id="patIn" placeholder="ghp_...">
     <div class="ma">
-      <button class="btn btn-outline" onclick="document.getElementById('patMo').classList.remove('on')">Cancel</button>
-      <button class="btn btn-primary" onclick="confirmPAT()">Authenticate</button>
+      <button class="btn" onclick="document.getElementById('patMo').classList.remove('on')">Cancel</button>
+      <button class="btn btnp" onclick="confirmPAT()">Confirm</button>
     </div>
   </div>
 </div>
@@ -305,43 +428,44 @@ body:not(.ed) .ci { pointer-events: none; }
 const GCI='695932302309-p1rccufdkq9itb5paam78j1ll1ejb1uu.apps.googleusercontent.com';
 const EE='suthepp.top@gmail.com';
 const API='https://api.github.com/repos/suthepptop/tsg-planner/contents/data.json';
+let isEd=false,plan=null,sha=null,patAction='save';
+let D={material:{rows:[], snap:{}, budget:2150000},installation:{rows:[], snap:{}, budget:1000000}};
+const $=id=>document.getElementById(id);
+const FN='Sarabun,sans-serif';
 
-let isEd = false, plan = null, sha = null, patAction = 'save';
-let D = { material: { rows: [], snap: {} }, installation: { rows: [], snap: {} } };
-
-const $ = id => document.getElementById(id);
-const FN = 'Sarabun, sans-serif';
-
-const C_PLAN = '#2563eb';   
-const C_ACT = '#f59e0b';    
-const C_TEXT = '#334155';   
-const C_MUTED = '#94a3b8';  
-const C_GRID = '#e2e8f0';   
-const C_TODAY = '#ef4444';  
-const C_HEAD = '#cbd5e1';   // 🌟 Color for Group Headers in Gantt
-
-const pd=s=>{if(!s)return null;s=s.trim();const m=s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);if(m){const d=new Date(+m[3],+m[2]-1,+m[1]);return isNaN(d.getTime())?null:d;}return null;};
+// ── HELPERS ──
+const pd=s=>{
+  if(!s)return null;s=s.trim();
+  const m=s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+  if(m){const d=new Date(+m[3],+m[2]-1,+m[1]);return isNaN(d.getTime())?null:d;}
+  return null;
+};
 const toI=s=>{if(!s)return'';const m=s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);return m?`${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`:'';};
 const frI=s=>{if(!s)return'';const[y,mo,d]=s.split('-');return`${d}/${mo}/${y}`;};
-const nd=s=>{if(!s)return'';s=s.trim();if(/^\d{1,2}[\/-]\d{1,2}[\/-]\d{4}$/.test(s)){const sp=s.includes('/')?'/':'-';const[d,m,y]=s.split(sp);return`${d.padStart(2,'0')}/${m.padStart(2,'0')}/${y}`;}if(/^\d{4}-\d{2}-\d{2}$/.test(s)){const[y,m,d]=s.split('-');return`${d}/${m}/${y}`;}if(/^\d{5}$/.test(s)){const dt=new Date((+s-25569)*86400000);return`${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}`;}return s;};
-const nn=v=>{if(v===''||v===null)return'';v=String(v).trim().replace('%','');let n=parseFloat(v)||0;if(n>0&&n<1)n*=100;return Math.round(n*100)/100;};
+const nd=s=>{
+  if(!s)return'';s=s.trim();
+  if(/^\d{1,2}[\/-]\d{1,2}[\/-]\d{4}$/.test(s)){const sp=s.includes('/')?'/':'-';const[d,m,y]=s.split(sp);return`${d.padStart(2,'0')}/${m.padStart(2,'0')}/${y}`;}
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)){const[y,m,d]=s.split('-');return`${d}/${m}/${y}`;}
+  if(/^\d{5}$/.test(s)){const dt=new Date((+s-25569)*86400000);return`${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}`;}
+  return s;
+};
+const nn=v=>{v=String(v).trim().replace('%','');let n=parseFloat(v)||0;if(n>0&&n<1)n*=100;return Math.round(n*100)/100;};
 const dd=(a,b)=>Math.round((b-a)/86400000);
 const fd=s=>{const d=pd(s);return d?`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`:'';}; 
-const toast=(msg,err=false)=>{const e=$('toast');e.textContent=msg;e.style.background=err?'var(--danger)':'var(--text-main)';e.classList.add('on');setTimeout(()=>e.classList.remove('on'),2800);};
+const toast=(msg,err=false)=>{const e=$('toast');e.textContent=msg;e.style.borderColor=err?'#c00':'#ccc';e.classList.add('on');setTimeout(()=>e.classList.remove('on'),2800);};
 
 function getRange(rows){
   let mn=null,mx=null;
-  rows.forEach(r=>{const s=pd(r.ps),e=pd(r.pe);if(s&&(!mn||s<mn))mn=s;if(e&&(!mx||e>mx))mx=e;});
+  rows.forEach(r=>{
+      if(!r.ps && !r.pe && (!r.wt || r.wt == 0)) return; // Ignore headers
+      const s=pd(r.ps),e=pd(r.pe);
+      if(s&&(!mn||s<mn))mn=s;if(e&&(!mx||e>mx))mx=e;
+  });
   if(!mn)mn=new Date('2026-02-16');if(!mx)mx=new Date('2026-07-15');
   return{start:mn,end:mx,days:dd(mn,mx)+1};
 }
 
-// 🌟 AUTO-DETECT GROUP HEADER LOGIC
-function isGroupHeader(r) {
-    // If it has a description, but NO plan dates and NO weight, treat it as a Header Category
-    return r.desc && r.desc.trim() !== '' && !r.ps && !r.pe && (!r.wt || r.wt == 0 || r.wt === '');
-}
-
+// ── SNAPSHOT ENGINE ──
 function recordSnap() {
   if(!plan) return;
   if(!D[plan].snap) D[plan].snap = {};
@@ -350,321 +474,608 @@ function recordSnap() {
   D[plan].snap[tStr] = calcP(D[plan].rows);
 }
 
+// ── EXPORT FUNCTIONS ──
 function exportExcel() {
   if(!plan) return;
   const rows = D[plan].rows;
   let csv = "\ufeffNo.,Item No.,Description,Plan Start,Plan Finish,Wt%,Act Start,Act Finish,Act%\n";
+  
   rows.forEach(r => {
     const desc = (r.desc || '').replace(/"/g, '""');
-    csv += `${r.no || ''},"${r.itemNo || ''}","${desc}",${r.ps || ''},${r.pe || ''},${r.wt || ''},${r.as || ''},${r.ae || ''},${r.pct || ''}\n`;
+    csv += `${r.no || ''},"${r.itemNo || ''}","${desc}",${r.ps || ''},${r.pe || ''},${r.wt || 0},${r.as || ''},${r.ae || ''},${r.pct || 0}\n`;
   });
+  
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
   link.download = `TSG_${plan}_plan.csv`;
   link.click();
-  toast('✓ Excel Exported');
+  toast('✓ Excel (CSV) Exported');
 }
 
 function exportPDF() {
   if(!plan) return;
-  toast('Preparing A4 PDF...');
-  const element = $('ppg'); const toolbar = $('planToolbar');
-  toolbar.style.display = 'none'; element.classList.add('print-mode');
-  renderGantt(); renderSC();
+  toast('Generating continuous 100% A4-width PDF...');
+  
+  const element = document.getElementById('ppg');
+  const toolbar = document.getElementById('planToolbar');
+  
+  toolbar.style.display = 'none';
+  element.classList.add('print-mode');
+  
+  renderGantt();
+  renderSC();
+  
   setTimeout(() => {
-    const w = element.offsetWidth; const h = element.offsetHeight;
-    const mmWidth = 210; const mmHeight = (h / w) * mmWidth;
+    const w = element.offsetWidth; 
+    const h = element.offsetHeight;
+    
+    const mmWidth = 210;
+    const mmHeight = (h / w) * mmWidth;
+    
     const opt = {
-      margin: 0, filename: `TSG_${plan}_plan.pdf`,
-      image: { type: 'jpeg', quality: 1.0 },
-      html2canvas: { scale: 2, useCORS: true, windowWidth: w, width: w, height: h, scrollY: 0 },
-      jsPDF: { unit: 'mm', format: [mmWidth, mmHeight], orientation: 'portrait' } 
+      margin:       0, 
+      filename:     `TSG_${plan}_plan.pdf`,
+      image:        { type: 'jpeg', quality: 1.0 },
+      html2canvas:  { scale: 2, useCORS: true, windowWidth: w, width: w, height: h, scrollY: 0 },
+      jsPDF:        { unit: 'mm', format: [mmWidth, mmHeight], orientation: 'portrait' } 
     };
+    
     html2pdf().set(opt).from(element).save().then(() => {
-      toolbar.style.display = 'flex'; element.classList.remove('print-mode'); renderGantt(); renderSC(); toast('✓ PDF Exported Successfully');
-    }).catch(() => {
-      toolbar.style.display = 'flex'; element.classList.remove('print-mode'); renderGantt(); renderSC(); toast('✗ PDF Failed', true);
+      toolbar.style.display = 'flex'; 
+      element.classList.remove('print-mode');
+      renderGantt();
+      renderSC();
+      toast('✓ PDF Exported Successfully');
+    }).catch((err) => {
+      toolbar.style.display = 'flex'; 
+      element.classList.remove('print-mode');
+      renderGantt();
+      renderSC();
+      toast('✗ PDF generation failed', true);
     });
   }, 500);
 }
 
+// ── SESSION RESTORE ──
 function restoreSession() {
-  if (sessionStorage.getItem('isEd') === 'true') {
-    isEd = true; $('uinfo').textContent = sessionStorage.getItem('email');
-    $('gBtn').style.display = 'none'; $('soBtn').style.display = 'inline-flex';
-    document.body.classList.add('ed'); showEdUI(); setupPaste();
+  const storedEd = sessionStorage.getItem('isEd');
+  const storedEmail = sessionStorage.getItem('email');
+  if (storedEd === 'true') {
+    isEd = true;
+    $('uinfo').textContent = storedEmail;
+    $('gBtn').style.display = 'none';
+    $('soBtn').style.display = 'inline-block';
+    document.body.classList.add('ed');
+    showEdUI();
+    setupPaste();
   }
 }
 
+// ── AUTH ──
 window.onload=()=>{
   restoreSession(); 
+  
   const lp = sessionStorage.getItem('lastPlan');
-  if(lp) { plan = lp; showPg('ppg'); $('ptit').innerHTML = lp==='material'?'📦 Material Plan':'🔧 Installation Plan'; $(lp==='material'?'nbM':'nbI').classList.add('on'); } 
-  else showPg('hpg');
+  if(lp) {
+    plan = lp;
+    showPg('ppg');
+    $('ptit').textContent=lp==='material'?'📦 Material Plan':'🔧 Installation Plan';
+    $(lp==='material'?'nbM':'nbI').classList.add('on');
+  } else {
+    showPg('hpg');
+  }
+
   google.accounts.id.initialize({client_id:GCI,callback:onLogin,auto_select:true});
-  google.accounts.id.renderButton($('gBtn'),{theme:'outline',size:'medium',text:'signin_with',shape:'rectangular'});
+  google.accounts.id.renderButton($('gBtn'),{theme:'filled_blue',size:'small',text:'signin_with',shape:'rectangular'});
   loadData();
 };
 
 function onLogin(resp){
   const p=JSON.parse(atob(resp.credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
-  isEd=p.email===EE; sessionStorage.setItem('isEd', isEd); sessionStorage.setItem('email', p.email);
-  $('uinfo').textContent=p.email; $('gBtn').style.display='none'; $('soBtn').style.display='inline-flex';
+  isEd=p.email===EE;
+  sessionStorage.setItem('isEd', isEd);
+  sessionStorage.setItem('email', p.email);
+  $('uinfo').textContent=p.email;
+  $('gBtn').style.display='none';
+  $('soBtn').style.display='inline-block';
   if(isEd){document.body.classList.add('ed');showEdUI();setupPaste();}
   if(plan)renderTable();
-  toast(isEd?'✓ Editor Access Granted':'✓ Logged in as Viewer');
+  toast(isEd?'✓ Editor':'✓ View only');
 }
 
-function showEdUI(){ $('savBtn').style.display='inline-flex'; $('rstBtn').style.display='inline-flex'; $('rwc').style.display='flex'; }
+function showEdUI(){
+  $('savBtn').style.display='inline-block';
+  $('rstBtn').style.display='inline-block';
+  $('rwc').style.display='flex';
+  $('nbB').style.display='inline-block'; // Show Billing Button to Admin
+}
 
 function signOut(){
-  google.accounts.id.disableAutoSelect(); isEd=false; sessionStorage.clear(); document.body.classList.remove('ed');
-  $('uinfo').textContent=''; $('gBtn').style.display='block';
-  ['soBtn','savBtn','rstBtn'].forEach(id=>$(id).style.display='none'); $('rwc').style.display='none';
+  google.accounts.id.disableAutoSelect();
+  isEd=false;
+  sessionStorage.removeItem('isEd');
+  sessionStorage.removeItem('email');
+  document.body.classList.remove('ed');
+  $('uinfo').textContent='';
+  $('gBtn').style.display='block';
+  ['soBtn','savBtn','rstBtn','nbB'].forEach(id=>$(id).style.display='none');
+  $('rwc').style.display='none';
   if(plan)renderTable();
+}
+
+// ── DATA TEMPLATES ──
+function initD(){
+  // Smart Template with Headers (blank dates/wt = Header)
+  const matTmpl = [
+      {no:'', itemNo:'', desc:'1. งานจัดหาวัสดุอุปกรณ์และประกอบ', ps:'', pe:'', wt:0, as:'', ae:'', pct:0},
+      {no:1, itemNo:'5.1', desc:'MDB-1 / Main Distribution Board', ps:'01/04/2026', pe:'31/05/2026', wt:6.93, as:'', ae:'', pct:0},
+      {no:2, itemNo:'5.2', desc:'MCC / Motor Control Center', ps:'01/04/2026', pe:'31/05/2026', wt:10.23, as:'', ae:'', pct:0},
+      {no:3, itemNo:'5.3', desc:'PLC Panel + UPS 40kVA + Battery', ps:'01/04/2026', pe:'10/06/2026', wt:19.30, as:'', ae:'', pct:0},
+      {no:4, itemNo:'5.4', desc:'Control Desk', ps:'01/04/2026', pe:'10/06/2026', wt:4.77, as:'', ae:'', pct:0},
+      {no:5, itemNo:'5.5', desc:'Control Marshalling Panel', ps:'01/04/2026', pe:'31/05/2026', wt:3.97, as:'', ae:'', pct:0},
+      {no:6, itemNo:'5.6', desc:'I/O Remote Box (Fiber) x3', ps:'01/04/2026', pe:'31/05/2026', wt:4.20, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'2. Cable tray & conduit', ps:'', pe:'', wt:0, as:'', ae:'', pct:0},
+      {no:7, itemNo:'6.2', desc:'Conduit & Fitting (Zone 1-4)', ps:'06/04/2026', pe:'25/05/2026', wt:8.57, as:'', ae:'', pct:0},
+      {no:8, itemNo:'6.3', desc:'Accessories (Cable Tie, Gland, etc.)', ps:'06/04/2026', pe:'25/05/2026', wt:3.21, as:'', ae:'', pct:0},
+      {no:9, itemNo:'6.4', desc:'Junction Box (Field) x12 sets', ps:'06/04/2026', pe:'25/05/2026', wt:2.26, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'3. ระบบกราวด์ (Grounding)', ps:'', pe:'', wt:0, as:'', ae:'', pct:0},
+      {no:10, itemNo:'7.4', desc:'Ground Test Box (Steel) x7 sets', ps:'01/04/2026', pe:'07/05/2026', wt:3.37, as:'', ae:'', pct:0},
+      {no:11, itemNo:'7.5', desc:'Grounding Accessories', ps:'23/03/2026', pe:'30/04/2026', wt:3.20, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'4. ระบบแสงสว่าง', ps:'', pe:'', wt:0, as:'', ae:'', pct:0},
+      {no:12, itemNo:'9.1', desc:'ตู้ Load Center x2', ps:'01/04/2026', pe:'31/05/2026', wt:1.92, as:'', ae:'', pct:0},
+      {no:13, itemNo:'9.2', desc:'Conduit & Fitting แสงสว่าง', ps:'01/04/2026', pe:'31/05/2026', wt:1.88, as:'', ae:'', pct:0},
+      {no:14, itemNo:'9.3', desc:'สายไฟแสงสว่าง', ps:'01/04/2026', pe:'31/05/2026', wt:1.59, as:'', ae:'', pct:0},
+      {no:15, itemNo:'9.4', desc:'โคมไฟ + หลอดไฟ High Bay 200W', ps:'01/04/2026', pe:'31/05/2026', wt:2.95, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'5. กล้องวงจรปิด (CCTV)', ps:'', pe:'', wt:0, as:'', ae:'', pct:0},
+      {no:16, itemNo:'10.1', desc:'กล้อง CCTV WiFi IP67 x9', ps:'23/03/2026', pe:'25/05/2026', wt:3.05, as:'', ae:'', pct:0},
+      {no:17, itemNo:'10.2', desc:'NVR 16CH + HDD', ps:'23/03/2026', pe:'25/05/2026', wt:1.20, as:'', ae:'', pct:0},
+      {no:18, itemNo:'10.4', desc:'สาย LAN Cat6 / Fiber Optic', ps:'23/03/2026', pe:'25/05/2026', wt:3.42, as:'', ae:'', pct:0}
+  ];
+
+  const instTmpl = [
+      {no:'', itemNo:'', desc:'2. งานออกแบบและติดตั้ง', ps:'', pe:'', wt:0, as:'', ae:'', pct:0},
+      {no:1, itemNo:'16.1', desc:'Electrical Single Line / Electrical SLD', ps:'16/02/2026', pe:'25/04/2026', wt:5.0, as:'', ae:'', pct:0},
+      {no:2, itemNo:'16.2', desc:'Cable Schedule & Route', ps:'02/03/2026', pe:'30/04/2026', wt:6.0, as:'', ae:'', pct:0},
+      {no:3, itemNo:'16.3', desc:'Cable Arrangement Diagram', ps:'02/03/2026', pe:'30/04/2026', wt:5.0, as:'', ae:'', pct:0},
+      {no:4, itemNo:'16.4', desc:'Grounding System Design', ps:'16/02/2026', pe:'25/04/2026', wt:6.0, as:'', ae:'', pct:0},
+      {no:5, itemNo:'16.5', desc:'Lightning Arrester Design', ps:'16/02/2026', pe:'20/04/2026', wt:5.0, as:'', ae:'', pct:0},
+      {no:6, itemNo:'16.6', desc:'Hook-up Drawing', ps:'23/03/2026', pe:'20/05/2026', wt:5.0, as:'', ae:'', pct:0},
+      {no:7, itemNo:'16.7', desc:'Panel GA Drawing', ps:'02/03/2026', pe:'20/04/2026', wt:6.0, as:'', ae:'', pct:0},
+      {no:8, itemNo:'16.8', desc:'Panel Wiring Diagram', ps:'02/03/2026', pe:'30/04/2026', wt:8.0, as:'', ae:'', pct:0},
+      {no:9, itemNo:'16.9', desc:'I/O Assignment List', ps:'02/03/2026', pe:'20/04/2026', wt:5.0, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'งานลากสายไฟ (Cabling)', ps:'', pe:'', wt:0, as:'', ae:'', pct:0},
+      {no:10, itemNo:'19.5', desc:'Cable Pulling & Terminate', ps:'10/06/2026', pe:'30/06/2026', wt:20.0, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'งานติดตั้ง Instrument', ps:'', pe:'', wt:0, as:'', ae:'', pct:0},
+      {no:11, itemNo:'20.1', desc:'Pressure Transmitter Install', ps:'25/05/2026', pe:'30/06/2026', wt:8.0, as:'', ae:'', pct:0},
+      {no:12, itemNo:'20.2', desc:'Temp & Level Transmitter Install', ps:'25/05/2026', pe:'30/06/2026', wt:8.0, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'งานติดตั้งแสงสว่าง & CCTV', ps:'', pe:'', wt:0, as:'', ae:'', pct:0},
+      {no:13, itemNo:'21.1', desc:'ติดตั้งโคมไฟและลากสาย', ps:'01/06/2026', pe:'30/06/2026', wt:6.0, as:'', ae:'', pct:0},
+      {no:14, itemNo:'22.1', desc:'งานติดตั้ง CCTV และลากสาย', ps:'01/06/2026', pe:'30/06/2026', wt:7.0, as:'', ae:'', pct:0}
+  ];
+
+  if(!D.material) D.material = {rows:[], snap:{}, budget:2150000};
+  if(!D.material.rows || !D.material.rows.length) D.material.rows = matTmpl;
+  if(!D.material.snap) D.material.snap={};
+  if(!D.material.budget) D.material.budget = 2150000;
+  
+  if(!D.installation) D.installation = {rows:[], snap:{}, budget:1000000};
+  if(!D.installation.rows || !D.installation.rows.length) D.installation.rows = instTmpl;
+  if(!D.installation.snap) D.installation.snap={};
+  if(!D.installation.budget) D.installation.budget = 1000000;
 }
 
 async function loadData() {
   let pat = sessionStorage.getItem('ghPAT');
-  let headers = pat ? {'Authorization': `token ${pat}`} : {};
+  let headers = {};
+  if (pat) headers['Authorization'] = `token ${pat}`;
+
   try {
     const r = await fetch(API + '?t=' + Date.now(), { headers });
+    
     if (!r.ok) { 
-        if ((r.status === 403 || r.status === 404) && !pat) { patAction = 'load'; $('patMo').classList.add('on'); } else initD(); 
-        renderAll(); return; 
+        if ((r.status === 403 || r.status === 404) && !pat) {
+            patAction = 'load';
+            $('patMo').classList.add('on');
+            toast('GitHub Limit Reached. Enter PAT to load data.', true);
+        } else {
+            initD(); 
+        }
+        renderAll(); 
+        return; 
     }
-    const j = await r.json(); sha = j.sha; 
-    const txt = new TextDecoder('utf-8').decode(Uint8Array.from(atob(j.content.replace(/\n/g, '')), c => c.charCodeAt(0)));
+    
+    const j = await r.json(); 
+    sha = j.sha; 
+    const raw = atob(j.content.replace(/\n/g, ''));
+    const bytes = Uint8Array.from(raw, c => c.charCodeAt(0));
+    const txt = new TextDecoder('utf-8').decode(bytes);
     const d = JSON.parse(txt);
-    if (d.material) { D.material.rows = d.material.rows||[]; D.material.snap = d.material.snap||{}; }
-    if (d.installation) { D.installation.rows = d.installation.rows||[]; D.installation.snap = d.installation.snap||{}; }
-  } catch(e) { initD(); }
+    
+    if (d.material) { 
+        D.material.rows = d.material.rows || []; 
+        D.material.snap = d.material.snap || {}; 
+        D.material.budget = d.material.budget || 2150000;
+    }
+    if (d.installation) { 
+        D.installation.rows = d.installation.rows || []; 
+        D.installation.snap = d.installation.snap || {}; 
+        D.installation.budget = d.installation.budget || 1000000;
+    }
+    toast('✓ Data loaded');
+  } catch(e) { 
+    initD(); 
+  }
   renderAll();
-}
-
-function initD(){
-  const mk=n=>Array.from({length:n},(_,i)=>({no:i+1,itemNo:'',desc:'',ps:'',pe:'',wt:'',as:'',ae:'',pct:''}));
-  if(!D.material.rows.length) D.material.rows=mk(16);
-  if(!D.installation.rows.length) D.installation.rows=mk(16);
 }
 
 async function saveData() {
   let pat = sessionStorage.getItem('ghPAT');
-  if (!pat) { patAction = 'save'; $('patMo').classList.add('on'); return; }
-  $('savBtn').textContent = 'Saving...';
-  if (!sha) { try { const check = await fetch(API, { headers: { Authorization: `token ${pat}` } }); if (check.ok) sha = (await check.json()).sha; } catch(e) {} }
+  if (!pat) { 
+      patAction = 'save';
+      $('patMo').classList.add('on'); 
+      return; 
+  }
+
+  if (!sha) {
+    try {
+      const check = await fetch(API, { headers: { Authorization: `token ${pat}` } });
+      if (check.ok) {
+        const j = await check.json();
+        sha = j.sha;
+      }
+    } catch(e) { console.warn("Could not pre-fetch SHA"); }
+  }
+
+  // Update Budgets from UI if Billing page is active
+  if(document.getElementById('bpg').classList.contains('on')) {
+      D.material.budget = +$('b-m-tot').value || 2150000;
+      D.installation.budget = +$('b-i-tot').value || 1000000;
+  }
+
   const json = JSON.stringify(D, null, 2);
-  let bin=''; new TextEncoder().encode(json).forEach(b=>bin+=String.fromCharCode(b));
+  const bytes = new TextEncoder().encode(json);
+  let bin = ''; bytes.forEach(b => bin += String.fromCharCode(b));
+  const content = btoa(bin);
+  
+  const body = { message: `Update TSG Plan data`, content };
+  if (sha) body.sha = sha;
+
   try {
     const r = await fetch(API, {
-      method: 'PUT', headers: { Authorization: `token ${pat}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: `Update ${plan} data`, content: btoa(bin), sha: sha||undefined })
+      method: 'PUT',
+      headers: { Authorization: `token ${pat}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
     });
-    if (!r.ok) { toast('✗ Save Failed', true); } 
-    else { sha = (await r.json()).content.sha; toast('✓ Synced to Cloud'); }
-  } catch(e) { toast('✗ Network Error', true); }
-  $('savBtn').innerHTML = '💾 Save to Cloud';
+    
+    if (!r.ok) { 
+      const e = await r.json(); 
+      toast('✗ ' + e.message, true); 
+      return; 
+    }
+    
+    const j = await r.json(); 
+    sha = j.content.sha; 
+    toast('✓ Saved');
+  } catch(e) { 
+    toast('✗ Error', true); 
+  }
 }
 
 function confirmPAT(){
-    const v=$('patIn').value.trim(); if(!v) return;
-    sessionStorage.setItem('ghPAT',v); $('patMo').classList.remove('on');
-    patAction === 'save' ? saveData() : loadData();
+    const v=$('patIn').value.trim();
+    if(!v) return;
+    sessionStorage.setItem('ghPAT',v);
+    $('patMo').classList.remove('on');
+    
+    if (patAction === 'save') {
+        saveData();
+    } else {
+        loadData(); 
+    }
 }
 
+// ── NAV ──
 function showPg(id){document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));$(id).classList.add('on');}
 function goPlan(p){
-  plan=p; sessionStorage.setItem('lastPlan',p);
-  $('ptit').innerHTML=p==='material'?'📦 Material Plan':'🔧 Installation Plan';
+  plan=p;
+  sessionStorage.setItem('lastPlan',p);
+  $('ptit').textContent=p==='material'?'📦 Material Plan':'🔧 Installation Plan';
   $('rwn').value=D[p].rows.length;
-  document.querySelectorAll('.tnb').forEach(b=>b.classList.remove('on')); $(p==='material'?'nbM':'nbI').classList.add('on');
-  if(isEd)showEdUI(); showPg('ppg'); renderTable();
+  document.querySelectorAll('.tnb').forEach(b=>b.classList.remove('on'));
+  $(p==='material'?'nbM':'nbI').classList.add('on');
+  if(isEd)showEdUI();
+  showPg('ppg');
+  renderTable();
   requestAnimationFrame(()=>requestAnimationFrame(()=>{renderGantt();renderSC();}));
 }
 function goHome(){
-  plan=null; sessionStorage.removeItem('lastPlan');
+  plan=null;
+  sessionStorage.removeItem('lastPlan');
   document.querySelectorAll('.tnb').forEach(b=>b.classList.remove('on'));
-  showPg('hpg'); requestAnimationFrame(()=>requestAnimationFrame(renderHome));
+  showPg('hpg');
+  requestAnimationFrame(()=>requestAnimationFrame(renderHome));
+}
+function goBilling(){
+  plan=null;
+  sessionStorage.removeItem('lastPlan');
+  document.querySelectorAll('.tnb').forEach(b=>b.classList.remove('on'));
+  $('nbB').classList.add('on');
+  showPg('bpg');
+  
+  // Set Input Values
+  $('b-m-tot').value = D.material.budget || 2150000;
+  $('b-i-tot').value = D.installation.budget || 1000000;
+  
+  updateBilling();
 }
 
+// ── BILLING LOGIC ──
+function formatTHB(num) { return num.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}); }
+function updateBilling() {
+  const mTot = +$('b-m-tot').value || 0;
+  const iTot = +$('b-i-tot').value || 0;
+  
+  const mPct = calcP(D.material.rows);
+  const iPct = calcP(D.installation.rows);
+  
+  $('bil-m-pct').textContent = mPct + '% Progress';
+  $('bil-i-pct').textContent = iPct + '% Progress';
+  
+  // Material 30/60/10
+  $('bil-m-down').textContent = formatTHB(mTot * 0.30);
+  $('bil-m-pool').textContent = formatTHB(mTot * 0.60);
+  $('bil-m-ret').textContent  = formatTHB(mTot * 0.10);
+  $('bil-m-claim').textContent = formatTHB((mTot * 0.60) * (mPct / 100)) + ' THB';
+  
+  // Installation 20/65/7.5/7.5
+  $('bil-i-down').textContent = formatTHB(iTot * 0.20);
+  $('bil-i-pool').textContent = formatTHB(iTot * 0.65);
+  $('bil-i-ret1').textContent = formatTHB(iTot * 0.075);
+  $('bil-i-ret2').textContent = formatTHB(iTot * 0.075);
+  $('bil-i-claim').textContent = formatTHB((iTot * 0.65) * (iPct / 100)) + ' THB';
+}
+
+
 function applyRows(){
-  if(!isEd)return; const n=parseInt($('rwn').value)||16; const rows=D[plan].rows;
-  while(rows.length<n)rows.push({no:rows.length+1,itemNo:'',desc:'',ps:'',pe:'',wt:'',as:'',ae:'',pct:''});
+  if(!isEd)return;
+  const n=parseInt($('rwn').value)||16;
+  const rows=D[plan].rows;
+  while(rows.length<n)rows.push({no:'',itemNo:'',desc:'',ps:'',pe:'',wt:0,as:'',ae:'',pct:0});
   if(rows.length>n)rows.splice(n);
   renderTable(); recordSnap(); renderGantt(); renderSC();
 }
 function resetRows(){
-  if(!isEd||!confirm('Clear all data?'))return;
-  D[plan].rows=Array.from({length:parseInt($('rwn').value)||16},(_,i)=>({no:i+1,itemNo:'',desc:'',ps:'',pe:'',wt:'',as:'',ae:'',pct:''}));
-  renderTable(); recordSnap(); renderGantt(); renderSC(); toast('✓ Reset');
+  if(!isEd||!confirm('Reset to Default Template? ALL CURRENT DATA WILL BE LOST.'))return;
+  D.material.rows = []; D.installation.rows = [];
+  initD();
+  $('rwn').value=D[plan].rows.length;
+  renderTable(); recordSnap(); renderGantt(); renderSC(); toast('✓ Template Loaded');
 }
 
+// ── TABLE ──
 function renderTable(){
-  if(!plan)return; const rows=D[plan].rows, ro=!isEd; const tb=$('tb'); tb.innerHTML='';
+  if(!plan)return;
+  const rows=D[plan].rows,ro=!isEd;
+  const tb=$('tb');tb.innerHTML='';
   rows.forEach((r,i)=>{
+    // Identify Headers (No Wt and No Dates)
+    const isHdr = (!r.wt || r.wt == 0) && !r.ps && !r.pe;
+    
     const tr=document.createElement('tr');
-    // 🌟 Check if this row is a Group Header
-    if (isGroupHeader(r)) tr.className = 'is-group';
+    if(isHdr) tr.className = 'hdr';
     
     tr.innerHTML=`
-      <td><input class="ci r" value="${r.no}" ${ro?'readonly':''} onchange="up(${i},'no',+this.value)"></td>
+      <td><input class="ci r" value="${r.no}" ${ro?'readonly':''} onchange="up(${i},'no',this.value)"></td>
       <td><input class="ci" value="${r.itemNo||''}" ${ro?'readonly':''} onchange="up(${i},'itemNo',this.value)"></td>
-      <td><input class="ci" value="${r.desc||''}" ${ro?'readonly':''} onchange="up(${i},'desc',this.value)" placeholder="Enter description..."></td>
-      <td><input class="ci" type="date" value="${toI(r.ps)}" ${ro?'readonly':''} onchange="upd(${i},'ps',frI(this.value))"></td>
-      <td><input class="ci" type="date" value="${toI(r.pe)}" ${ro?'readonly':''} onchange="upd(${i},'pe',frI(this.value))"></td>
-      <td><input class="ci r" value="${r.wt||''}" ${ro?'readonly':''} onchange="up(${i},'wt',nn(this.value))"></td>
-      <td><input class="ci" type="date" value="${toI(r.as||r.ps)}" ${ro?'readonly':''} onchange="up(${i},'as',frI(this.value))"></td>
-      <td><input class="ci" type="date" value="${toI(r.ae||r.pe)}" ${ro?'readonly':''} onchange="up(${i},'ae',frI(this.value))"></td>
-      <td><input class="ci r" value="${r.pct||''}" ${ro?'readonly':''} onchange="up(${i},'pct',nn(this.value))"></td>`;
+      <td><input class="ci" value="${r.desc||''}" ${ro?'readonly':''} onchange="up(${i},'desc',this.value)"></td>
+      <td><input class="ci" type="date" value="${toI(r.ps)}" ${ro||isHdr?'readonly':''} onchange="upd(${i},'ps',frI(this.value))"></td>
+      <td><input class="ci" type="date" value="${toI(r.pe)}" ${ro||isHdr?'readonly':''} onchange="upd(${i},'pe',frI(this.value))"></td>
+      <td><input class="ci r" value="${r.wt||0}" ${ro||isHdr?'readonly':''} onchange="up(${i},'wt',nn(this.value))"></td>
+      <td><input class="ci" type="date" value="${toI(r.as||r.ps)}" ${ro||isHdr?'readonly':''} onchange="up(${i},'as',frI(this.value))"></td>
+      <td><input class="ci" type="date" value="${toI(r.ae||r.pe)}" ${ro||isHdr?'readonly':''} onchange="up(${i},'ae',frI(this.value))"></td>
+      <td><input class="ci r" value="${r.pct||0}" ${ro||isHdr?'readonly':''} onchange="up(${i},'pct',nn(this.value))"></td>`;
     tb.appendChild(tr);
   });
   updWt();
 }
-
-function up(i,k,v){ D[plan].rows[i][k]=v; updWt(); recordSnap(); renderGantt(); renderSC(); renderTable(); }
-function upd(i,k,v){ 
-    D[plan].rows[i][k]=v; const r=D[plan].rows[i];
-    if(k==='ps'&&!r.as)r.as=v; if(k==='pe'&&!r.ae)r.ae=v;
-    updWt(); recordSnap(); renderGantt(); renderSC(); renderTable(); 
+function up(i,k,v){
+  D[plan].rows[i][k]=v;
+  updWt();
+  recordSnap(); 
+  renderGantt();
+  renderSC();
+  if(k==='wt' || k==='ps' || k==='pe') renderTable(); // Redraw if header status changes
 }
-
+function upd(i,k,v){
+  D[plan].rows[i][k]=v;
+  const r=D[plan].rows[i];
+  if(k==='ps'&&!r.as)r.as=v;if(k==='pe'&&!r.ae)r.ae=v;
+  updWt();
+  recordSnap(); 
+  renderGantt();
+  renderSC();
+  renderTable();
+}
 function updWt(){
-  if(!plan)return; const rows=D[plan].rows;
+  if(!plan)return;
+  const rows=D[plan].rows;
   const s=rows.reduce((a,r)=>a+(+r.wt||0),0);
-  $('wts').textContent=s.toFixed(1)+'%'; $('wts').className=Math.abs(s-100)<0.5?'ok':'wn';
-  $('acn').textContent=rows.filter(r=>(+r.pct||0)>0).length;
+  const el=$('wts');el.textContent=s.toFixed(1)+'%';el.className=Math.abs(s-100)<0.5?'ok':'wn';
+  $('acn').textContent=rows.filter(r=>r.pct>0 && r.wt>0).length;
 }
 
+// ── PASTE ──
 function setupPaste(){
   if(window._pf)document.removeEventListener('paste',window._pf);
   window._pf=e=>{
-    if(!isEd||!plan)return; const tb=$('tb'); if(!tb)return;
-    const inputs=Array.from(tb.querySelectorAll('input')); const si=inputs.indexOf(document.activeElement); if(si<0)return;
-    e.preventDefault(); const txt=(e.clipboardData||window.clipboardData).getData('text'); if(!txt)return;
-    const pr=txt.trim().split(/\r?\n/).map(r=>r.split('\t')); const cols=['no','itemNo','desc','ps','pe','wt','as','ae','pct'];
-    const sr=Math.floor(si/9), sc=si%9; const rows=D[plan].rows;
-    while(rows.length<sr+pr.length)rows.push({no:rows.length+1,itemNo:'',desc:'',ps:'',pe:'',wt:'',as:'',ae:'',pct:''});
+    if(!isEd||!plan)return;
+    const tb=$('tb');if(!tb)return;
+    const inputs=Array.from(tb.querySelectorAll('input'));
+    const si=inputs.indexOf(document.activeElement);if(si<0)return;
+    e.preventDefault();
+    const txt=(e.clipboardData||window.clipboardData).getData('text');if(!txt)return;
+    const pr=txt.trim().split(/\r?\n/).map(r=>r.split('\t'));
+    const cols=['no','itemNo','desc','ps','pe','wt','as','ae','pct'];
+    const sr=Math.floor(si/9),sc=si%9;
+    const rows=D[plan].rows;
+    while(rows.length<sr+pr.length)rows.push({no:'',itemNo:'',desc:'',ps:'',pe:'',wt:0,as:'',ae:'',pct:0});
     pr.forEach((row,ri)=>{
+      const ri2=sr+ri;
       row.forEach((val,ci)=>{
-        const ci2=sc+ci; if(ci2>=cols.length)return;
-        const k=cols[ci2]; let v=val.trim();
-        if('ps pe as ae'.split(' ').includes(k)) v=nd(v); else if('wt pct no'.split(' ').includes(k)) v=nn(v);
-        rows[sr+ri][k]=v;
-        if(k==='ps'&&!rows[sr+ri].as) rows[sr+ri].as=v; if(k==='pe'&&!rows[sr+ri].ae) rows[sr+ri].ae=v;
+        const ci2=sc+ci;if(ci2>=cols.length)return;
+        const k=cols[ci2];let v=val.trim();
+        if('ps pe as ae'.split(' ').includes(k))v=nd(v);
+        else if('wt pct'.split(' ').includes(k))v=nn(v);
+        rows[ri2][k]=v;
+        if(k==='ps'&&!rows[ri2].as)rows[ri2].as=v;
+        if(k==='pe'&&!rows[ri2].ae)rows[ri2].ae=v;
       });
     });
-    $('rwn').value=rows.length; renderTable(); recordSnap(); renderGantt(); renderSC(); toast(`✓ ${pr.length} rows pasted`);
+    $('rwn').value=rows.length;
+    renderTable(); recordSnap(); renderGantt(); renderSC();
+    toast('✓ Pasted '+pr.length+' rows');
   };
   document.addEventListener('paste',window._pf);
 }
 
-// ── GANTT CANVAS ENGINE ──
+// ── GANTT (DYNAMIC MULTI-LINE TEXT WRAPPING + MOBILE RESPONSIVE) ──
 function renderGantt(){
-  const cv=$('cGantt'),sec=$('gsec'); if(!cv||!plan)return;
-  const rows=D[plan].rows; const{start:ps,end:pe,days:td}=getRange(rows); const today=new Date();
+  const cv=$('cGantt'),sec=$('gsec');
+  if(!cv||!plan)return;
+  const rows=D[plan].rows;
+  const{start:ps,end:pe,days:td}=getRange(rows);
+  const today=new Date();
   
   const isMob = window.innerWidth <= 768;
   const secW = sec.getBoundingClientRect().width || sec.offsetWidth || window.innerWidth;
   const W = isMob ? secW : Math.max(secW, 600);
   const LW = Math.floor(W * (isMob ? 0.30 : 0.35)); 
   
-  const HH = isMob ? 30 : 40; const LH = isMob ? 20 : 30; const baseRH = isMob ? 34 : 44;
-  const tmpCtx = cv.getContext('2d'); const maxW = LW - 16;
+  const HH = isMob ? 28 : 34;
+  const LH = isMob ? 20 : 26;
+  const baseRH = isMob ? 30 : 38;
+  
+  const tmpCtx = cv.getContext('2d');
+  const maxW = LW - 10;
   
   const getLines = (ctx, text, maxWidth) => {
-      if(!text) return ['']; const lines = []; let curr = '';
+      if(!text) return [''];
+      const lines = []; let curr = '';
       for(let i=0; i<text.length; i++) {
           const c = text[i];
-          if (ctx.measureText(curr + c).width <= maxWidth) curr += c; 
-          else {
+          if (ctx.measureText(curr + c).width <= maxWidth) { 
+              curr += c; 
+          } else {
               const ls = curr.lastIndexOf(' ');
-              if(ls > 0 && curr.length - ls < 15) { lines.push(curr.substring(0, ls)); curr = curr.substring(ls + 1) + c; } 
-              else { lines.push(curr); curr = c; }
+              if(ls > 0 && curr.length - ls < 15) {
+                   lines.push(curr.substring(0, ls));
+                   curr = curr.substring(ls + 1) + c;
+              } else { 
+                   lines.push(curr); 
+                   curr = c; 
+              }
           }
       }
-      if(curr) lines.push(curr); return lines;
+      if(curr) lines.push(curr);
+      return lines;
   };
 
   const rowData = rows.map((r, i) => {
-      const isGrp = isGroupHeader(r);
       const lbl = (r.itemNo ? r.itemNo + ' ' : '') + (r.desc || '');
-      tmpCtx.font = (isGrp ? '700 ' : '500 ') + (isMob ? '10px ' : '13px ') + FN;
-      const lines = getLines(tmpCtx, lbl || ('Task '+r.no), maxW);
-      return { r, lines, isGrp, rh: Math.max(baseRH, lines.length * (isMob?16:20) + 16) };
+      const isDesc = !!r.desc;
+      const isHdr = (!r.wt || r.wt == 0) && !r.ps && !r.pe;
+      
+      tmpCtx.font = (isDesc ? (isMob?'10px ':'13px ') : (isMob?'italic 9px ':'italic 12px ')) + FN;
+      if (isHdr) tmpCtx.font = 'bold ' + tmpCtx.font; // Headers are bold
+      
+      const lines = getLines(tmpCtx, lbl || ('row '+r.no), maxW);
+      const rh = Math.max(baseRH, lines.length * (isMob?14:18) + 12);
+      return { r, lines, rh, isDesc, isHdr };
   });
 
-  const totalRH = rowData.reduce((sum, rd) => sum + rd.rh, 0); const H = HH + totalRH + LH;
-  const dpr = window.devicePixelRatio || 1;
-  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
-  cv.style.width = W + 'px'; cv.style.height = H + 'px';
+  const totalRH = rowData.reduce((sum, rd) => sum + rd.rh, 0);
+  const H = HH + totalRH + LH;
   
-  const ctx = cv.getContext('2d'); ctx.scale(dpr, dpr);
-  const BW=W-LW; const gx=d=>LW+(d/td)*BW; const dx=d=>gx(dd(ps,d));
+  cv.width=W;cv.height=H;cv.style.width=W+'px';cv.style.height=H+'px';
+  const ctx=cv.getContext('2d');
+  const BW=W-LW;
+  const gx=d=>LW+(d/td)*BW;
+  const dx=d=>gx(dd(ps,d));
   ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
 
-  // Month Headers
+  // Month headers
   const ms=[];let mc=new Date(ps.getFullYear(),ps.getMonth(),1);
   while(mc<=pe){ms.push(new Date(mc));mc=new Date(mc.getFullYear(),mc.getMonth()+1,1);}
   ms.forEach((m,i)=>{
-    const x1=Math.max(LW,dx(m)), x2=Math.min(W,dx(new Date(m.getFullYear(),m.getMonth()+1,1)));
-    ctx.fillStyle = i%2 ? '#f8fafc' : '#f1f5f9'; ctx.fillRect(x1,0,x2-x1,HH);
-    ctx.fillStyle = C_TEXT; ctx.font = '600 '+(isMob?'10px ':'12px ')+FN; ctx.textAlign='center';
-    ctx.fillText(m.toLocaleString('default',{month:'short'})+" '"+String(m.getFullYear()).slice(2),(x1+x2)/2,HH - (isMob?10:14));
-    if(x1>LW){ctx.strokeStyle=C_GRID; ctx.lineWidth=1; ctx.beginPath();ctx.moveTo(x1,HH);ctx.lineTo(x1,H-LH);ctx.stroke();}
+    const x1=Math.max(LW,dx(m)),x2=Math.min(W,dx(new Date(m.getFullYear(),m.getMonth()+1,1)));
+    ctx.fillStyle=i%2?'#1050a0':'#1560a8';ctx.fillRect(x1,0,x2-x1,HH);
+    ctx.fillStyle='#fff';ctx.font='bold '+(isMob?'10px ':'13px ')+FN;ctx.textAlign='center';
+    ctx.fillText(m.toLocaleString('default',{month:'short'})+"'"+String(m.getFullYear()).slice(2),(x1+x2)/2,HH - (isMob?8:10));
+    if(x1>LW){ctx.strokeStyle='#e0e0e0';ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(x1,HH);ctx.lineTo(x1,H-LH);ctx.stroke();}
   });
-  
-  ctx.fillStyle='#f1f5f9'; ctx.fillRect(0,0,LW,HH);
-  ctx.fillStyle=C_TEXT; ctx.font='600 '+(isMob?'10px ':'12px ')+FN; ctx.textAlign='left'; ctx.fillText('Task Description', 12, HH - (isMob?10:14));
-  ctx.strokeStyle=C_GRID; ctx.lineWidth=1; ctx.beginPath();ctx.moveTo(LW,0);ctx.lineTo(LW,H);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(0,HH);ctx.lineTo(W,HH);ctx.stroke();
+  ctx.fillStyle='#1560a8';ctx.fillRect(0,0,LW,HH);
+  ctx.fillStyle='#fff';ctx.font='bold '+(isMob?'10px ':'13px ')+FN;ctx.textAlign='center';ctx.fillText('Item / Description',LW/2,HH - (isMob?8:10));
+  ctx.strokeStyle='#999';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(LW,0);ctx.lineTo(LW,H);ctx.stroke();
 
-  // Rows
+  // Draw dynamically wrapped rows
   let y = HH;
   rowData.forEach((rd, i) => {
-    const r = rd.r; const RH = rd.rh;
+    const r = rd.r;
+    const RH = rd.rh;
     
-    // 🌟 Group Header Background OR Normal Background
-    if (rd.isGrp) {
-        ctx.fillStyle = C_HEAD; ctx.fillRect(0,y,W,RH);
-        ctx.strokeStyle = '#94a3b8'; ctx.lineWidth=1; ctx.beginPath();ctx.moveTo(0,y+RH);ctx.lineTo(W,y+RH);ctx.stroke();
+    // Header Background
+    if (rd.isHdr) {
+        ctx.fillStyle = '#e8f0fb';
     } else {
-        ctx.fillStyle = i%2 ? '#ffffff' : '#f8fafc'; ctx.fillRect(0,y,W,RH);
-        ctx.strokeStyle=C_GRID; ctx.lineWidth=1; ctx.beginPath();ctx.moveTo(0,y+RH);ctx.lineTo(W,y+RH);ctx.stroke();
+        ctx.fillStyle=i%2?'#fff':'#f7f9fb';
     }
     
-    // Text
-    ctx.fillStyle = r.desc ? C_TEXT : C_MUTED; 
-    ctx.font = (rd.isGrp ? '700 ' : '500 ') + (isMob ? '10px ' : '13px ') + FN; 
+    ctx.fillRect(0,y,W,RH);
+    ctx.strokeStyle=rd.isHdr ? '#1560a8' : '#e5e5e5';
+    ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(0,y+RH);ctx.lineTo(W,y+RH);ctx.stroke();
+    
+    // Draw Text lines
+    ctx.fillStyle=rd.isHdr ? '#1560a8' : (rd.isDesc?'#111':'#aaa');
+    let fStyle = (rd.isDesc ? (isMob?'10px ':'13px ') : (isMob?'italic 9px ':'italic 12px ')) + FN;
+    if (rd.isHdr) fStyle = 'bold ' + fStyle;
+    ctx.font = fStyle;
     ctx.textAlign='left';
+    
     rd.lines.forEach((line, li) => {
-        const lh = isMob ? 16 : 20; const startY = y + (RH - (rd.lines.length * lh)) / 2 + (isMob?11:14);
-        ctx.fillText(line, 12, startY + li * lh);
+        const lh = isMob ? 14 : 18;
+        const textStartY = y + (RH - (rd.lines.length * lh)) / 2 + (isMob?10:13);
+        ctx.fillText(line, 5, textStartY + li * lh);
     });
     
-    // 🌟 Skip drawing bars if it is a Group Header
-    if(!rd.isGrp) {
+    // Draw Bars (Skip if Header)
+    if (!rd.isHdr) {
         const s=pd(r.ps),e=pd(r.pe);
         if(s && e){
-            const bx=dx(s), ex=dx(e), bw=Math.max(ex-bx,4);
-            const pH=isMob?8:12, pY=y+(RH - (isMob?18:24))/2; 
-            ctx.fillStyle = C_PLAN; ctx.beginPath(); ctx.roundRect?ctx.roundRect(bx,pY,bw,pH,4):ctx.rect(bx,pY,bw,pH); ctx.fill();
-            
-            const mY=pY+(isMob?7:10); ctx.fillStyle=C_MUTED; ctx.font=(isMob?'9px ':'11px ')+FN;
-            ctx.textAlign='right'; ctx.fillText(fd(r.ps),bx-6,mY); ctx.textAlign='left'; ctx.fillText(fd(r.pe),bx+bw+6,mY);
+            const bx=dx(s),ex=dx(e),bw=Math.max(ex-bx,3);
+            const pH=isMob?10:14, pY=y+(RH - (isMob?20:26))/2; 
+            ctx.fillStyle='#1560a8';
+            ctx.beginPath();if(ctx.roundRect)ctx.roundRect(bx,pY,bw,pH,3);else ctx.rect(bx,pY,bw,pH);ctx.fill();
+            if(bw>26){ctx.fillStyle='#fff';ctx.font='bold '+(isMob?'8px ':'10px ')+FN;ctx.textAlign='center';ctx.fillText(dd(s,e)+1+'d',bx+bw/2,pY+(isMob?8:10));}
+            const mY=pY+(isMob?8:11);
+            ctx.fillStyle='#666';ctx.font=(isMob?'8px ':'10px ')+FN;
+            ctx.textAlign='right';ctx.fillText(fd(r.ps),bx-3,mY);
+            ctx.textAlign='left';ctx.fillText(fd(r.pe),bx+bw+3,mY);
             
             const as=pd(r.as||r.ps),ae=pd(r.ae||r.pe);
             if(as && ae){
-                const ax=dx(as), aex=dx(ae), aw=Math.max(aex-ax,4);
-                const aH=isMob?6:8, aY=pY+pH+2;
-                ctx.fillStyle = C_ACT; ctx.beginPath(); ctx.roundRect?ctx.roundRect(ax,aY,aw,aH,4):ctx.rect(ax,aY,aw,aH); ctx.fill();
+                const ax=dx(as),aex=dx(ae),aw=Math.max(aex-ax,3);
+                const aH=isMob?8:10, aY=pY+pH+2;
+                ctx.fillStyle='#FFD700';
+                ctx.beginPath();if(ctx.roundRect)ctx.roundRect(ax,aY,aw,aH,3);else ctx.rect(ax,aY,aw,aH);ctx.fill();
                 const pct=+r.pct||0;
                 if(pct>0){
                     const rx=ax+(pct/100)*aw, mAY=aY+aH/2;
-                    ctx.strokeStyle='#1e293b'; ctx.lineWidth=isMob?2:3; ctx.lineCap='round';
+                    ctx.strokeStyle='#000';ctx.lineWidth=isMob?2:3;ctx.lineCap='round';
                     ctx.beginPath();ctx.moveTo(ax,mAY);ctx.lineTo(rx,mAY);ctx.stroke();
-                    ctx.fillStyle='#1e293b'; ctx.font='700 '+(isMob?'9px ':'11px ')+FN; ctx.textAlign='right';
-                    ctx.fillText(pct+'%',ax-6,aY+(isMob?7:8));
+                    ctx.lineCap='butt';ctx.lineWidth=1;
+                    ctx.fillStyle='#000';ctx.font='bold '+(isMob?'8px ':'10px ')+FN;ctx.textAlign='right';
+                    ctx.fillText(pct+'%',ax-3,aY+(isMob?7:8));
                 }
             }
         }
@@ -672,56 +1083,77 @@ function renderGantt(){
     y += RH;
   });
 
-  // Today Line
-  {const tc=today<ps?ps:today>pe?pe:today, tx=dx(tc);
-  ctx.strokeStyle=C_TODAY; ctx.lineWidth=2; ctx.setLineDash([4,4]);
+  // Today line on top
+  {const tc=today<ps?ps:today>pe?pe:today,tx=dx(tc);
+  ctx.strokeStyle='#c00';ctx.lineWidth=2;ctx.setLineDash([5,3]);
   ctx.beginPath();ctx.moveTo(tx,HH);ctx.lineTo(tx,H-LH);ctx.stroke();ctx.setLineDash([]);
-  ctx.fillStyle=C_TODAY; ctx.font='700 '+(isMob?'10px ':'12px ')+FN; ctx.textAlign='center'; ctx.fillText('TODAY',tx,HH+(isMob?12:16));}
+  ctx.fillStyle='#c00';ctx.font='bold '+(isMob?'9px ':'11px ')+FN;ctx.textAlign='center';ctx.fillText('TODAY',tx,HH+(isMob?10:13));}
 
   // Legend
-  ctx.fillStyle='#ffffff'; ctx.fillRect(0,H-LH,W,LH);
-  const ly=H-LH+(isMob?12:16);
-  ctx.fillStyle=C_PLAN; ctx.roundRect?ctx.roundRect(LW+12,ly-8,24,10,3):ctx.fillRect(LW+12,ly-8,24,10);
-  ctx.fillStyle=C_TEXT; ctx.font='500 '+(isMob?'10px ':'12px ')+FN; ctx.textAlign='left'; ctx.fillText('Plan',LW+44,ly);
-  ctx.fillStyle=C_ACT; ctx.roundRect?ctx.roundRect(LW+90,ly-8,24,10,3):ctx.fillRect(LW+90,ly-8,24,10);
-  ctx.fillStyle=C_TEXT; ctx.fillText('Actual',LW+122,ly);
-  ctx.strokeStyle='#1e293b'; ctx.lineWidth=3; ctx.beginPath();ctx.moveTo(LW+94,ly-3);ctx.lineTo(LW+110,ly-3);ctx.stroke();
+  ctx.fillStyle='#f4f6f8';ctx.fillRect(0,H-LH,W,LH);
+  ctx.strokeStyle='#ddd';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,H-LH);ctx.lineTo(W,H-LH);ctx.stroke();
+  const ly=H-LH+(isMob?7:9);
+  ctx.fillStyle='#1560a8';ctx.fillRect(LW+8,ly-5,22,9);
+  ctx.fillStyle='#333';ctx.font=(isMob?'9px ':'11px ')+FN;ctx.textAlign='left';ctx.fillText('Plan',LW+34,ly+(isMob?3:2));
+  ctx.fillStyle='#FFD700';ctx.fillRect(LW+(isMob?60:74),ly-5,22,9);ctx.strokeStyle='#aaa';ctx.lineWidth=.5;ctx.strokeRect(LW+(isMob?60:74),ly-5,22,9);
+  ctx.fillStyle='#333';ctx.fillText('Actual',LW+(isMob?86:100),ly+(isMob?3:2));
+  ctx.strokeStyle='#000';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(LW+(isMob?62:76),ly);ctx.lineTo(LW+(isMob?80:94),ly);ctx.stroke();
+  ctx.lineWidth=1;ctx.fillStyle='#333';ctx.fillText('(black=Act%)',LW+(isMob?124:148),ly+(isMob?3:2));
 }
 
-// ── S-CURVE CANVAS ENGINE ──
+// ── S-CURVE (POWERED BY SNAPSHOT ENGINE) ──
 function buildC(rows, snapData){
-  const {start:ps, days:td} = getRange(rows); const tw = rows.reduce((s,r)=>s+(+r.wt||0),0);
-  const pl = new Array(td).fill(0); const ac = new Array(td).fill(0);
-  const today = new Date(); const todD = Math.min(td-1, Math.max(0, dd(ps, today)));
+  const {start:ps, days:td} = getRange(rows);
+  const tw = rows.reduce((s,r)=>s+(+r.wt||0),0);
+  const pl = new Array(td).fill(0);
+  const ac = new Array(td).fill(0);
+  const today = new Date();
+  const todD = Math.min(td-1, Math.max(0, dd(ps, today)));
 
+  // 1. Build Plan Curve (pl)
   if(tw>0){
     rows.forEach(r=>{
-      const w=(+r.wt||0)/tw; if(!w)return; const s=pd(r.ps), e=pd(r.pe); if(!s||!e)return;
-      const sd=Math.max(0,dd(ps,s)), ed=Math.min(td-1,dd(ps,e)); const sp=ed-sd+1; if(sp<=0)return;
+      const w=(+r.wt||0)/tw; if(!w)return;
+      const s=pd(r.ps), e=pd(r.pe); if(!s||!e)return;
+      const sd=Math.max(0,dd(ps,s)), ed=Math.min(td-1,dd(ps,e));
+      const sp=ed-sd+1; if(sp<=0)return;
       for(let d=sd;d<=ed;d++) pl[d] += w/sp;
     });
     for(let d=1;d<td;d++) pl[d] += pl[d-1];
   }
 
+  // 2. Build Actual Curve (ac) from Snapshot Memory
   const snaps = JSON.parse(JSON.stringify(snapData || {})); 
   const tStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
   snaps[tStr] = tw > 0 ? calcP(rows) : 0; 
 
   const snapDates = Object.keys(snaps).sort((a,b) => new Date(a) - new Date(b));
+
   if (snapDates.length > 0) {
-    let snapPts = snapDates.map(ds => ({ day: dd(ps, new Date(ds)), val: snaps[ds] / 100 })).sort((a,b)=>a.day - b.day);
+    let snapPts = snapDates.map(ds => {
+       return { day: dd(ps, new Date(ds)), val: snaps[ds] / 100 };
+    }).sort((a,b)=>a.day - b.day);
+
     snapPts = snapPts.filter((v,i,a)=> i===0 || v.day !== a[i-1].day);
 
     if (snapPts.length > 0) {
         let ptIdx = 0;
         for(let d=0; d<=todD; d++){
             if (d < 0) continue; 
-            if (d <= snapPts[0].day) ac[d] = snapPts[0].day <= 0 ? snapPts[0].val : (d / snapPts[0].day) * snapPts[0].val;
-            else if (ptIdx < snapPts.length - 1 && d > snapPts[ptIdx+1].day) { ptIdx++; d--; } 
-            else if (ptIdx < snapPts.length - 1) {
+            
+            if (d <= snapPts[0].day) {
+                if (snapPts[0].day <= 0) ac[d] = snapPts[0].val;
+                else ac[d] = (d / snapPts[0].day) * snapPts[0].val;
+            } else if (ptIdx < snapPts.length - 1 && d > snapPts[ptIdx+1].day) {
+                ptIdx++;
+                d--; 
+            } else if (ptIdx < snapPts.length - 1) {
                 const p1 = snapPts[ptIdx], p2 = snapPts[ptIdx+1];
-                ac[d] = p1.val + ((d - p1.day) / (p2.day - p1.day)) * (p2.val - p1.val);
-            } else ac[d] = snapPts[snapPts.length-1].val;
+                const ratio = (d - p1.day) / (p2.day - p1.day);
+                ac[d] = p1.val + ratio * (p2.val - p1.val);
+            } else {
+                ac[d] = snapPts[snapPts.length-1].val;
+            }
         }
     }
   }
@@ -731,31 +1163,44 @@ function buildC(rows, snapData){
 function drawSC(cvId,rows,snapData,pc,ac_color){
   const cv=$(cvId);if(!cv)return;
   const W=cv.parentElement.getBoundingClientRect().width||cv.parentElement.offsetWidth||400;
-  const H=parseInt(cv.getAttribute('height'))||200; if(W<10)return;
-  
-  const dpr = window.devicePixelRatio || 1;
-  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
-  cv.style.width = W + 'px'; cv.style.height = H + 'px';
-  const ctx = cv.getContext('2d'); ctx.scale(dpr, dpr);
-  
+  const H=parseInt(cv.getAttribute('height'))||200;
+  if(W<10)return;
+  cv.width=Math.round(W);cv.height=H;
+  const ctx=cv.getContext('2d');
   ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
-  const PL=45, PR=20, PT=30, PB=30;
-  const pw=W-PL-PR, ph=H-PT-PB; const px1=PL, py1=PT, px2=PL+pw, py2=PT+ph;
-  const{pl,ac:act,td,ps}=buildC(rows, snapData); const{start:pst,end:pen}=getRange(rows);
-  const today=new Date(); const todD=Math.min(td-1,Math.max(0,dd(pst,today)));
-
-  ctx.fillStyle=C_TEXT; ctx.font='700 14px '+FN; ctx.textAlign='left'; 
-  ctx.fillText(cvId==='cSC'?(plan==='material'?'Material S-Curve':'Installation S-Curve'):cvId==='cMat'?'Material Curve':'Installation Curve', px1, py1-10);
   
-  ctx.fillStyle=C_MUTED; ctx.font='500 11px '+FN; ctx.textAlign='right';
-  ctx.fillText('As of: '+today.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}), W-PR, py1-10);
+  const PL=40,PR=30,PT=26,PB=28;
+  const pw=W-PL-PR,ph=H-PT-PB;
+  const px1=PL,py1=PT,px2=PL+pw,py2=PT+ph;
+  const{pl,ac:act,td,ps}=buildC(rows, snapData); 
+  const{start:pst,end:pen}=getRange(rows);
+  const today=new Date();
+  const todD=Math.min(td-1,Math.max(0,dd(pst,today)));
+
+  const tw = rows.reduce((s,r)=>s+(+r.wt||0),0);
+  const overallAct = tw > 0 ? calcP(rows) : 0;
+
+  const baseTitle = cvId==='cSC'?(plan==='material'?'Material S-Curve':'Installation S-Curve'):cvId==='cMat'?'Material S-Curve':'Installation S-Curve';
+  const fullTitle = `${baseTitle} (Progress = ${overallAct}%)`;
+  
+  ctx.fillStyle='#333';ctx.font='bold 12px '+FN;ctx.textAlign='left';ctx.fillText(fullTitle,px1,py1-8);
+  
+  ctx.fillStyle='#666';ctx.font='10px '+FN;ctx.textAlign='right';
+  ctx.fillText('As of: '+today.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}),W-6,16);
+
+  const legY = py1 + 18; 
+  ctx.fillStyle=pc;ctx.fillRect(px1+3,legY-4,14,4);
+  ctx.fillStyle='#555';ctx.font='10px '+FN;ctx.textAlign='left';ctx.fillText('Plan',px1+20,legY);
+  ctx.strokeStyle=ac_color;ctx.lineWidth=2;ctx.setLineDash([5,3]);
+  ctx.beginPath();ctx.moveTo(px1+52,legY-2);ctx.lineTo(px1+66,legY-2);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#555';ctx.fillText('Actual',px1+69,legY);
 
   [0,20,40,60,80,100].forEach(p=>{
     const gy=py2-(p/100)*ph;
-    ctx.strokeStyle=p%100===0?C_GRID:'#f1f5f9'; ctx.lineWidth=1;
-    ctx.setLineDash(p%100===0?[]:[4,4]);
+    ctx.strokeStyle=p%100===0?'#bbb':'#eee';ctx.lineWidth=p%100===0?1:.5;
+    ctx.setLineDash(p%100===0?[]:[3,3]);
     ctx.beginPath();ctx.moveTo(px1,gy);ctx.lineTo(px2,gy);ctx.stroke();
-    ctx.fillStyle=C_MUTED; ctx.font='500 11px '+FN; ctx.textAlign='right'; ctx.fillText(p+'%',px1-8,gy+4);
+    ctx.fillStyle='#888';ctx.font='10px '+FN;ctx.textAlign='right';ctx.fillText(p+'%',px1-3,gy+3.5);
   });
   ctx.setLineDash([]);
 
@@ -763,54 +1208,69 @@ function drawSC(cvId,rows,snapData,pc,ac_color){
   while(mc<=pen){mths.push(new Date(mc));mc=new Date(mc.getFullYear(),mc.getMonth()+1,1);}
   mths.forEach(m=>{
     const gx=px1+(dd(pst,m)/td)*pw;
-    ctx.strokeStyle='#f1f5f9'; ctx.lineWidth=1; ctx.setLineDash([4,4]);
+    ctx.strokeStyle='#eee';ctx.lineWidth=.5;ctx.setLineDash([2,3]);
     ctx.beginPath();ctx.moveTo(gx,py1);ctx.lineTo(gx,py2);ctx.stroke();ctx.setLineDash([]);
-    ctx.fillStyle=C_MUTED; ctx.font='500 11px '+FN; ctx.textAlign='center';
-    ctx.fillText(m.toLocaleString('default',{month:'short'}),gx,py2+16);
+    ctx.fillStyle='#888';ctx.font='10px '+FN;ctx.textAlign='center';
+    ctx.fillText(m.toLocaleString('default',{month:'short'}),gx,py2+14);
   });
 
-  ctx.strokeStyle=C_GRID; ctx.lineWidth=1; ctx.beginPath();ctx.moveTo(px1,py1);ctx.lineTo(px1,py2);ctx.lineTo(px2,py2);ctx.stroke();
+  ctx.strokeStyle='#888';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(px1,py1);ctx.lineTo(px1,py2);ctx.lineTo(px2,py2);ctx.stroke();
 
-  const step=Math.max(1,Math.floor(td/300)); const pp=[], ap=[];
+  const step=Math.max(1,Math.floor(td/300));
+  const pp=[],ap=[];
   for(let d=0;d<td;d+=step){
-    pp.push([px1+(d/td)*pw, py2-pl[d]*ph]);
-    if(d<=todD) ap.push([px1+(d/td)*pw, py2-act[d]*ph]);
+    pp.push([px1+(d/td)*pw,py2-pl[d]*ph]);
+    if(d<=todD)ap.push([px1+(d/td)*pw,py2-act[d]*ph]);
   }
+
   if(pp.length){
     ctx.beginPath();ctx.moveTo(pp[0][0],py2);pp.forEach(([x,y])=>ctx.lineTo(x,y));
     ctx.lineTo(pp[pp.length-1][0],py2);ctx.closePath();
-    ctx.fillStyle=pc+'1A'; ctx.fill();
+    ctx.fillStyle=pc+'22';ctx.fill();
   }
 
-  const dl=(pts,col,dash,w)=>{if(!pts.length)return;ctx.strokeStyle=col;ctx.lineWidth=w;ctx.lineJoin='round';ctx.setLineDash(dash||[]);ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);pts.forEach(([x,y])=>ctx.lineTo(x,y));ctx.stroke();ctx.setLineDash([]);};
-  dl(pp,pc,[],3); dl(ap,ac_color,[6,4],3);
+  const dl=(pts,col,dash)=>{if(!pts.length)return;ctx.strokeStyle=col;ctx.lineWidth=2;ctx.setLineDash(dash||[]);ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);pts.forEach(([x,y])=>ctx.lineTo(x,y));ctx.stroke();ctx.setLineDash([]);};
+  dl(pp,pc);dl(ap,ac_color,[6,3]);
+
+  if(pp.length){const[x,y]=pp[pp.length-1];const pct=Math.round(pl[Math.min(td-1,(pp.length-1)*step)]*100);ctx.fillStyle=pc;ctx.font='bold 10px '+FN;ctx.textAlign='left';ctx.fillText(pct+'%',x+4,y+4);}
+  if(ap.length){const[x,y]=ap[ap.length-1];const pct=Math.round(act[todD]*100);ctx.fillStyle=ac_color;ctx.font='bold 10px '+FN;ctx.textAlign='left';ctx.fillText(pct+'%',x+4,y+4);}
 
   if(today>=pst&&today<=pen){
     const tx=px1+(dd(pst,today)/td)*pw;
-    ctx.strokeStyle=C_TODAY; ctx.lineWidth=1.5; ctx.setLineDash([4,4]);
+    ctx.strokeStyle='#c00';ctx.lineWidth=1;ctx.setLineDash([3,3]);
     ctx.beginPath();ctx.moveTo(tx,py1);ctx.lineTo(tx,py2);ctx.stroke();ctx.setLineDash([]);
   }
 }
 
-function renderSC(){if(!plan)return;drawSC('cSC',D[plan].rows,D[plan].snap,C_PLAN,C_ACT);}
+function renderSC(){if(!plan)return;drawSC('cSC',D[plan].rows,D[plan].snap,plan==='material'?'#1560a8':'#d97706','#2a8a2a');}
 function calcP(rows){const tw=rows.reduce((s,r)=>s+(+r.wt||0),0);if(!tw)return 0;return Math.round(rows.reduce((s,r)=>s+(+r.wt||0)*(+r.pct||0)/100,0)/tw*100);}
 function renderHome(){
-  drawSC('cMat',D.material.rows,D.material.snap,C_PLAN,C_ACT);
-  drawSC('cInst',D.installation.rows,D.installation.snap,C_ACT,C_ACT); 
+  drawSC('cMat',D.material.rows,D.material.snap,'#1560a8','#2a8a2a');
+  drawSC('cInst',D.installation.rows,D.installation.snap,'#d97706','#2a8a2a');
   const mp=calcP(D.material.rows),ip=calcP(D.installation.rows);
-  $('hmp').textContent=mp+'%'; $('hip').textContent=ip+'%'; 
-  $('hmb').style.width=mp+'%'; $('hib').style.width=ip+'%';
+  const se=(id,v)=>{const e=$(id);if(e)e.textContent=v;};
+  const sw=(id,v)=>{const e=$(id);if(e)e.style.width=v+'%';};
+  se('hmp',mp+'%');se('hip',ip+'%');sw('hmb',mp);sw('hib',ip);
 }
 function renderAll(){
-  initD(); const lp=sessionStorage.getItem('lastPlan');
-  if(lp){ requestAnimationFrame(()=>requestAnimationFrame(()=>goPlan(lp))); } 
-  else { requestAnimationFrame(()=>requestAnimationFrame(renderHome)); }
+  initD();
+  const lp=sessionStorage.getItem('lastPlan');
+  if(lp){
+    requestAnimationFrame(()=>requestAnimationFrame(()=>goPlan(lp)));
+  } else {
+    requestAnimationFrame(()=>requestAnimationFrame(renderHome));
+  }
 }
 
-let _rt;
-window.addEventListener('resize',()=>{clearTimeout(_rt);_rt=setTimeout(()=>{renderGantt();renderSC();renderHome();},150);});
+let _rt, _lastW = window.innerWidth;
+window.addEventListener('resize',()=>{
+  if(window.innerWidth === _lastW) return; 
+  _lastW = window.innerWidth;
+  clearTimeout(_rt);
+  _rt=setTimeout(()=>{renderGantt();renderSC();renderHome();},120);
+});
 window.addEventListener('orientationchange',()=>setTimeout(()=>{renderGantt();renderSC();},300));
 </script>
 </body>
 </html>
-
