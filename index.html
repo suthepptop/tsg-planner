@@ -113,7 +113,7 @@ thead th {
 .col-item  { width: 100px; }
 .col-desc  { width: auto;  } 
 .col-date  { width: 135px; } 
-.col-bg    { width: 85px;  text-align: right; } /* Expanded for Budget numbers */
+.col-bg    { width: 85px;  text-align: right; }
 .col-pct   { width: 60px;  text-align: center; }
 
 tbody tr:nth-child(even) {background:#f7f9fb}
@@ -197,7 +197,7 @@ body:not(.ed) .ci {pointer-events:none}
 .print-mode table { width: 100% !important; min-width: 100% !important; table-layout: fixed !important; border-collapse: collapse !important; }
 .print-mode .col-no    { width: 4% !important; text-align: center; }
 .print-mode .col-item  { width: 8% !important; }
-.print-mode .col-desc  { width: 32% !important; }
+.print-mode .col-desc  { width: auto !important; } /* Let it automatically fill space */
 .print-mode .col-date  { width: 11% !important; text-align: center; }
 .print-mode .col-bg    { width: 8% !important; text-align: right; }
 .print-mode .col-pct   { width: 5% !important; text-align: center; }
@@ -399,7 +399,7 @@ body:not(.ed) .ci {pointer-events:none}
           <th class="col-desc">Description</th>
           <th class="col-date">Plan Start</th>
           <th class="col-date">Plan Finish</th>
-          <th class="col-bg">Budget (THB)</th>
+          <th class="col-bg" id="th-bg" style="display:none;">Budget (THB)</th>
           <th class="col-date">Act Start</th>
           <th class="col-date">Act Finish</th>
           <th class="col-pct">Act%</th>
@@ -407,7 +407,10 @@ body:not(.ed) .ci {pointer-events:none}
         <tbody id="tb"></tbody>
       </table>
     </div>
-    <div class="wtb">Total Plan Budget: <span id="wts" style="color:#1560a8;">0 THB</span> &nbsp;|&nbsp; Tasks in Progress: <span id="acn">0</span></div>
+    <div class="wtb">
+        <span id="foot-bg" style="display:none;">Total Plan Budget: <span id="wts" style="color:#1560a8;">0 THB</span> &nbsp;|&nbsp; </span>
+        Tasks in Progress: <span id="acn">0</span>
+    </div>
   </div>
 </div>
 
@@ -475,15 +478,23 @@ function recordSnap() {
   D[plan].snap[tStr] = calcP(D[plan].rows);
 }
 
-// ── EXPORT FUNCTIONS ──
+// ── EXPORT FUNCTIONS (SECURED) ──
 function exportExcel() {
   if(!plan) return;
   const rows = D[plan].rows;
-  let csv = "\ufeffNo.,Item No.,Description,Plan Start,Plan Finish,Budget (THB),Act Start,Act Finish,Act%\n";
+  
+  // SECURE EXPORT: Only Admins get the Budget column
+  let csv = isEd ? 
+    "\ufeffNo.,Item No.,Description,Plan Start,Plan Finish,Budget (THB),Act Start,Act Finish,Act%\n" : 
+    "\ufeffNo.,Item No.,Description,Plan Start,Plan Finish,Act Start,Act Finish,Act%\n";
   
   rows.forEach(r => {
     const desc = (r.desc || '').replace(/"/g, '""');
-    csv += `${r.no || ''},"${r.itemNo || ''}","${desc}",${r.ps || ''},${r.pe || ''},${r.bg || 0},${r.as || ''},${r.ae || ''},${r.pct || 0}\n`;
+    if (isEd) {
+        csv += `${r.no || ''},"${r.itemNo || ''}","${desc}",${r.ps || ''},${r.pe || ''},${r.bg || 0},${r.as || ''},${r.ae || ''},${r.pct || 0}\n`;
+    } else {
+        csv += `${r.no || ''},"${r.itemNo || ''}","${desc}",${r.ps || ''},${r.pe || ''},${r.as || ''},${r.ae || ''},${r.pct || 0}\n`;
+    }
   });
   
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -579,7 +590,14 @@ function onLogin(resp){
   $('uinfo').textContent=p.email;
   $('gBtn').style.display='none';
   $('soBtn').style.display='inline-block';
-  if(isEd){document.body.classList.add('ed');showEdUI();setupPaste();}
+  if(isEd){
+      document.body.classList.add('ed');
+      showEdUI();
+      setupPaste();
+  } else {
+      // If someone else logs in, ensure sensitive fields remain hidden
+      signOut(); 
+  }
   if(plan)renderTable();
   toast(isEd?'✓ Editor':'✓ View only');
 }
@@ -588,7 +606,11 @@ function showEdUI(){
   $('savBtn').style.display='inline-block';
   $('rstBtn').style.display='inline-block';
   $('rwc').style.display='flex';
-  $('nbB').style.display='inline-block'; // Show Billing
+  
+  // UNHIDE CONFIDENTIAL ELEMENTS FOR ADMIN
+  $('nbB').style.display='inline-block'; // Show Billing Button
+  $('th-bg').style.display='table-cell'; // Show Table Budget Header
+  $('foot-bg').style.display='inline';   // Show Footer Total Budget
 }
 
 function signOut(){
@@ -599,8 +621,13 @@ function signOut(){
   document.body.classList.remove('ed');
   $('uinfo').textContent='';
   $('gBtn').style.display='block';
+  
+  // HIDE CONFIDENTIAL ELEMENTS
   ['soBtn','savBtn','rstBtn','nbB'].forEach(id=>$(id).style.display='none');
   $('rwc').style.display='none';
+  $('th-bg').style.display='none';
+  $('foot-bg').style.display='none';
+  
   if(plan)renderTable();
 }
 
@@ -805,7 +832,7 @@ async function loadData() {
     }
     if (d.installation) { 
         D.installation.rows = d.installation.rows || []; 
-        migrate(D.installation.rows, 3100000); // Set Installation base default to 3,100,000
+        migrate(D.installation.rows, 3100000); 
         D.installation.snap = d.installation.snap || {}; 
     }
     toast('✓ Data loaded');
@@ -966,13 +993,15 @@ function renderTable(){
     const tr=document.createElement('tr');
     if(isHdr) tr.className = 'hdr';
     
+    const bgTd = isEd ? `<td><input class="ci r" value="${isHdr ? '' : formatInt(r.bg)}" ${ro||isHdr?'readonly':''} onchange="up(${i},'bg',nn(this.value))"></td>` : '';
+    
     tr.innerHTML=`
       <td><input class="ci r" value="${r.no}" ${ro?'readonly':''} onchange="up(${i},'no',this.value)"></td>
       <td><input class="ci" value="${r.itemNo||''}" ${ro?'readonly':''} onchange="up(${i},'itemNo',this.value)"></td>
       <td><input class="ci" value="${r.desc||''}" ${ro?'readonly':''} onchange="up(${i},'desc',this.value)"></td>
       <td><input class="ci" type="date" value="${toI(r.ps)}" ${ro||isHdr?'readonly':''} onchange="upd(${i},'ps',frI(this.value))"></td>
       <td><input class="ci" type="date" value="${toI(r.pe)}" ${ro||isHdr?'readonly':''} onchange="upd(${i},'pe',frI(this.value))"></td>
-      <td><input class="ci r" value="${isHdr ? '' : formatInt(r.bg)}" ${ro||isHdr?'readonly':''} onchange="up(${i},'bg',nn(this.value))"></td>
+      ${bgTd}
       <td><input class="ci" type="date" value="${toI(r.as||r.ps)}" ${ro||isHdr?'readonly':''} onchange="up(${i},'as',frI(this.value))"></td>
       <td><input class="ci" type="date" value="${toI(r.ae||r.pe)}" ${ro||isHdr?'readonly':''} onchange="up(${i},'ae',frI(this.value))"></td>
       <td><input class="ci r" value="${isHdr ? '' : (r.pct||0)}" ${ro||isHdr?'readonly':''} onchange="up(${i},'pct',nn(this.value))"></td>`;
