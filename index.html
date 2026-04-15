@@ -717,26 +717,28 @@ function exportPDF(){
     const scH=scCanvas.height*scRatio;
     pdf.addImage(scCanvas.toDataURL('image/jpeg',0.92),'JPEG',margin,margin,contentW,scH);
 
-    // GANTT: slice directly from canvas into A4 pages
+    // GANTT: slice directly from canvas, continuing after S-curve
     const ganttRatio=contentW/ganttCanvas.width;
-    const pageCanvasH=(pH-margin*2)/ganttRatio; // how many canvas px fit per page
     let ganttY=0;
-    let firstGanttPage=true;
-    let startY=margin+scH+8; // y position after S-curve on first page
+    let currentPageY=margin+scH+4; // continue right after S-curve
 
     while(ganttY<ganttCanvas.height){
-      const availPt = firstGanttPage ? (pH-startY-margin) : (pH-margin*2);
-      const availPx = availPt/ganttRatio;
+      const availPt=pH-currentPageY-margin;
+      const availPx=availPt/ganttRatio;
       const sliceH=Math.min(availPx, ganttCanvas.height-ganttY);
+      if(sliceH<=0){ pdf.addPage(); currentPageY=margin; continue; }
       const tmp=document.createElement('canvas');
       tmp.width=ganttCanvas.width;
       tmp.height=Math.ceil(sliceH);
       tmp.getContext('2d').drawImage(ganttCanvas,0,ganttY,ganttCanvas.width,sliceH,0,0,ganttCanvas.width,sliceH);
       const slicePt=sliceH*ganttRatio;
-      if(!firstGanttPage) pdf.addPage();
-      pdf.addImage(tmp.toDataURL('image/jpeg',0.92),'JPEG',margin,firstGanttPage?startY:margin,contentW,slicePt);
+      pdf.addImage(tmp.toDataURL('image/jpeg',0.92),'JPEG',margin,currentPageY,contentW,slicePt);
       ganttY+=sliceH;
-      firstGanttPage=false;
+      currentPageY+=slicePt+4;
+      // If remaining gantt doesn't fit on current page, start new page
+      if(ganttY<ganttCanvas.height && currentPageY+20>pH-margin){
+        pdf.addPage(); currentPageY=margin;
+      }
     }
 
     // TABLE: build in iframe, capture, slice into pages
