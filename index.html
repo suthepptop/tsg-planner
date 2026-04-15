@@ -376,9 +376,6 @@ body:not(.ed) .ci {pointer-events:none}
     <button class="btn btnsm" onclick="goHome()">← Home</button>
     <span class="ptit" id="ptit"></span>
     
-    <button class="btn btnsm" style="margin-left:8px; border-color:#d97706; color:#d97706;" onclick="exportPDF()">📄 PDF</button>
-    <button class="btn btnsm" style="border-color:#2a8a2a; color:#2a8a2a;" onclick="exportExcel()">Excel</button>
-    
     <div class="sp"></div>
     <div class="rwc" id="rwc" style="display:none">
       Rows:<input type="number" id="rwn" min="1" max="300" value="16">
@@ -567,15 +564,16 @@ function exportPDF() {
   renderGantt();
   renderSC();
   setTimeout(() => {
-    const A4W = 794;
-    const A4ContentW = Math.round(A4W * 0.95);
+    const A4_MM = 210;
+    const A4_PX = 794;
     const h = element.scrollHeight;
+    const mmH = (h / A4_PX) * A4_MM;
     const opt = {
-      margin: [5, (A4W - A4ContentW)/2],
+      margin: 0,
       filename: `TSG_${plan}_plan.pdf`,
       image: { type: 'jpeg', quality: 1.0 },
-      html2canvas: { scale: 2, useCORS: true, windowWidth: A4W, width: A4W, height: h, scrollY: 0 },
-      jsPDF: { unit: 'px', format: [A4W, h + 20], orientation: 'portrait' }
+      html2canvas: { scale: 2, useCORS: true, windowWidth: A4_PX, width: A4_PX, height: h, scrollY: 0 },
+      jsPDF: { unit: 'mm', format: [A4_MM, mmH], orientation: 'portrait' }
     };
     html2pdf().set(opt).from(element).save().then(() => {
       toolbar.style.display = 'flex';
