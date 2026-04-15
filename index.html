@@ -561,32 +561,25 @@ function exportPDF() {
   const wtb = element.querySelector('.wtb');
   toolbar.style.display = 'none';
   if(wtb) wtb.style.display = 'none';
-  element.classList.add('print-mode');
-  renderGantt();
-  renderSC();
   setTimeout(() => {
     const opt = {
-      margin: [10, 10, 10, 10],
+      margin: 5,
       filename: `TSG_${plan}_plan.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+      html2canvas: { scale: 1.5, useCORS: true, scrollY: 0, scrollX: 0 },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
-      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+      pagebreak: { mode: 'css', after: '.gs' }
     };
     html2pdf().set(opt).from(element).save().then(() => {
       toolbar.style.display = 'flex';
       if(wtb) wtb.style.display = 'flex';
-      element.classList.remove('print-mode');
-      renderGantt(); renderSC();
       toast('✓ PDF Exported');
     }).catch(() => {
       toolbar.style.display = 'flex';
       if(wtb) wtb.style.display = 'flex';
-      element.classList.remove('print-mode');
-      renderGantt(); renderSC();
       toast('✗ Failed', true);
     });
-  }, 500);
+  }, 300);
 }
 
 function restoreSession() {
