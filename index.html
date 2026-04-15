@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no, viewport-fit=cover">
 <meta http-equiv="Cache-Control" content="no-cache">
 <title>TSG Project Planner</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
@@ -511,38 +513,64 @@ function exportCurrentPDF(){
   else exportHomePDF();
 }
 
-function openPDFTab(html, filename){
-  const blob = new Blob([html], {type:'text/html;charset=utf-8'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.target = '_blank';
-  a.rel = 'noopener';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(()=>URL.revokeObjectURL(url), 5000);
-  toast('✓ PDF ready — use browser Save as PDF');
+// Core: build hidden iframe at fixed width, capture with html2canvas, save with jsPDF
+function captureAndSave(htmlContent, filename){
+  toast('Generating PDF...');
+  const iframe = document.createElement('iframe');
+  iframe.style.cssText = 'position:fixed;top:0;left:0;width:794px;height:1122px;border:none;opacity:0;pointer-events:none;z-index:-1;';
+  document.body.appendChild(iframe);
+  const idoc = iframe.contentDocument || iframe.contentWindow.document;
+  idoc.open();
+  idoc.write(htmlContent);
+  idoc.close();
+  setTimeout(()=>{
+    iframe.style.height = idoc.body.scrollHeight + 'px';
+    const {jsPDF} = window.jspdf;
+    const pdf = new jsPDF({unit:'pt', format:'a4', orientation:'portrait'});
+    const pW = pdf.internal.pageSize.getWidth();   // 595pt
+    const pH = pdf.internal.pageSize.getHeight();  // 842pt
+    const margin = 28; // ~10mm in pt
+    const contentW = pW - margin*2;
+    window.html2canvas(idoc.body,{
+      scale:2, useCORS:true, allowTaint:true,
+      backgroundColor:'#ffffff', logging:false,
+      width:794, windowWidth:794,
+      height:idoc.body.scrollHeight
+    }).then(canvas=>{
+      document.body.removeChild(iframe);
+      const imgH = canvas.height * contentW / canvas.width;
+      const pageH = pH - margin*2;
+      // Get row boundaries for clean page breaks
+      const rows = Array.from(idoc.querySelectorAll('tr'));
+      const bodyTop = idoc.body.getBoundingClientRect ? idoc.body.getBoundingClientRect().top : 0;
+      const scale2 = canvas.height / idoc.body.scrollHeight;
+      const rowEnds = rows.map(r=>(r.offsetTop + r.offsetHeight) * scale2 * (imgH/canvas.height));
+      let yPt=0, page=0;
+      while(yPt < imgH){
+        if(page>0) pdf.addPage();
+        let cutPt = yPt + pageH;
+        if(cutPt < imgH){
+          const snap = rowEnds.filter(y=>y>yPt && y<=cutPt).pop();
+          if(snap) cutPt=snap;
+        } else cutPt=imgH;
+        const slicePt = cutPt - yPt;
+        const srcY = yPt * canvas.height / imgH;
+        const srcH = slicePt * canvas.height / imgH;
+        const tmp = document.createElement('canvas');
+        tmp.width = canvas.width;
+        tmp.height = Math.ceil(srcH);
+        tmp.getContext('2d').drawImage(canvas,0,srcY,canvas.width,srcH,0,0,canvas.width,srcH);
+        pdf.addImage(tmp.toDataURL('image/jpeg',0.92),'JPEG',margin,margin,contentW,slicePt);
+        yPt=cutPt; page++;
+      }
+      pdf.save(filename);
+      toast('✓ Downloaded');
+    }).catch(e=>{console.error(e);toast('✗ Failed',true);});
+  },600);
 }
 
-function pdfBase(){
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8">
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
-<style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:Sarabun,sans-serif}
-body{background:#fff;padding:12mm}
-@page{size:A4 portrait;margin:10mm}
-@media print{body{padding:0}button{display:none!important}}
-.dl{position:fixed;top:10px;right:10px;background:#1560a8;color:#fff;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-size:13px;font-family:Sarabun,sans-serif;z-index:999}
-img{max-width:100%;display:block}
-table{width:100%;border-collapse:collapse;table-layout:fixed}
-th{background:#e8edf2;border:1px solid #bbb;padding:4px 3px;font-size:9px;text-align:left;word-break:break-word}
-td{border:1px solid #ddd;padding:3px;font-size:9px;vertical-align:middle;word-break:break-word}
-tr:nth-child(even) td{background:#f7f9fb}
-thead{display:table-header-group}
-tr{page-break-inside:avoid;break-inside:avoid}
-</style></head><body>
-<button class="dl" onclick="window.print()">⬇ Save as PDF</button>`;
+function pdfStyle(){
+  return `<style>*{box-sizing:border-box;margin:0;padding:0;font-family:Sarabun,sans-serif}body{background:#fff;padding:12px;font-size:11px}img{max-width:100%;display:block}table{width:100%;border-collapse:collapse;table-layout:fixed}th{background:#e8edf2;border:1px solid #bbb;padding:4px 3px;font-size:9px;text-align:left;word-break:break-word}td{border:1px solid #ddd;padding:3px;font-size:9px;vertical-align:middle;word-break:break-word}tr:nth-child(even) td{background:#f7f9fb}</style>`;
 }
 
 function exportHomePDF(){
@@ -552,28 +580,28 @@ function exportHomePDF(){
     const inst=document.getElementById('cInst').toDataURL('image/png');
     const mp=document.getElementById('hmp').textContent;
     const ip=document.getElementById('hip').textContent;
-    const html=pdfBase()+`
-<div style="font-size:14px;font-weight:700;color:#1560a8;margin-bottom:12px">TSG Project Planner — Overview — ${new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</div>
+    const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">${pdfStyle()}</head><body>
+<div style="font-size:14px;font-weight:700;color:#1560a8;margin-bottom:10px">TSG Project Planner — Overview — ${new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</div>
 <img src="${mat}" style="margin-bottom:10px;border:1px solid #ddd">
-<img src="${inst}" style="margin-bottom:14px;border:1px solid #ddd">
-<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;font-size:13px"><span>Material Progress</span><span style="color:#1560a8;font-weight:700">${mp}</span></div>
-<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px"><span>Installation Progress</span><span style="color:#d97706;font-weight:700">${ip}</span></div>
+<img src="${inst}" style="margin-bottom:12px;border:1px solid #ddd">
+<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;font-size:12px"><span>Material Progress</span><span style="color:#1560a8;font-weight:700">${mp}</span></div>
+<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:12px"><span>Installation Progress</span><span style="color:#d97706;font-weight:700">${ip}</span></div>
 </body></html>`;
-    openPDFTab(html,'TSG_home.pdf');
+    captureAndSave(html,'TSG_home.pdf');
   },300);
 }
 
 function exportBillingPDF(){
   const g=id=>document.getElementById(id).textContent;
-  const card=(title,bg,pct,body)=>`<div style="border:1px solid #ddd;border-radius:6px;margin-bottom:14px;overflow:hidden;page-break-inside:avoid"><div style="background:${bg};color:#fff;padding:9px 14px;font-weight:700;font-size:13px;display:flex;justify-content:space-between"><span>${title}</span><span>${pct}</span></div><div style="padding:12px">${body}</div></div>`;
+  const card=(t,bg,pct,body)=>`<div style="border:1px solid #ddd;border-radius:5px;margin-bottom:12px;overflow:hidden"><div style="background:${bg};color:#fff;padding:8px 14px;font-weight:700;font-size:12px;display:flex;justify-content:space-between"><span>${t}</span><span>${pct}</span></div><div style="padding:12px">${body}</div></div>`;
   const row=(l,v,c='#222')=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;font-size:12px"><span style="color:#555">${l}</span><span style="font-weight:700;color:${c}">${v}</span></div>`;
-  const hl=(l,v)=>`<div style="background:#f0fdf4;padding:9px;border-radius:4px;border:1px solid #bbf7d0;margin-top:8px;display:flex;justify-content:space-between"><span style="color:#166534;font-weight:700">${l}</span><span style="color:#15803d;font-weight:700;font-size:14px">${v}</span></div>`;
-  const html=pdfBase()+`
-<div style="font-size:12px;color:#666;display:flex;justify-content:space-between;margin-bottom:14px"><span>${document.getElementById('bil-summary').innerHTML}</span><span>${g('bil-asof')}</span></div>
+  const hl=(l,v)=>`<div style="background:#f0fdf4;padding:8px;border-radius:4px;border:1px solid #bbf7d0;margin-top:8px;display:flex;justify-content:space-between"><span style="color:#166534;font-weight:700;font-size:12px">${l}</span><span style="color:#15803d;font-weight:700;font-size:13px">${v}</span></div>`;
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">${pdfStyle()}</head><body>
+<div style="font-size:11px;color:#666;display:flex;justify-content:space-between;margin-bottom:12px"><span>${document.getElementById('bil-summary').innerHTML}</span><span>${g('bil-asof')}</span></div>
 ${card('📦 Material & Equipment (30/60/10)','#1560a8',g('bil-m-pct'),row('Total Contract Budget',g('bil-m-tot'),'#1560a8')+row('Down Payment (30%)',g('bil-m-down'))+row('Progress Pool (60%)',g('bil-m-pool'))+row('After Cold Test (10%)',g('bil-m-ret'))+hl('Current Claimable ('+g('bil-m-formula')+')',g('bil-m-claim')))}
 ${card('🔧 Design & Installation (20/65/7.5/7.5)','#d97706',g('bil-i-pct'),row('Total Contract Budget',g('bil-i-tot'),'#d97706')+row('Down Payment (20%)',g('bil-i-down'))+row('Progress Pool (65%)',g('bil-i-pool'))+row('Punch List (7.5%)',g('bil-i-ret1'))+row('After Commissioning (7.5%)',g('bil-i-ret2'))+hl('Current Claimable ('+g('bil-i-formula')+')',g('bil-i-claim')))}
 </body></html>`;
-  openPDFTab(html,'TSG_billing.pdf');
+  captureAndSave(html,'TSG_billing.pdf');
 }
 
 function exportPDF(){
@@ -584,29 +612,29 @@ function exportPDF(){
     const rate=plan==='material'?0.60:0.65;
     const scImg=document.getElementById('cSC').toDataURL('image/png');
     const ganttImg=document.getElementById('cGantt').toDataURL('image/png');
-    const colsAdmin=`<colgroup><col style="width:4%"><col style="width:7%"><col style="width:22%"><col style="width:9%"><col style="width:9%"><col style="width:8%"><col style="width:9%"><col style="width:9%"><col style="width:6%"><col style="width:8%"></colgroup>`;
-    const colsView=`<colgroup><col style="width:5%"><col style="width:8%"><col style="width:29%"><col style="width:12%"><col style="width:12%"><col style="width:12%"><col style="width:12%"><col style="width:8%"></colgroup>`;
-    const thAdmin=`<tr><th>No.</th><th>Item</th><th>Description</th><th>Plan Start</th><th>Plan Finish</th><th>Budget</th><th>Act Start</th><th>Act Finish</th><th>Act%</th><th>Claimable</th></tr>`;
-    const thView=`<tr><th>No.</th><th>Item</th><th>Description</th><th>Plan Start</th><th>Plan Finish</th><th>Act Start</th><th>Act Finish</th><th>Act%</th></tr>`;
+    const cA=`<colgroup><col style="width:4%"><col style="width:7%"><col style="width:22%"><col style="width:9%"><col style="width:9%"><col style="width:8%"><col style="width:9%"><col style="width:9%"><col style="width:6%"><col style="width:8%"></colgroup>`;
+    const cV=`<colgroup><col style="width:5%"><col style="width:8%"><col style="width:29%"><col style="width:12%"><col style="width:12%"><col style="width:12%"><col style="width:12%"><col style="width:8%"></colgroup>`;
+    const hA=`<tr><th>No.</th><th>Item</th><th>Description</th><th>Pl.Start</th><th>Pl.Finish</th><th>Budget</th><th>Ac.Start</th><th>Ac.Finish</th><th>Act%</th><th>Claim</th></tr>`;
+    const hV=`<tr><th>No.</th><th>Item</th><th>Description</th><th>Pl.Start</th><th>Pl.Finish</th><th>Ac.Start</th><th>Ac.Finish</th><th>Act%</th></tr>`;
     let tbody='',totBg=0,totClaim=0;
     rows.forEach(r=>{
       const isHdr=(!r.bg||r.bg==0)&&!r.ps&&!r.pe;
       const claim=isHdr?0:(r.bg||0)*(r.pct||0)/100*rate;
       totBg+=(+r.bg||0); totClaim+=claim;
       const bg=isHdr?'background:#e8f0fb;font-weight:700;color:#1560a8;':'';
-      const actS=r.as||r.ps||''; const actE=r.ae||r.pe||'';
+      const aS=r.as||r.ps||''; const aE=r.ae||r.pe||'';
       tbody+=isEd
-        ?`<tr style="${bg}"><td>${r.no||''}</td><td>${r.itemNo||''}</td><td>${r.desc||''}</td><td>${r.ps||''}</td><td>${r.pe||''}</td><td style="text-align:right">${isHdr?'':parseInt(r.bg||0).toLocaleString()}</td><td>${actS}</td><td>${actE}</td><td style="text-align:center">${isHdr?'':Number(r.pct||0).toFixed(2)+'%'}</td><td style="text-align:right;color:#2a8a2a">${isHdr?'':parseInt(claim).toLocaleString()}</td></tr>`
-        :`<tr style="${bg}"><td>${r.no||''}</td><td>${r.itemNo||''}</td><td>${r.desc||''}</td><td>${r.ps||''}</td><td>${r.pe||''}</td><td>${actS}</td><td>${actE}</td><td style="text-align:center">${isHdr?'':Number(r.pct||0).toFixed(2)+'%'}</td></tr>`;
+        ?`<tr style="${bg}"><td>${r.no||''}</td><td>${r.itemNo||''}</td><td>${r.desc||''}</td><td>${r.ps||''}</td><td>${r.pe||''}</td><td style="text-align:right">${isHdr?'':parseInt(r.bg||0).toLocaleString()}</td><td>${aS}</td><td>${aE}</td><td style="text-align:center">${isHdr?'':Number(r.pct||0).toFixed(2)+'%'}</td><td style="text-align:right;color:#2a8a2a">${isHdr?'':parseInt(claim).toLocaleString()}</td></tr>`
+        :`<tr style="${bg}"><td>${r.no||''}</td><td>${r.itemNo||''}</td><td>${r.desc||''}</td><td>${r.ps||''}</td><td>${r.pe||''}</td><td>${aS}</td><td>${aE}</td><td style="text-align:center">${isHdr?'':Number(r.pct||0).toFixed(2)+'%'}</td></tr>`;
     });
-    const totRow=isEd?`<tr style="background:#e8f0fb;font-weight:700"><td colspan="5" style="text-align:right">Total</td><td style="text-align:right;color:#1560a8">${totBg.toLocaleString('en-US',{minimumFractionDigits:2})}</td><td colspan="3"></td><td style="text-align:right;color:#2a8a2a">${totClaim.toLocaleString('en-US',{minimumFractionDigits:2})}</td></tr>`:'';
-    const html=pdfBase()+`
+    const tot=isEd?`<tr style="background:#e8f0fb;font-weight:700"><td colspan="5" style="text-align:right">Total</td><td style="text-align:right;color:#1560a8">${totBg.toLocaleString('en-US',{minimumFractionDigits:2})}</td><td colspan="3"></td><td style="text-align:right;color:#2a8a2a">${totClaim.toLocaleString('en-US',{minimumFractionDigits:2})}</td></tr>`:'';
+    const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">${pdfStyle()}</head><body>
 <div style="font-size:13px;font-weight:700;color:#1560a8;margin-bottom:8px">${plan==='material'?'📦 Material Plan':'🔧 Installation Plan'} — As of ${new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</div>
-<img src="${scImg}" style="margin-bottom:8px;border:1px solid #ddd">
+<img src="${scImg}" style="margin-bottom:6px;border:1px solid #ddd">
 <img src="${ganttImg}" style="margin-bottom:10px;border:1px solid #ddd">
-<table>${isEd?colsAdmin:colsView}<thead>${isEd?thAdmin:thView}</thead><tbody>${tbody}${totRow}</tbody></table>
+<table>${isEd?cA:cV}<thead>${isEd?hA:hV}</thead><tbody>${tbody}${tot}</tbody></table>
 </body></html>`;
-    openPDFTab(html,`TSG_${plan}_plan.pdf`);
+    captureAndSave(html,`TSG_${plan}_plan.pdf`);
   },400);
 }
 
