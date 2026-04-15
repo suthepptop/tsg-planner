@@ -657,7 +657,8 @@ function exportPDF(){
     // just use the already-rendered canvases
     const scImg = document.getElementById('cSC').toDataURL('image/png');
     const ganttImg = document.getElementById('cGantt').toDataURL('image/png');
-    const thAdmin = `<tr><th>No.</th><th>Item No.</th><th>Description</th><th>Plan Start</th><th>Plan Finish</th><th>Budget</th><th>Act Start</th><th>Act Finish</th><th>Act%</th><th>Claimable</th></tr>`;
+    const colsAdmin = `<colgroup><col style="width:4%"><col style="width:7%"><col style="width:22%"><col style="width:9%"><col style="width:9%"><col style="width:8%"><col style="width:9%"><col style="width:9%"><col style="width:6%"><col style="width:8%"></colgroup>`;
+    const colsView  = `<colgroup><col style="width:5%"><col style="width:8%"><col style="width:28%"><col style="width:12%"><col style="width:12%"><col style="width:12%"><col style="width:12%"><col style="width:8%"></colgroup>`;
     const thView  = `<tr><th>No.</th><th>Item No.</th><th>Description</th><th>Plan Start</th><th>Plan Finish</th><th>Act Start</th><th>Act Finish</th><th>Act%</th></tr>`;
     let tbody='', totBg=0, totClaim=0;
     rows.forEach(r=>{
@@ -679,7 +680,7 @@ function exportPDF(){
       <img src="${scImg}" style="width:100%;display:block;margin-bottom:8px;border:1px solid #ddd">
       <img src="${ganttImg}" style="width:100%;display:block;margin-bottom:12px;border:1px solid #ddd">
       <style>*{box-sizing:border-box}table{width:100%;border-collapse:collapse;table-layout:fixed}th{background:#e8edf2;border:1px solid #bbb;padding:4px 3px;font-size:10px;text-align:left;word-wrap:break-word;overflow-wrap:break-word}td{border:1px solid #ddd;padding:3px;font-size:10px;vertical-align:middle;word-wrap:break-word;overflow-wrap:break-word}tr:nth-child(even) td{background:#f7f9fb}tr{page-break-inside:avoid;break-inside:avoid}</style>
-      <table><thead>${isEd?thAdmin:thView}</thead><tbody>${tbody}${totRow}</tbody></table>`;
+      <table style="width:770px;max-width:770px"><thead>${isEd?colsAdmin+thAdmin:colsView+thView}</thead><tbody>${tbody}${totRow}</tbody></table>`;
     document.body.appendChild(div);
     doPDF(div, `TSG_${plan}_plan.pdf`);
   }, 600);
