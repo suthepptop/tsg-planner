@@ -5,7 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no, viewport-fit=cover">
 <meta http-equiv="Cache-Control" content="no-cache">
 <title>TSG Project Planner</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 
 <style>
@@ -267,8 +270,9 @@ tbody tr { page-break-inside: avoid; }
   </div>
   <div class="r">
     <span id="uinfo"></span>
+    <button class="btn btnsm" id="pdfBtn" style="color:#fff;background:transparent;border-color:rgba(255,255,255,.5)" onclick="exportCurrentPDF()">📄 PDF</button>
     <div id="gBtn"></div>
-    <button class="btn btnsm" id="pinBtn" style="color:#fff;background:transparent;border-color:rgba(255,255,255,.5)" onclick="document.getElementById('pinMo').classList.add('on')">🔑 Admin</button>
+    <button class="btn btnsm" id="pinBtn" style="color:#fff;background:transparent;border-color:rgba(255,255,255,.5)" onclick="$('pinMo').classList.add('on')">🔑</button>
     <button class="btn btnsm" id="soBtn" style="display:none;color:#fff;background:transparent;border-color:rgba(255,255,255,.5)" onclick="signOut()">Sign Out</button>
   </div>
 </div>
@@ -375,7 +379,6 @@ tbody tr { page-break-inside: avoid; }
 <div class="pg" id="ppg">
   <div class="ptb" id="planToolbar">
     <button class="btn btnsm" onclick="goHome()">← Home</button>
-    <button class="btn btnsm btnd" id="rstBtn" style="display:none" onclick="resetRows()">✕ Reset</button>
     <span class="ptit" id="ptit"></span>
     
     <div class="sp"></div>
@@ -383,6 +386,7 @@ tbody tr { page-break-inside: avoid; }
       Rows:<input type="number" id="rwn" min="1" max="300" value="16">
       <button class="btn btnsm" onclick="applyRows()">Apply</button>
     </div>
+    <button class="btn btnsm btnd" id="rstBtn" style="display:none" onclick="resetRows()">✕ Reset Template</button>
     <button class="btn btnsm btnp" id="savBtn" style="display:none" onclick="saveData()">💾 Save</button>
   </div>
   
@@ -427,45 +431,26 @@ tbody tr { page-break-inside: avoid; }
     </div>
   </div>
 </div>
-<div class="mo" id="pinMo">
-  <div class="md">
-    <h2>Admin PIN</h2>
-    <p>Enter PIN to access admin mode.</p>
-    <label>PIN</label>
-    <input type="password" id="pinIn" placeholder="••••••" maxlength="6" inputmode="numeric">
-    <div class="ma">
-      <button class="btn" onclick="document.getElementById('pinMo').classList.remove('on')">Cancel</button>
-      <button class="btn btnp" onclick="confirmPIN()">Confirm</button>
-    </div>
-  </div>
-</div>
 <div id="toast"></div>
 
 <script>
 const ADMIN_PIN='260150';
-
 function confirmPIN(){
-  const v=$('pinIn').value.trim();
-  if(v===ADMIN_PIN){
+  if($('pinIn').value.trim()===ADMIN_PIN){
     isEd=true;
     sessionStorage.setItem('isEd','true');
-    sessionStorage.setItem('email','admin');
+    sessionStorage.setItem('email','Admin');
     $('uinfo').textContent='Admin';
     $('pinMo').classList.remove('on');
     $('pinBtn').style.display='none';
-    $('gBtn').style.display='none';
-    $('pinBtn').style.display='none';
     $('soBtn').style.display='inline-block';
     document.body.classList.add('ed');
-    showEdUI();
-    setupPaste();
+    showEdUI(); setupPaste();
     if(plan)renderTable();
-    toast('✓ Admin access granted');
-  } else {
-    toast('✗ Wrong PIN',true);
-    $('pinIn').value='';
-  }
+    toast('✓ Admin');
+  } else { toast('✗ Wrong PIN',true); $('pinIn').value=''; }
 }
+const GCI='695932302309-p1rccufdkq9itb5paam78j1ll1ejb1uu.apps.googleusercontent.com';
 const EE='suthepp.top@gmail.com';
 const API='https://api.github.com/repos/suthepptop/tsg-planner/contents/data.json';
 const RAW='https://raw.githubusercontent.com/suthepptop/tsg-planner/main/data.json';
@@ -537,6 +522,210 @@ function exportExcel() {
   toast('✓ Excel (CSV) Exported');
 }
 
+function exportCurrentPDF(){
+  const lb=sessionStorage.getItem('lastPage');
+  const lp=sessionStorage.getItem('lastPlan');
+  if(lb==='billing') exportBillingPDF();
+  else if(lp) exportPDF();
+  else exportHomePDF();
+}
+
+// Core: build hidden iframe at fixed width, capture with html2canvas, save with jsPDF
+function captureAndSave(htmlContent, filename){
+  toast('Generating PDF...');
+  const iframe = document.createElement('iframe');
+  iframe.style.cssText = 'position:fixed;top:0;left:0;width:794px;height:2000px;border:none;visibility:hidden;z-index:9999;';
+  document.body.appendChild(iframe);
+  const idoc = iframe.contentDocument || iframe.contentWindow.document;
+  idoc.open(); idoc.write(htmlContent); idoc.close();
+  setTimeout(()=>{
+    const totalH = idoc.body.scrollHeight;
+    iframe.style.height = totalH + 'px';
+    const {jsPDF} = window.jspdf;
+    const pdf = new jsPDF({unit:'pt', format:'a4', orientation:'portrait'});
+    const pW = pdf.internal.pageSize.getWidth();
+    const pH = pdf.internal.pageSize.getHeight();
+    const margin = 28;
+    const contentW = pW - margin*2;
+
+    // Get thead height and row positions BEFORE html2canvas
+    const thead = idoc.querySelector('thead');
+    const trows = Array.from(idoc.querySelectorAll('tbody tr, tfoot tr'));
+    const theadH = thead ? thead.offsetHeight : 0;
+    const rowBottoms = trows.map(r => r.offsetTop + r.offsetHeight); // px in doc
+
+    window.html2canvas(idoc.body,{
+      scale:2, useCORS:true, allowTaint:true,
+      backgroundColor:'#ffffff', logging:false,
+      width:794, windowWidth:794, height:totalH
+    }).then(canvas=>{
+      document.body.removeChild(iframe);
+      const ratio = contentW / canvas.width; // pt per canvas-px
+      const imgTotalPt = canvas.height * ratio + 2; // +2pt buffer for last border
+      const pageContentH = pH - margin*2;
+
+      // thead height in pt (scale:2 so *2)
+      const theadPt = theadH * 2 * ratio;
+
+      // row bottom positions in pt
+      const rowEndsPt = rowBottoms.map(y => y * 2 * ratio);
+
+      // Extract thead strip from canvas
+      let theadImg = null;
+      if(thead && theadH > 0){
+        const tc = document.createElement('canvas');
+        tc.width = canvas.width;
+        tc.height = Math.ceil(theadH * 2);
+        tc.getContext('2d').drawImage(canvas, 0, thead.offsetTop*2, canvas.width, theadH*2, 0, 0, canvas.width, theadH*2);
+        theadImg = tc.toDataURL('image/jpeg', 0.95);
+      }
+
+      let yPt = 0, page = 0;
+      while(yPt < imgTotalPt){
+        if(page > 0) pdf.addPage();
+        const extraH = (page > 0 && theadImg) ? theadPt : 0;
+        const avail = pageContentH - extraH;
+        let cutPt = yPt + avail;
+
+        if(cutPt < imgTotalPt){
+          // Snap to last row bottom that fits
+          const fit = rowEndsPt.filter(y => y > yPt && y <= cutPt);
+          if(fit.length > 0){
+            cutPt = fit[fit.length-1];
+          } else {
+            // Force next row boundary even if it slightly overflows
+            const next = rowEndsPt.find(y => y > yPt);
+            if(next) cutPt = next;
+          }
+        } else {
+          cutPt = imgTotalPt; // Always capture full remaining content
+        }
+
+        let drawY = margin;
+
+        // Repeat thead on pages 2+
+        if(page > 0 && theadImg){
+          pdf.addImage(theadImg, 'JPEG', margin, drawY, contentW, theadPt);
+          drawY += theadPt;
+        }
+
+        const slicePt = cutPt - yPt;
+        const srcY = Math.round(yPt / ratio);
+        const srcH = Math.round(slicePt / ratio);
+        const tmp = document.createElement('canvas');
+        tmp.width = canvas.width;
+        tmp.height = srcH;
+        tmp.getContext('2d').drawImage(canvas, 0, srcY, canvas.width, srcH, 0, 0, canvas.width, srcH);
+        pdf.addImage(tmp.toDataURL('image/jpeg',0.92), 'JPEG', margin, drawY, contentW, slicePt);
+
+        yPt = cutPt;
+        page++;
+      }
+      pdf.save(filename);
+      toast('✓ Downloaded');
+    }).catch(e=>{ document.body.removeChild(iframe); console.error(e); toast('✗ Failed',true); });
+  }, 800);
+}
+
+function pdfStyle(){
+  return `<style>*{box-sizing:border-box;margin:0;padding:0;font-family:Sarabun,sans-serif}body{background:#fff;padding:12px;font-size:11px}img{max-width:100%;display:block}table{width:100%;border-collapse:collapse;table-layout:fixed}th{background:#e8edf2;border:1px solid #bbb;padding:4px 3px;font-size:9px;text-align:left;word-break:break-word}td{border:1px solid #ddd;padding:3px;font-size:9px;vertical-align:middle;word-break:break-word}tr:nth-child(even) td{background:#f7f9fb}</style>`;
+}
+
+function exportHomePDF(){
+  renderHome();
+  setTimeout(()=>{
+    const mat=document.getElementById('cMat').toDataURL('image/png');
+    const inst=document.getElementById('cInst').toDataURL('image/png');
+    const mp=document.getElementById('hmp').textContent;
+    const ip=document.getElementById('hip').textContent;
+    const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">${pdfStyle()}</head><body>
+<div style="font-size:14px;font-weight:700;color:#1560a8;margin-bottom:10px">TSG Project Planner — Overview — ${new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</div>
+<img src="${mat}" style="margin-bottom:10px;border:1px solid #ddd">
+<img src="${inst}" style="margin-bottom:12px;border:1px solid #ddd">
+<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;font-size:12px"><span>Material Progress</span><span style="color:#1560a8;font-weight:700">${mp}</span></div>
+<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:12px"><span>Installation Progress</span><span style="color:#d97706;font-weight:700">${ip}</span></div>
+<div class="mo" id="pinMo">
+  <div class="md">
+    <h2>Admin PIN</h2>
+    <input type="password" id="pinIn" placeholder="Enter PIN" maxlength="6" inputmode="numeric" style="width:100%;padding:6px 9px;border:1px solid #ccc;border-radius:4px;font-size:14px;margin-bottom:10px;font-family:Sarabun,sans-serif">
+    <div class="ma">
+      <button class="btn" onclick="$('pinMo').classList.remove('on')">Cancel</button>
+      <button class="btn btnp" onclick="confirmPIN()">Login</button>
+    </div>
+  </div>
+</div>
+</body></html>`;
+    captureAndSave(html,'TSG_home.pdf');
+  },300);
+}
+
+function exportBillingPDF(){
+  const g=id=>document.getElementById(id).textContent;
+  const card=(t,bg,pct,body)=>`<div style="border:1px solid #ddd;border-radius:5px;margin-bottom:12px;overflow:hidden"><div style="background:${bg};color:#fff;padding:8px 14px;font-weight:700;font-size:12px;display:flex;justify-content:space-between"><span>${t}</span><span>${pct}</span></div><div style="padding:12px">${body}</div></div>`;
+  const row=(l,v,c='#222')=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;font-size:12px"><span style="color:#555">${l}</span><span style="font-weight:700;color:${c}">${v}</span></div>`;
+  const hl=(l,v)=>`<div style="background:#f0fdf4;padding:8px;border-radius:4px;border:1px solid #bbf7d0;margin-top:8px;display:flex;justify-content:space-between"><span style="color:#166534;font-weight:700;font-size:12px">${l}</span><span style="color:#15803d;font-weight:700;font-size:13px">${v}</span></div>`;
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">${pdfStyle()}</head><body>
+<div style="font-size:11px;color:#666;display:flex;justify-content:space-between;margin-bottom:12px"><span>${document.getElementById('bil-summary').innerHTML}</span><span>${g('bil-asof')}</span></div>
+${card('📦 Material & Equipment (30/60/10)','#1560a8',g('bil-m-pct'),row('Total Contract Budget',g('bil-m-tot'),'#1560a8')+row('Down Payment (30%)',g('bil-m-down'))+row('Progress Pool (60%)',g('bil-m-pool'))+row('After Cold Test (10%)',g('bil-m-ret'))+hl('Current Claimable ('+g('bil-m-formula')+')',g('bil-m-claim')))}
+${card('🔧 Design & Installation (20/65/7.5/7.5)','#d97706',g('bil-i-pct'),row('Total Contract Budget',g('bil-i-tot'),'#d97706')+row('Down Payment (20%)',g('bil-i-down'))+row('Progress Pool (65%)',g('bil-i-pool'))+row('Punch List (7.5%)',g('bil-i-ret1'))+row('After Commissioning (7.5%)',g('bil-i-ret2'))+hl('Current Claimable ('+g('bil-i-formula')+')',g('bil-i-claim')))}
+<div class="mo" id="pinMo">
+  <div class="md">
+    <h2>Admin PIN</h2>
+    <input type="password" id="pinIn" placeholder="Enter PIN" maxlength="6" inputmode="numeric" style="width:100%;padding:6px 9px;border:1px solid #ccc;border-radius:4px;font-size:14px;margin-bottom:10px;font-family:Sarabun,sans-serif">
+    <div class="ma">
+      <button class="btn" onclick="$('pinMo').classList.remove('on')">Cancel</button>
+      <button class="btn btnp" onclick="confirmPIN()">Login</button>
+    </div>
+  </div>
+</div>
+</body></html>`;
+  captureAndSave(html,'TSG_billing.pdf');
+}
+
+function exportPDF(){
+  if(!plan) return;
+  renderSC(); renderGantt();
+  setTimeout(()=>{
+    const rows=D[plan].rows;
+    const rate=plan==='material'?0.60:0.65;
+    const scImg=document.getElementById('cSC').toDataURL('image/png');
+    const ganttImg=document.getElementById('cGantt').toDataURL('image/png');
+    const cA=`<colgroup><col style="width:4%"><col style="width:7%"><col style="width:22%"><col style="width:9%"><col style="width:9%"><col style="width:8%"><col style="width:9%"><col style="width:9%"><col style="width:6%"><col style="width:8%"></colgroup>`;
+    const cV=`<colgroup><col style="width:5%"><col style="width:8%"><col style="width:29%"><col style="width:12%"><col style="width:12%"><col style="width:12%"><col style="width:12%"><col style="width:8%"></colgroup>`;
+    const hA=`<tr><th>No.</th><th>Item</th><th>Description</th><th>Pl.Start</th><th>Pl.Finish</th><th>Budget</th><th>Ac.Start</th><th>Ac.Finish</th><th>Act%</th><th>Claim</th></tr>`;
+    const hV=`<tr><th>No.</th><th>Item</th><th>Description</th><th>Pl.Start</th><th>Pl.Finish</th><th>Ac.Start</th><th>Ac.Finish</th><th>Act%</th></tr>`;
+    let tbody='',totBg=0,totClaim=0;
+    rows.forEach(r=>{
+      const isHdr=(!r.bg||r.bg==0)&&!r.ps&&!r.pe;
+      const claim=isHdr?0:(r.bg||0)*(r.pct||0)/100*rate;
+      totBg+=(+r.bg||0); totClaim+=claim;
+      const bg=isHdr?'background:#e8f0fb;font-weight:700;color:#1560a8;':'';
+      const aS=r.as||r.ps||''; const aE=r.ae||r.pe||'';
+      tbody+=isEd
+        ?`<tr style="${bg}"><td>${r.no||''}</td><td>${r.itemNo||''}</td><td>${r.desc||''}</td><td>${r.ps||''}</td><td>${r.pe||''}</td><td style="text-align:right">${isHdr?'':parseInt(r.bg||0).toLocaleString()}</td><td>${aS}</td><td>${aE}</td><td style="text-align:center">${isHdr?'':Number(r.pct||0).toFixed(2)+'%'}</td><td style="text-align:right;color:#2a8a2a">${isHdr?'':parseInt(claim).toLocaleString()}</td></tr>`
+        :`<tr style="${bg}"><td>${r.no||''}</td><td>${r.itemNo||''}</td><td>${r.desc||''}</td><td>${r.ps||''}</td><td>${r.pe||''}</td><td>${aS}</td><td>${aE}</td><td style="text-align:center">${isHdr?'':Number(r.pct||0).toFixed(2)+'%'}</td></tr>`;
+    });
+    const tot=isEd?`<tr style="background:#e8f0fb;font-weight:700"><td colspan="5" style="text-align:right">Total</td><td style="text-align:right;color:#1560a8">${totBg.toLocaleString('en-US',{minimumFractionDigits:2})}</td><td colspan="3"></td><td style="text-align:right;color:#2a8a2a">${totClaim.toLocaleString('en-US',{minimumFractionDigits:2})}</td></tr>`:'';
+    const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">${pdfStyle()}</head><body>
+<div style="font-size:13px;font-weight:700;color:#1560a8;margin-bottom:8px">${plan==='material'?'📦 Material Plan':'🔧 Installation Plan'} — As of ${new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</div>
+<img src="${scImg}" style="margin-bottom:6px;border:1px solid #ddd">
+<img src="${ganttImg}" style="margin-bottom:10px;border:1px solid #ddd">
+<table>${isEd?cA:cV}<thead>${isEd?hA:hV}</thead><tbody>${tbody}${tot}</tbody></table>
+<div class="mo" id="pinMo">
+  <div class="md">
+    <h2>Admin PIN</h2>
+    <input type="password" id="pinIn" placeholder="Enter PIN" maxlength="6" inputmode="numeric" style="width:100%;padding:6px 9px;border:1px solid #ccc;border-radius:4px;font-size:14px;margin-bottom:10px;font-family:Sarabun,sans-serif">
+    <div class="ma">
+      <button class="btn" onclick="$('pinMo').classList.remove('on')">Cancel</button>
+      <button class="btn btnp" onclick="confirmPIN()">Login</button>
+    </div>
+  </div>
+</div>
+</body></html>`;
+    captureAndSave(html,`TSG_${plan}_plan.pdf`);
+  },400);
+}
+
 function restoreSession() {
   const storedEd = sessionStorage.getItem('isEd');
   const storedEmail = sessionStorage.getItem('email');
@@ -606,8 +795,8 @@ function signOut(){
   document.body.classList.remove('ed');
   $('uinfo').textContent='';
   $('gBtn').style.display='block';
-  $('pinBtn').style.display='inline-block';
   ['soBtn','savBtn','rstBtn','nbB'].forEach(id=>$(id).style.display='none');
+  $('pinBtn').style.display='inline-block';
   $('rwc').style.display='none';
   $('th-bg').style.display='none';
   $('th-claim').style.display='none';
@@ -1312,5 +1501,15 @@ window.addEventListener('resize',()=>{
 });
 window.addEventListener('orientationchange',()=>setTimeout(()=>{renderGantt();renderSC();},300));
 </script>
+<div class="mo" id="pinMo">
+  <div class="md">
+    <h2>Admin PIN</h2>
+    <input type="password" id="pinIn" placeholder="Enter PIN" maxlength="6" inputmode="numeric" style="width:100%;padding:6px 9px;border:1px solid #ccc;border-radius:4px;font-size:14px;margin-bottom:10px;font-family:Sarabun,sans-serif">
+    <div class="ma">
+      <button class="btn" onclick="$('pinMo').classList.remove('on')">Cancel</button>
+      <button class="btn btnp" onclick="confirmPIN()">Login</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
