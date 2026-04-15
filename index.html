@@ -799,17 +799,21 @@ function exportPDF(){
         const rowEndsPt=rowBottoms.map(y=>y*2*tRatio);
 
         let yPt=0,pg=0;
-        pdf.addPage(); // new page for table
+        // Continue on same page after gantt, only add page if not enough space
+        let firstTableY = currentPageY+4;
+        if(firstTableY + 40 > pH - margin){ pdf.addPage(); firstTableY = margin; }
         while(yPt<tTotalPt){
           if(pg>0) pdf.addPage();
+          const isFirstSlice = pg===0;
           const extraH=(pg>0&&theadImg)?theadPt:0;
-          const avail=pageH2-extraH;
+          const startY2 = isFirstSlice ? firstTableY : margin;
+          const avail = isFirstSlice ? (pH - firstTableY - margin) : (pageH2 - extraH);
           let cutPt=yPt+avail;
           if(cutPt<tTotalPt){
             const fit=rowEndsPt.filter(y=>y>yPt&&y<=cutPt);
             cutPt=fit.length>0?fit[fit.length-1]:(rowEndsPt.find(y=>y>yPt)||cutPt);
           } else cutPt=tTotalPt;
-          let drawY=margin;
+          let drawY=startY2;
           if(pg>0&&theadImg){ pdf.addImage(theadImg,'JPEG',margin,drawY,contentW,theadPt); drawY+=theadPt; }
           const slicePt=cutPt-yPt;
           const tmp2=document.createElement('canvas');
