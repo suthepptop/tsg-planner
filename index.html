@@ -266,6 +266,7 @@ body:not(.ed) .ci {pointer-events:none}
   </div>
   <div class="r">
     <span id="uinfo"></span>
+    <button class="btn btnsm" id="pdfBtn" style="color:#fff;background:transparent;border-color:rgba(255,255,255,.5)" onclick="exportCurrentPDF()">📄 PDF</button>
     <div id="gBtn"></div>
     <button class="btn btnsm" id="soBtn" style="display:none;color:#fff;background:transparent;border-color:rgba(255,255,255,.5)" onclick="signOut()">Sign Out</button>
   </div>
@@ -376,7 +377,7 @@ body:not(.ed) .ci {pointer-events:none}
     <span class="ptit" id="ptit"></span>
     
     <button class="btn btnsm" style="margin-left:8px; border-color:#d97706; color:#d97706;" onclick="exportPDF()">📄 PDF</button>
-    <button class="btn btnsm" style="border-color:#2a8a2a; color:#2a8a2a;" onclick="exportExcel()">📊 Excel</button>
+    <button class="btn btnsm" style="border-color:#2a8a2a; color:#2a8a2a;" onclick="exportExcel()">Excel</button>
     
     <div class="sp"></div>
     <div class="rwc" id="rwc" style="display:none">
@@ -502,39 +503,92 @@ function exportExcel() {
   toast('✓ Excel (CSV) Exported');
 }
 
+function exportCurrentPDF(){
+  const lb = sessionStorage.getItem('lastPage');
+  const lp = sessionStorage.getItem('lastPlan');
+  if(lb==='billing') exportBillingPDF();
+  else if(lp) exportPDF();
+  else exportHomePDF();
+}
+
+function exportHomePDF(){
+  toast('Generating Home PDF...');
+  const element = document.getElementById('hpg');
+  const A4W = 794; // 210mm at 96dpi
+  const origStyle = element.getAttribute('style')||'';
+  element.style.cssText = `width:${A4W}px!important;height:auto!important;overflow:visible!important;display:block!important;`;
+  renderHome();
+  setTimeout(()=>{
+    const h = element.scrollHeight;
+    const opt = {
+      margin:0, filename:'TSG_home.pdf',
+      image:{type:'jpeg',quality:1.0},
+      html2canvas:{scale:2,useCORS:true,windowWidth:A4W,width:A4W,height:h,scrollY:0},
+      jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
+    };
+    html2pdf().set(opt).from(element).save().then(()=>{
+      element.setAttribute('style',origStyle);
+      renderHome();
+      toast('✓ PDF Exported');
+    }).catch(()=>{ element.setAttribute('style',origStyle); toast('✗ Failed',true); });
+  },400);
+}
+
+function exportBillingPDF(){
+  toast('Generating Billing PDF...');
+  const element = document.getElementById('bpg');
+  const A4W = 794;
+  const origStyle = element.getAttribute('style')||'';
+  element.style.cssText = `width:${A4W}px!important;max-width:${A4W}px!important;height:auto!important;overflow:visible!important;`;
+  setTimeout(()=>{
+    const h = element.scrollHeight;
+    const opt = {
+      margin:0, filename:'TSG_billing.pdf',
+      image:{type:'jpeg',quality:1.0},
+      html2canvas:{scale:2,useCORS:true,windowWidth:A4W,width:A4W,height:h,scrollY:0},
+      jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
+    };
+    html2pdf().set(opt).from(element).save().then(()=>{
+      element.setAttribute('style',origStyle);
+      toast('✓ PDF Exported');
+    }).catch(()=>{ element.setAttribute('style',origStyle); toast('✗ Failed',true); });
+  },400);
+}
+
 function exportPDF() {
   if(!plan) return;
-  toast('Generating continuous 100% A4-width PDF...');
+  toast('Generating PDF...');
   const element = document.getElementById('ppg');
   const toolbar = document.getElementById('planToolbar');
+  const wtb = element.querySelector('.wtb');
   toolbar.style.display = 'none';
+  if(wtb) wtb.style.display = 'none';
   element.classList.add('print-mode');
   renderGantt();
   renderSC();
   setTimeout(() => {
-    const w = element.offsetWidth; 
-    const h = element.offsetHeight;
-    const mmWidth = 210;
-    const mmHeight = (h / w) * mmWidth;
+    const A4W = 794;
+    const A4ContentW = Math.round(A4W * 0.95);
+    const h = element.scrollHeight;
     const opt = {
-      margin: 0, 
+      margin: [5, (A4W - A4ContentW)/2],
       filename: `TSG_${plan}_plan.pdf`,
       image: { type: 'jpeg', quality: 1.0 },
-      html2canvas: { scale: 2, useCORS: true, windowWidth: w, width: w, height: h, scrollY: 0 },
-      jsPDF: { unit: 'mm', format: [mmWidth, mmHeight], orientation: 'portrait' } 
+      html2canvas: { scale: 2, useCORS: true, windowWidth: A4W, width: A4W, height: h, scrollY: 0 },
+      jsPDF: { unit: 'px', format: [A4W, h + 20], orientation: 'portrait' }
     };
     html2pdf().set(opt).from(element).save().then(() => {
-      toolbar.style.display = 'flex'; 
+      toolbar.style.display = 'flex';
+      if(wtb) wtb.style.display = 'flex';
       element.classList.remove('print-mode');
-      renderGantt();
-      renderSC();
-      toast('✓ PDF Exported Successfully');
+      renderGantt(); renderSC();
+      toast('✓ PDF Exported');
     }).catch(() => {
-      toolbar.style.display = 'flex'; 
+      toolbar.style.display = 'flex';
+      if(wtb) wtb.style.display = 'flex';
       element.classList.remove('print-mode');
-      renderGantt();
-      renderSC();
-      toast('✗ PDF generation failed', true);
+      renderGantt(); renderSC();
+      toast('✗ Failed', true);
     });
   }, 500);
 }
@@ -554,15 +608,17 @@ function restoreSession() {
 }
 
 window.onload=()=>{
-  // Detect embedded webview (LINE, Facebook, Instagram, etc.)
+  // Auto-redirect webview (LINE, Facebook, etc.) to Chrome/Safari
   const ua = navigator.userAgent;
   const isWebview = /Line|FBAN|FBAV|Instagram|MicroMessenger|WebView|(iPhone|iPod|iPad).*AppleWebKit(?!.*Safari)/i.test(ua);
   if(isWebview){
-    document.body.innerHTML = `<div style="padding:30px;text-align:center;font-family:Sarabun,sans-serif;">
-      <div style="font-size:18px;font-weight:700;color:#c00;margin-bottom:12px;">⚠️ กรุณาเปิดใน Browser</div>
-      <div style="font-size:14px;color:#444;margin-bottom:20px;">แอปนี้ไม่รองรับการ Login ผ่าน LINE / Facebook Browser<br>กรุณาเปิดใน Chrome หรือ Safari</div>
-      <button onclick="window.open(location.href,'_blank')" style="padding:10px 24px;background:#1560a8;color:#fff;border:none;border-radius:6px;font-size:14px;font-family:Sarabun,sans-serif;cursor:pointer;">เปิดใน Browser ภายนอก</button>
-    </div>`;
+    const url = location.href;
+    const isAndroid = /Android/i.test(ua);
+    if(isAndroid){
+      location.href = 'intent://' + url.replace(/^https?:\/\//,'') + '#Intent;scheme=https;package=com.android.chrome;end';
+    } else {
+      location.href = url; // iOS: opens in Safari
+    }
     return;
   }
   restoreSession(); 
