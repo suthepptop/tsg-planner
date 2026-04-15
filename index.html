@@ -156,9 +156,10 @@ body.ed .ci:not([readonly]) {
 body:not(.ed) .ci {pointer-events:none}
 
 .wtb {padding:5px 13px;background:#f4f6f8;border-top:1px solid #ddd;font-size:13px;color:#333;display:flex;gap:18px; width: 100%; font-weight: 700; flex-wrap: wrap; position:fixed; bottom:0; left:0; right:0; z-index:100;}
+thead { display: table-header-group; }
 tbody tr { page-break-inside: avoid; }
 .scs { page-break-after: avoid; }
-.gs { page-break-inside: avoid; }
+.gs { page-break-inside: avoid; page-break-after: avoid; }
 
 /* BILLING DASHBOARD */
 .bil-cont { padding: 20px; display: flex; flex-direction: column; gap: 20px; align-items: center; }
@@ -568,7 +569,7 @@ function exportPDF() {
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 3, useCORS: true, scrollY: 0, scrollX: 0 },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
-      pagebreak: { mode: 'css', after: '.gs' }
+      pagebreak: { mode: ['legacy'], avoid: ['tr', '.scb'] }
     };
     html2pdf().set(opt).from(element).save().then(() => {
       toolbar.style.display = 'flex';
