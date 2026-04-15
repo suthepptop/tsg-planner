@@ -589,6 +589,10 @@ function captureAndSave(htmlContent, filename){
       }
 
       let yPt = 0, page = 0;
+      // Find where table starts in pt
+      const tableEl = idoc.querySelector('table');
+      const tableStartPt = tableEl ? tableEl.offsetTop * 2 * ratio : imgTotalPt;
+
       while(yPt < imgTotalPt){
         if(page > 0) pdf.addPage();
         const extraH = (page > 0 && theadImg) ? theadPt : 0;
@@ -596,17 +600,19 @@ function captureAndSave(htmlContent, filename){
         let cutPt = yPt + avail;
 
         if(cutPt < imgTotalPt){
-          // Snap to last row bottom that fits
-          const fit = rowEndsPt.filter(y => y > yPt && y <= cutPt);
-          if(fit.length > 0){
-            cutPt = fit[fit.length-1];
-          } else {
-            // Force next row boundary even if it slightly overflows
-            const next = rowEndsPt.find(y => y > yPt);
-            if(next) cutPt = next;
+          if(cutPt > tableStartPt && rowEndsPt.length > 0){
+            // We're in the table — snap to row boundary
+            const fit = rowEndsPt.filter(y => y > yPt && y <= cutPt);
+            if(fit.length > 0){
+              cutPt = fit[fit.length-1];
+            } else {
+              const next = rowEndsPt.find(y => y > yPt);
+              if(next) cutPt = next;
+            }
           }
+          // else in image/gantt area — just cut at page boundary, no snapping needed
         } else {
-          cutPt = imgTotalPt; // Always capture full remaining content
+          cutPt = imgTotalPt;
         }
 
         let drawY = margin;
