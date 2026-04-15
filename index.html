@@ -507,12 +507,12 @@ function exportExcel() {
 
 function doPDF(el, filename){
   toast('Generating PDF...');
-  // Force visible
   el.style.position = 'fixed';
   el.style.top = '0';
   el.style.left = '0';
   el.style.zIndex = '9998';
   el.style.background = '#fff';
+  el.style.width = '794px';
 
   setTimeout(()=>{
     html2canvas(el, {
@@ -521,9 +521,9 @@ function doPDF(el, filename){
       allowTaint: true,
       backgroundColor: '#ffffff',
       logging: false,
-      width: el.scrollWidth,
+      width: 794,
       height: el.scrollHeight,
-      windowWidth: el.scrollWidth
+      windowWidth: 794
     }).then(canvas => {
       const {jsPDF} = window.jspdf;
       const pdf = new jsPDF({unit:'mm', format:'a4', orientation:'portrait'});
@@ -533,11 +533,9 @@ function doPDF(el, filename){
       const imgW = pageW - margin * 2;
       const imgH = canvas.height * imgW / canvas.width;
       const pageContentH = pageH - margin * 2;
-      let yOffset = 0;
-      let page = 0;
-      while(yOffset < imgH) {
+      let yOffset = 0, page = 0;
+      while(yOffset < imgH){
         if(page > 0) pdf.addPage();
-        // Slice canvas for this page
         const sliceH = Math.min(pageContentH, imgH - yOffset);
         const srcY = yOffset * canvas.height / imgH;
         const srcH = sliceH * canvas.height / imgH;
@@ -550,14 +548,14 @@ function doPDF(el, filename){
         page++;
       }
       pdf.save(filename);
-      if(el.parentNode && el.id === '') document.body.removeChild(el);
+      if(el.parentNode && !el.id) document.body.removeChild(el);
       toast('✓ Downloaded');
-    }).catch(e => {
+    }).catch(e=>{
       console.error(e);
-      if(el.parentNode && el.id === '') document.body.removeChild(el);
+      if(el.parentNode && !el.id) document.body.removeChild(el);
       toast('✗ Failed', true);
     });
-  }, 300);
+  }, 500);
 }
 
 function exportCurrentPDF(){
@@ -571,12 +569,15 @@ function exportCurrentPDF(){
 function exportHomePDF(){
   renderHome();
   setTimeout(()=>{
-    const div = document.createElement('div');
-    div.style.cssText = 'width:794px;background:#fff;padding:20px;font-family:Sarabun,sans-serif;';
-    const mat = document.getElementById('cMat').toDataURL('image/png');
-    const inst = document.getElementById('cInst').toDataURL('image/png');
+    // Re-render canvases at 794px width for PDF
+    const matC = document.getElementById('cMat');
+    const instC = document.getElementById('cInst');
+    const mat = matC.toDataURL('image/png');
+    const inst = instC.toDataURL('image/png');
     const mp = document.getElementById('hmp').textContent;
     const ip = document.getElementById('hip').textContent;
+    const div = document.createElement('div');
+    div.style.cssText = 'width:794px;background:#fff;padding:20px;font-family:Sarabun,sans-serif;';
     div.innerHTML = `
       <div style="font-size:14px;font-weight:700;color:#1560a8;margin-bottom:12px">TSG Project Planner — Overview — ${new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</div>
       <img src="${mat}" style="width:100%;display:block;margin-bottom:12px;border:1px solid #ddd">
@@ -589,70 +590,67 @@ function exportHomePDF(){
 }
 
 function exportBillingPDF(){
-  const div = document.createElement('div');
-  div.style.cssText = 'width:794px;background:#fff;padding:20px;font-family:Sarabun,sans-serif;';
-  const card = (title, headCls, pct, rows) => `
-    <div style="border:1px solid #ddd;border-radius:6px;margin-bottom:16px;overflow:hidden">
-      <div style="background:${headCls};color:#fff;padding:10px 16px;font-weight:700;font-size:13px;display:flex;justify-content:space-between"><span>${title}</span><span>${pct}</span></div>
-      <div style="padding:14px">${rows}</div>
-    </div>`;
-  const row = (l,v,style='') => `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;font-size:13px"><span style="color:#555">${l}</span><span style="font-weight:700;${style}">${v}</span></div>`;
-  const hl = (l,v) => `<div style="background:#f0fdf4;padding:10px;border-radius:4px;border:1px solid #bbf7d0;margin-top:10px;display:flex;justify-content:space-between"><span style="color:#166534;font-weight:700;font-size:13px">${l}</span><span style="color:#15803d;font-weight:700;font-size:15px">${v}</span></div>`;
   const g = id => document.getElementById(id).textContent;
+  const card = (title,bg,pct,body) => `<div style="border:1px solid #ddd;border-radius:6px;margin-bottom:16px;overflow:hidden"><div style="background:${bg};color:#fff;padding:10px 16px;font-weight:700;font-size:13px;display:flex;justify-content:space-between"><span>${title}</span><span>${pct}</span></div><div style="padding:14px">${body}</div></div>`;
+  const row = (l,v,c='#222') => `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;font-size:13px"><span style="color:#555">${l}</span><span style="font-weight:700;color:${c}">${v}</span></div>`;
+  const hl = (l,v) => `<div style="background:#f0fdf4;padding:10px;border-radius:4px;border:1px solid #bbf7d0;margin-top:10px;display:flex;justify-content:space-between"><span style="color:#166534;font-weight:700;font-size:13px">${l}</span><span style="color:#15803d;font-weight:700;font-size:15px">${v}</span></div>`;
+  const div = document.createElement('div');
+  div.style.cssText = 'width:794px;background:#fff;padding:24px;font-family:Sarabun,sans-serif;';
   div.innerHTML = `
-    <div style="font-size:12px;color:#666;display:flex;justify-content:space-between;margin-bottom:14px"><span>${document.getElementById('bil-summary').innerHTML}</span><span>${g('bil-asof')}</span></div>
+    <div style="font-size:12px;color:#666;display:flex;justify-content:space-between;margin-bottom:16px"><span>${document.getElementById('bil-summary').innerHTML}</span><span>${g('bil-asof')}</span></div>
     ${card('📦 Material & Equipment (30 / 60 / 10)','#1560a8',g('bil-m-pct'),
-      row('Total Contract Budget',g('bil-m-tot'),'color:#1560a8')+
-      row('Down Payment (30%)',g('bil-m-down'))+
-      row('Total Progress Pool (60%)',g('bil-m-pool'))+
-      row('After Cold Test (10%)',g('bil-m-ret'))+
-      hl('Current Claimable ('+g('bil-m-formula')+')',g('bil-m-claim')))}
+      row('Total Contract Budget',g('bil-m-tot'),'#1560a8')+row('Down Payment (30%)',g('bil-m-down'))+row('Total Progress Pool (60%)',g('bil-m-pool'))+row('After Cold Test (10%)',g('bil-m-ret'))+hl('Current Claimable ('+g('bil-m-formula')+')',g('bil-m-claim')))}
     ${card('🔧 Design & Installation (20 / 65 / 7.5 / 7.5)','#d97706',g('bil-i-pct'),
-      row('Total Contract Budget',g('bil-i-tot'),'color:#d97706')+
-      row('Down Payment (20%)',g('bil-i-down'))+
-      row('Total Progress Pool (65%)',g('bil-i-pool'))+
-      row('Punch List (7.5%)',g('bil-i-ret1'))+
-      row('After Commissioning (7.5%)',g('bil-i-ret2'))+
-      hl('Current Claimable ('+g('bil-i-formula')+')',g('bil-i-claim')))}`;
+      row('Total Contract Budget',g('bil-i-tot'),'#d97706')+row('Down Payment (20%)',g('bil-i-down'))+row('Total Progress Pool (65%)',g('bil-i-pool'))+row('Punch List (7.5%)',g('bil-i-ret1'))+row('After Commissioning (7.5%)',g('bil-i-ret2'))+hl('Current Claimable ('+g('bil-i-formula')+')',g('bil-i-claim')))}`;
   document.body.appendChild(div);
   doPDF(div, 'TSG_billing.pdf');
 }
 
 function exportPDF(){
   if(!plan) return;
+  // Render canvases at full 794px for PDF quality
+  const sec = document.getElementById('gsec');
+  const scb = document.querySelector('.scb');
+  const origGW = sec.style.width; const origSW = scb.style.width;
+  sec.style.width = '794px'; scb.style.width = '794px';
   renderSC(); renderGantt();
   setTimeout(()=>{
+    sec.style.width = origGW; scb.style.width = origSW;
+    renderSC(); renderGantt();
     const rows = D[plan].rows;
     const rate = plan === 'material' ? 0.60 : 0.65;
+    // FIX 1: render at 794px so canvas fills full width
+    const tmpSc = document.createElement('canvas');
+    const tmpG = document.createElement('canvas');
+    // just use the already-rendered canvases
     const scImg = document.getElementById('cSC').toDataURL('image/png');
     const ganttImg = document.getElementById('cGantt').toDataURL('image/png');
-    const thAdmin = `<tr><th>No.</th><th>Item No.</th><th>Description</th><th>Plan Start</th><th>Plan Finish</th><th style="text-align:right">Budget</th><th>Act Start</th><th>Act Finish</th><th style="text-align:center">Act%</th><th style="text-align:right">Claimable</th></tr>`;
-    const thView  = `<tr><th>No.</th><th>Item No.</th><th>Description</th><th>Plan Start</th><th>Plan Finish</th><th>Act Start</th><th>Act Finish</th><th style="text-align:center">Act%</th></tr>`;
-    let tbody = ''; let totBg=0,totClaim=0;
+    const thAdmin = `<tr><th>No.</th><th>Item No.</th><th>Description</th><th>Plan Start</th><th>Plan Finish</th><th>Budget</th><th>Act Start</th><th>Act Finish</th><th>Act%</th><th>Claimable</th></tr>`;
+    const thView  = `<tr><th>No.</th><th>Item No.</th><th>Description</th><th>Plan Start</th><th>Plan Finish</th><th>Act Start</th><th>Act Finish</th><th>Act%</th></tr>`;
+    let tbody='', totBg=0, totClaim=0;
     rows.forEach(r=>{
       const isHdr=(!r.bg||r.bg==0)&&!r.ps&&!r.pe;
       const claim=isHdr?0:(r.bg||0)*(r.pct||0)/100*rate;
       totBg+=(+r.bg||0); totClaim+=claim;
       const bg=isHdr?'background:#e8f0fb;font-weight:700;color:#1560a8;':'';
+      // FIX 2: use r.as||r.ps and r.ae||r.pe so actual dates show
+      const actS = r.as||r.ps||''; const actE = r.ae||r.pe||'';
       tbody += isEd
-        ? `<tr style="${bg}"><td style="text-align:center">${r.no||''}</td><td>${r.itemNo||''}</td><td>${r.desc||''}</td><td>${r.ps||''}</td><td>${r.pe||''}</td><td style="text-align:right">${isHdr?'':parseInt(r.bg||0).toLocaleString()}</td><td>${r.as||''}</td><td>${r.ae||''}</td><td style="text-align:center">${isHdr?'':Number(r.pct||0).toFixed(2)+'%'}</td><td style="text-align:right;color:#2a8a2a;font-weight:700">${isHdr?'':parseInt(claim).toLocaleString()}</td></tr>`
-        : `<tr style="${bg}"><td style="text-align:center">${r.no||''}</td><td>${r.itemNo||''}</td><td>${r.desc||''}</td><td>${r.ps||''}</td><td>${r.pe||''}</td><td>${r.as||''}</td><td>${r.ae||''}</td><td style="text-align:center">${isHdr?'':Number(r.pct||0).toFixed(2)+'%'}</td></tr>`;
+        ? `<tr style="${bg}"><td>${r.no||''}</td><td>${r.itemNo||''}</td><td>${r.desc||''}</td><td>${r.ps||''}</td><td>${r.pe||''}</td><td style="text-align:right">${isHdr?'':parseInt(r.bg||0).toLocaleString()}</td><td>${actS}</td><td>${actE}</td><td style="text-align:center">${isHdr?'':Number(r.pct||0).toFixed(2)+'%'}</td><td style="text-align:right;color:#2a8a2a;font-weight:700">${isHdr?'':parseInt(claim).toLocaleString()}</td></tr>`
+        : `<tr style="${bg}"><td>${r.no||''}</td><td>${r.itemNo||''}</td><td>${r.desc||''}</td><td>${r.ps||''}</td><td>${r.pe||''}</td><td>${actS}</td><td>${actE}</td><td style="text-align:center">${isHdr?'':Number(r.pct||0).toFixed(2)+'%'}</td></tr>`;
     });
-    const totRow = isEd?`<tr style="background:#e8f0fb;font-weight:700"><td colspan="5" style="text-align:right;padding:4px 8px">Total</td><td style="text-align:right;color:#1560a8">${totBg.toLocaleString('en-US',{minimumFractionDigits:2})}</td><td colspan="3"></td><td style="text-align:right;color:#2a8a2a">${totClaim.toLocaleString('en-US',{minimumFractionDigits:2})}</td></tr>`:'';
+    const totRow=isEd?`<tr style="background:#e8f0fb;font-weight:700"><td colspan="5" style="text-align:right">Total</td><td style="text-align:right;color:#1560a8">${totBg.toLocaleString('en-US',{minimumFractionDigits:2})}</td><td colspan="3"></td><td style="text-align:right;color:#2a8a2a">${totClaim.toLocaleString('en-US',{minimumFractionDigits:2})}</td></tr>`:'';
     const div = document.createElement('div');
     div.style.cssText='width:794px;background:#fff;padding:12px;font-family:Sarabun,sans-serif;';
     div.innerHTML=`
       <div style="font-size:13px;font-weight:700;color:#1560a8;margin-bottom:8px">${plan==='material'?'📦 Material Plan':'🔧 Installation Plan'} — As of ${new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</div>
-      <img src="${scImg}" style="width:100%;display:block;margin-bottom:8px;border:1px solid #ddd;max-height:180px;object-fit:contain">
+      <img src="${scImg}" style="width:100%;display:block;margin-bottom:8px;border:1px solid #ddd">
       <img src="${ganttImg}" style="width:100%;display:block;margin-bottom:12px;border:1px solid #ddd">
-      <style>th{background:#e8edf2;border:1px solid #bbb;padding:4px 3px;font-size:10px;text-align:left}td{border:1px solid #ddd;padding:3px;font-size:10px;vertical-align:middle}tr:nth-child(even){background:#f7f9fb}</style>
-      <table style="width:100%;border-collapse:collapse;font-size:10px">
-        <thead>${isEd?thAdmin:thView}</thead>
-        <tbody>${tbody}${totRow}</tbody>
-      </table>`;
+      <style>table{width:100%;border-collapse:collapse}th{background:#e8edf2;border:1px solid #bbb;padding:4px 3px;font-size:10px;text-align:left}td{border:1px solid #ddd;padding:3px;font-size:10px;vertical-align:middle}tr:nth-child(even) td{background:#f7f9fb}</style>
+      <table><thead>${isEd?thAdmin:thView}</thead><tbody>${tbody}${totRow}</tbody></table>`;
     document.body.appendChild(div);
     doPDF(div, `TSG_${plan}_plan.pdf`);
-  }, 400);
+  }, 600);
 }
 
 function restoreSession() {
