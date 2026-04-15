@@ -513,45 +513,47 @@ function exportCurrentPDF(){
 function exportHomePDF(){
   toast('Generating Home PDF...');
   const element = document.getElementById('hpg');
-  const A4W = 794; // 210mm at 96dpi
-  const origStyle = element.getAttribute('style')||'';
-  element.style.cssText = `width:${A4W}px!important;height:auto!important;overflow:visible!important;display:block!important;`;
+  const A4W = 794;
+  const origStyle = element.style.cssText;
+  element.style.cssText = `width:${A4W}px!important;max-width:${A4W}px!important;min-width:${A4W}px!important;height:auto!important;overflow:visible!important;display:block!important;position:absolute!important;left:0!important;top:0!important;z-index:9999!important;background:#fff!important;`;
   renderHome();
   setTimeout(()=>{
     const h = element.scrollHeight;
     const opt = {
-      margin:0, filename:'TSG_home.pdf',
-      image:{type:'jpeg',quality:1.0},
-      html2canvas:{scale:2,useCORS:true,windowWidth:A4W,width:A4W,height:h,scrollY:0},
-      jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
+      margin: 10,
+      filename: 'TSG_home.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, windowWidth: A4W, width: A4W, height: h, scrollY: 0, scrollX: 0 },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
     html2pdf().set(opt).from(element).save().then(()=>{
-      element.setAttribute('style',origStyle);
+      element.style.cssText = origStyle;
       renderHome();
       toast('✓ PDF Exported');
-    }).catch(()=>{ element.setAttribute('style',origStyle); toast('✗ Failed',true); });
-  },400);
+    }).catch(()=>{ element.style.cssText = origStyle; toast('✗ Failed',true); });
+  }, 400);
 }
 
 function exportBillingPDF(){
   toast('Generating Billing PDF...');
   const element = document.getElementById('bpg');
   const A4W = 794;
-  const origStyle = element.getAttribute('style')||'';
-  element.style.cssText = `width:${A4W}px!important;max-width:${A4W}px!important;height:auto!important;overflow:visible!important;`;
+  const origStyle = element.style.cssText;
+  element.style.cssText = `width:${A4W}px!important;max-width:${A4W}px!important;min-width:${A4W}px!important;position:absolute!important;left:0!important;top:0!important;z-index:9999!important;background:#fff!important;`;
   setTimeout(()=>{
     const h = element.scrollHeight;
     const opt = {
-      margin:0, filename:'TSG_billing.pdf',
-      image:{type:'jpeg',quality:1.0},
-      html2canvas:{scale:2,useCORS:true,windowWidth:A4W,width:A4W,height:h,scrollY:0},
-      jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
+      margin: 10,
+      filename: 'TSG_billing.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, windowWidth: A4W, width: A4W, height: h, scrollY: 0, scrollX: 0 },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
     html2pdf().set(opt).from(element).save().then(()=>{
-      element.setAttribute('style',origStyle);
+      element.style.cssText = origStyle;
       toast('✓ PDF Exported');
-    }).catch(()=>{ element.setAttribute('style',origStyle); toast('✗ Failed',true); });
-  },400);
+    }).catch(()=>{ element.style.cssText = origStyle; toast('✗ Failed',true); });
+  }, 400);
 }
 
 function exportPDF() {
@@ -560,27 +562,36 @@ function exportPDF() {
   const element = document.getElementById('ppg');
   const toolbar = document.getElementById('planToolbar');
   const wtb = element.querySelector('.wtb');
+  const A4W = 1122; // landscape A4 at 96dpi
   toolbar.style.display = 'none';
   if(wtb) wtb.style.display = 'none';
+  const origStyle = element.style.cssText;
+  element.style.cssText = `width:${A4W}px!important;max-width:${A4W}px!important;min-width:${A4W}px!important;position:absolute!important;left:0!important;top:0!important;z-index:9999!important;background:#fff!important;`;
+  renderGantt(); renderSC();
   setTimeout(() => {
+    const h = element.scrollHeight;
     const opt = {
       margin: 5,
       filename: `TSG_${plan}_plan.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 3, useCORS: true, scrollY: 0, scrollX: 0 },
+      html2canvas: { scale: 2, useCORS: true, windowWidth: A4W, width: A4W, height: h, scrollY: 0, scrollX: 0 },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
       pagebreak: { mode: ['legacy'], avoid: ['tr', '.scb'] }
     };
     html2pdf().set(opt).from(element).save().then(() => {
+      element.style.cssText = origStyle;
       toolbar.style.display = 'flex';
       if(wtb) wtb.style.display = 'flex';
+      renderGantt(); renderSC();
       toast('✓ PDF Exported');
     }).catch(() => {
+      element.style.cssText = origStyle;
       toolbar.style.display = 'flex';
       if(wtb) wtb.style.display = 'flex';
+      renderGantt(); renderSC();
       toast('✗ Failed', true);
     });
-  }, 300);
+  }, 500);
 }
 
 function restoreSession() {
