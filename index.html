@@ -531,20 +531,37 @@ function doPDF(el, filename){
       const pageH = pdf.internal.pageSize.getHeight();
       const margin = 8;
       const imgW = pageW - margin * 2;
-      const imgH = canvas.height * imgW / canvas.width;
-      const pageContentH = pageH - margin * 2;
-      let yOffset = 0, page = 0;
-      while(yOffset < imgH){
+      const scale = canvas.width / imgW; // px per mm
+      const pageCanvasH = (pageH - margin * 2) * scale;
+
+      // Get row positions to avoid cutting mid-row
+      const rows = Array.from(el.querySelectorAll('tr'));
+      const elRect = el.getBoundingClientRect();
+      const rowBreaks = rows.map(r => {
+        const rect = r.getBoundingClientRect();
+        return (rect.bottom - elRect.top) * 2; // *2 for scale:2
+      });
+
+      let srcY = 0, page = 0;
+      while(srcY < canvas.height){
         if(page > 0) pdf.addPage();
-        const sliceH = Math.min(pageContentH, imgH - yOffset);
-        const srcY = yOffset * canvas.height / imgH;
-        const srcH = sliceH * canvas.height / imgH;
+        // Find the best cut point: last row that fits within this page
+        let cutY = srcY + pageCanvasH;
+        if(cutY < canvas.height){
+          // Snap cutY back to just before the next row boundary
+          const bestCut = rowBreaks.filter(y => y > srcY && y <= cutY).pop();
+          if(bestCut) cutY = bestCut;
+        } else {
+          cutY = canvas.height;
+        }
+        const sliceH = cutY - srcY;
         const tmp = document.createElement('canvas');
         tmp.width = canvas.width;
-        tmp.height = Math.ceil(srcH);
-        tmp.getContext('2d').drawImage(canvas, 0, srcY, canvas.width, srcH, 0, 0, canvas.width, srcH);
-        pdf.addImage(tmp.toDataURL('image/jpeg', 0.92), 'JPEG', margin, margin, imgW, sliceH);
-        yOffset += pageContentH;
+        tmp.height = Math.ceil(sliceH);
+        tmp.getContext('2d').drawImage(canvas, 0, srcY, canvas.width, sliceH, 0, 0, canvas.width, sliceH);
+        const imgH = sliceH / scale;
+        pdf.addImage(tmp.toDataURL('image/jpeg', 0.92), 'JPEG', margin, margin, imgW, imgH);
+        srcY = cutY;
         page++;
       }
       pdf.save(filename);
@@ -646,7 +663,7 @@ function exportPDF(){
       <div style="font-size:13px;font-weight:700;color:#1560a8;margin-bottom:8px">${plan==='material'?'📦 Material Plan':'🔧 Installation Plan'} — As of ${new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</div>
       <img src="${scImg}" style="width:100%;display:block;margin-bottom:8px;border:1px solid #ddd">
       <img src="${ganttImg}" style="width:100%;display:block;margin-bottom:12px;border:1px solid #ddd">
-      <style>table{width:100%;border-collapse:collapse}th{background:#e8edf2;border:1px solid #bbb;padding:4px 3px;font-size:10px;text-align:left}td{border:1px solid #ddd;padding:3px;font-size:10px;vertical-align:middle}tr:nth-child(even) td{background:#f7f9fb}</style>
+      <style>table{width:100%;border-collapse:collapse}th{background:#e8edf2;border:1px solid #bbb;padding:4px 3px;font-size:10px;text-align:left}td{border:1px solid #ddd;padding:3px;font-size:10px;vertical-align:middle}tr:nth-child(even) td{background:#f7f9fb}tr{page-break-inside:avoid;break-inside:avoid}</style>
       <table><thead>${isEd?thAdmin:thView}</thead><tbody>${tbody}${totRow}</tbody></table>`;
     document.body.appendChild(div);
     doPDF(div, `TSG_${plan}_plan.pdf`);
