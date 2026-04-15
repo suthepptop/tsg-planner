@@ -538,7 +538,15 @@ function captureAndSave(htmlContent, filename){
   document.body.appendChild(iframe);
   const idoc = iframe.contentDocument || iframe.contentWindow.document;
   idoc.open(); idoc.write(htmlContent); idoc.close();
-  setTimeout(()=>{
+
+  // Wait for all images to load before measuring
+  const imgs = Array.from(idoc.querySelectorAll('img'));
+  const imgPromises = imgs.map(img => new Promise(res => {
+    if(img.complete) res();
+    else { img.onload = res; img.onerror = res; }
+  }));
+
+  Promise.all(imgPromises).then(()=>{
     const totalH = idoc.body.scrollHeight;
     iframe.style.height = totalH + 'px';
     const {jsPDF} = window.jspdf;
@@ -624,7 +632,7 @@ function captureAndSave(htmlContent, filename){
       pdf.save(filename);
       toast('✓ Downloaded');
     }).catch(e=>{ document.body.removeChild(iframe); console.error(e); toast('✗ Failed',true); });
-  }, 800);
+  });
 }
 
 function pdfStyle(){
