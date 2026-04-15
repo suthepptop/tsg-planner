@@ -533,7 +533,7 @@ function captureAndSave(htmlContent, filename){
 
     // Get thead height and row positions BEFORE html2canvas
     const thead = idoc.querySelector('thead');
-    const trows = Array.from(idoc.querySelectorAll('tbody tr'));
+    const trows = Array.from(idoc.querySelectorAll('tbody tr, tfoot tr'));
     const theadH = thead ? thead.offsetHeight : 0;
     const rowBottoms = trows.map(r => r.offsetTop + r.offsetHeight); // px in doc
 
@@ -544,7 +544,7 @@ function captureAndSave(htmlContent, filename){
     }).then(canvas=>{
       document.body.removeChild(iframe);
       const ratio = contentW / canvas.width; // pt per canvas-px
-      const imgTotalPt = canvas.height * ratio;
+      const imgTotalPt = canvas.height * ratio + 2; // +2pt buffer for last border
       const pageContentH = pH - margin*2;
 
       // thead height in pt (scale:2 so *2)
@@ -581,7 +581,7 @@ function captureAndSave(htmlContent, filename){
             if(next) cutPt = next;
           }
         } else {
-          cutPt = imgTotalPt;
+          cutPt = imgTotalPt; // Always capture full remaining content
         }
 
         let drawY = margin;
