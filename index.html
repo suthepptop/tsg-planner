@@ -562,7 +562,7 @@ function exportPDF() {
   const element = document.getElementById('ppg');
   const toolbar = document.getElementById('planToolbar');
   const wtb = element.querySelector('.wtb');
-  const A4W = 1122; // landscape A4 at 96dpi
+  const A4W = 794; // portrait A4 at 96dpi
   toolbar.style.display = 'none';
   if(wtb) wtb.style.display = 'none';
   const origStyle = element.style.cssText;
@@ -575,7 +575,7 @@ function exportPDF() {
       filename: `TSG_${plan}_plan.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2, useCORS: true, windowWidth: A4W, width: A4W, height: h, scrollY: 0, scrollX: 0 },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
       pagebreak: { mode: ['legacy'], avoid: ['tr', '.scb'] }
     };
     html2pdf().set(opt).from(element).save().then(() => {
