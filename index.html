@@ -1030,6 +1030,21 @@ function renderTable(){
       ${claimTd}`;
     tb.appendChild(tr);
   });
+
+  // Total row (admin only)
+  if(isEd){
+    const totBg = rows.reduce((a,r)=>a+(+r.bg||0),0);
+    const totClaim = rows.reduce((a,r)=>a+((+r.bg||0)*(+r.pct||0)/100*rate),0);
+    const tfoot = document.createElement('tr');
+    tfoot.style.cssText='background:#e8f0fb;border-top:2px solid #1560a8;font-weight:700;';
+    const colCount = 7; // no, itemNo, desc, ps, pe, as, ae, pct = 8 + bg + claim
+    tfoot.innerHTML=`
+      <td colspan="5" style="text-align:right;padding:4px 8px;border:1px solid #bbb;color:#333;font-size:12px;">Total</td>
+      <td style="text-align:right;padding:4px 6px;border:1px solid #bbb;color:#1560a8;font-size:12px;">${formatTHB(totBg)}</td>
+      <td colspan="3" style="border:1px solid #bbb;"></td>
+      <td style="text-align:right;padding:4px 6px;border:1px solid #bbb;color:#2a8a2a;font-size:12px;">${formatTHB(totClaim)}</td>`;
+    tb.appendChild(tfoot);
+  }
   updWt();
 }
 function up(i,k,v){
