@@ -1403,10 +1403,8 @@ function renderGantt(){
   });
   const totalRH = rowData.reduce((sum, rd) => sum + rd.rh, 0);
   const H = HH + totalRH + LH;
-  const dpr = window.devicePixelRatio || 1;
-  cv.width=W*dpr;cv.height=H*dpr;cv.style.width=W+'px';cv.style.height=H+'px';
+  cv.width=W;cv.height=H;cv.style.width=W+'px';cv.style.height=H+'px';
   const ctx=cv.getContext('2d');
-  ctx.scale(dpr,dpr);
   const BW=W-LW;
   const gx=d=>LW+(d/td)*BW;
   const dx=d=>gx(dd(ps,d));
@@ -1542,11 +1540,8 @@ function drawSC(cvId,rows,snapData,pc,ac_color){
   const W = isMob ? window.innerWidth - 10 : (cv.parentElement.getBoundingClientRect().width||cv.parentElement.offsetWidth||400);
   const H=parseInt(cv.getAttribute('height'))||200;
   if(W<10)return;
-  const dpr = window.devicePixelRatio || 1;
-  cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
-  cv.style.width=Math.round(W)+'px';cv.style.height=H+'px';
+  cv.width=Math.round(W);cv.height=H;
   const ctx=cv.getContext('2d');
-  ctx.scale(dpr,dpr);
   ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
   const PL=40,PR=30,PT=26,PB=28;
   const pw=W-PL-PR,ph=H-PT-PB;
