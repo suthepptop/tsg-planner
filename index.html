@@ -702,8 +702,44 @@ function exportPDF(){
   setTimeout(()=>{
     const rows=D[plan].rows;
     const rate=plan==='material'?0.60:0.65;
-    const scImg=document.getElementById('cSC').toDataURL('image/png');
-    const ganttImg=document.getElementById('cGantt').toDataURL('image/png');
+    const scCanvas=document.getElementById('cSC');
+    const ganttCanvas=document.getElementById('cGantt');
+
+    const {jsPDF}=window.jspdf;
+    const pdf=new jsPDF({unit:'pt',format:'a4',orientation:'portrait'});
+    const pW=pdf.internal.pageSize.getWidth();
+    const pH=pdf.internal.pageSize.getHeight();
+    const margin=28;
+    const contentW=pW-margin*2;
+
+    // PAGE 1+: S-Curve (fit on first page top)
+    const scRatio=contentW/scCanvas.width;
+    const scH=scCanvas.height*scRatio;
+    pdf.addImage(scCanvas.toDataURL('image/jpeg',0.92),'JPEG',margin,margin,contentW,scH);
+
+    // GANTT: slice directly from canvas into A4 pages
+    const ganttRatio=contentW/ganttCanvas.width;
+    const pageCanvasH=(pH-margin*2)/ganttRatio; // how many canvas px fit per page
+    let ganttY=0;
+    let firstGanttPage=true;
+    let startY=margin+scH+8; // y position after S-curve on first page
+
+    while(ganttY<ganttCanvas.height){
+      const availPt = firstGanttPage ? (pH-startY-margin) : (pH-margin*2);
+      const availPx = availPt/ganttRatio;
+      const sliceH=Math.min(availPx, ganttCanvas.height-ganttY);
+      const tmp=document.createElement('canvas');
+      tmp.width=ganttCanvas.width;
+      tmp.height=Math.ceil(sliceH);
+      tmp.getContext('2d').drawImage(ganttCanvas,0,ganttY,ganttCanvas.width,sliceH,0,0,ganttCanvas.width,sliceH);
+      const slicePt=sliceH*ganttRatio;
+      if(!firstGanttPage) pdf.addPage();
+      pdf.addImage(tmp.toDataURL('image/jpeg',0.92),'JPEG',margin,firstGanttPage?startY:margin,contentW,slicePt);
+      ganttY+=sliceH;
+      firstGanttPage=false;
+    }
+
+    // TABLE: build in iframe, capture, slice into pages
     const cA=`<colgroup><col style="width:4%"><col style="width:7%"><col style="width:22%"><col style="width:9%"><col style="width:9%"><col style="width:8%"><col style="width:9%"><col style="width:9%"><col style="width:6%"><col style="width:8%"></colgroup>`;
     const cV=`<colgroup><col style="width:5%"><col style="width:8%"><col style="width:29%"><col style="width:12%"><col style="width:12%"><col style="width:12%"><col style="width:12%"><col style="width:8%"></colgroup>`;
     const hA=`<tr><th>No.</th><th>Item</th><th>Description</th><th>Pl.Start</th><th>Pl.Finish</th><th>Budget</th><th>Ac.Start</th><th>Ac.Finish</th><th>Act%</th><th>Claim</th></tr>`;
@@ -720,13 +756,70 @@ function exportPDF(){
         :`<tr style="${bg}"><td>${r.no||''}</td><td>${r.itemNo||''}</td><td>${r.desc||''}</td><td>${r.ps||''}</td><td>${r.pe||''}</td><td>${aS}</td><td>${aE}</td><td style="text-align:center">${isHdr?'':Number(r.pct||0).toFixed(2)+'%'}</td></tr>`;
     });
     const tot=isEd?`<tr style="background:#e8f0fb;font-weight:700"><td colspan="5" style="text-align:right">Total</td><td style="text-align:right;color:#1560a8">${totBg.toLocaleString('en-US',{minimumFractionDigits:2})}</td><td colspan="3"></td><td style="text-align:right;color:#2a8a2a">${totClaim.toLocaleString('en-US',{minimumFractionDigits:2})}</td></tr>`:'';
-    const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">${pdfStyle()}</head><body>
-<div style="font-size:13px;font-weight:700;color:#1560a8;margin-bottom:8px">${plan==='material'?'📦 Material Plan':'🔧 Installation Plan'} — As of ${new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</div>
-<img src="${scImg}" style="margin-bottom:6px;border:1px solid #ddd">
-<img src="${ganttImg}" style="margin-bottom:10px;border:1px solid #ddd">
+
+    const tableHTML=`<!DOCTYPE html><html><head><meta charset="UTF-8">${pdfStyle()}</head><body>
 <table>${isEd?cA:cV}<thead>${isEd?hA:hV}</thead><tbody>${tbody}${tot}</tbody></table>
 </body></html>`;
-    captureAndSave(html,`TSG_${plan}_plan.pdf`);
+
+    const iframe=document.createElement('iframe');
+    iframe.style.cssText='position:fixed;top:0;left:0;width:794px;height:2000px;border:none;visibility:hidden;z-index:9999;';
+    document.body.appendChild(iframe);
+    const idoc=iframe.contentDocument||iframe.contentWindow.document;
+    idoc.open(); idoc.write(tableHTML); idoc.close();
+
+    setTimeout(()=>{
+      const totalH=idoc.body.scrollHeight;
+      iframe.style.height=totalH+'px';
+      const thead=idoc.querySelector('thead');
+      const theadH=thead?thead.offsetHeight:0;
+      const trows=Array.from(idoc.querySelectorAll('tbody tr'));
+      const rowBottoms=trows.map(r=>r.offsetTop+r.offsetHeight);
+
+      window.html2canvas(idoc.body,{
+        scale:2,useCORS:true,allowTaint:true,
+        backgroundColor:'#ffffff',logging:false,
+        width:794,windowWidth:794,height:totalH
+      }).then(tCanvas=>{
+        document.body.removeChild(iframe);
+        const tRatio=contentW/tCanvas.width;
+        const tTotalPt=tCanvas.height*tRatio+4;
+        const pageH2=pH-margin*2;
+
+        // thead image for repeat
+        let theadImg=null,theadPt=0;
+        if(thead&&theadH>0){
+          theadPt=theadH*2*tRatio;
+          const tc=document.createElement('canvas');
+          tc.width=tCanvas.width; tc.height=Math.ceil(theadH*2);
+          tc.getContext('2d').drawImage(tCanvas,0,thead.offsetTop*2,tCanvas.width,theadH*2,0,0,tCanvas.width,theadH*2);
+          theadImg=tc.toDataURL('image/jpeg',0.95);
+        }
+        const rowEndsPt=rowBottoms.map(y=>y*2*tRatio);
+
+        let yPt=0,pg=0;
+        pdf.addPage(); // new page for table
+        while(yPt<tTotalPt){
+          if(pg>0) pdf.addPage();
+          const extraH=(pg>0&&theadImg)?theadPt:0;
+          const avail=pageH2-extraH;
+          let cutPt=yPt+avail;
+          if(cutPt<tTotalPt){
+            const fit=rowEndsPt.filter(y=>y>yPt&&y<=cutPt);
+            cutPt=fit.length>0?fit[fit.length-1]:(rowEndsPt.find(y=>y>yPt)||cutPt);
+          } else cutPt=tTotalPt;
+          let drawY=margin;
+          if(pg>0&&theadImg){ pdf.addImage(theadImg,'JPEG',margin,drawY,contentW,theadPt); drawY+=theadPt; }
+          const slicePt=cutPt-yPt;
+          const tmp2=document.createElement('canvas');
+          tmp2.width=tCanvas.width; tmp2.height=Math.ceil(slicePt/tRatio);
+          tmp2.getContext('2d').drawImage(tCanvas,0,Math.round(yPt/tRatio),tCanvas.width,tmp2.height,0,0,tCanvas.width,tmp2.height);
+          pdf.addImage(tmp2.toDataURL('image/jpeg',0.92),'JPEG',margin,drawY,contentW,slicePt);
+          yPt=cutPt; pg++;
+        }
+        pdf.save(`TSG_${plan}_plan.pdf`);
+        toast('✓ Downloaded');
+      }).catch(e=>{document.body.removeChild(iframe);toast('✗ Failed',true);});
+    },500);
   },400);
 }
 
