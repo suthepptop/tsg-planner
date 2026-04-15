@@ -544,7 +544,9 @@ function captureAndSave(htmlContent, filename){
     }).then(canvas=>{
       document.body.removeChild(iframe);
       const ratio = contentW / canvas.width; // pt per canvas-px
-      const imgTotalPt = canvas.height * ratio + 2; // +2pt buffer for last border
+      const lastRowH = rowBottoms.length > 0 ? 
+        (rowBottoms[rowBottoms.length-1] - (rowBottoms.length>1 ? rowBottoms[rowBottoms.length-2] : 0)) * 2 * ratio : 20;
+      const imgTotalPt = canvas.height * ratio + lastRowH + 4; // buffer = last row height
       const pageContentH = pH - margin*2;
 
       // thead height in pt (scale:2 so *2)
