@@ -698,14 +698,14 @@ function restoreSession() {
 window.onload=()=>{
   // Auto-redirect webview (LINE, Facebook, etc.) to Chrome/Safari
   const ua = navigator.userAgent;
-  const isWebview = /Line|FBAN|FBAV|Instagram|MicroMessenger|WebView|(iPhone|iPod|iPad).*AppleWebKit(?!.*Safari)/i.test(ua);
+  const isWebview = /Line\/|FBAN|FBAV|Instagram|MicroMessenger/.test(ua) || 
+    (/iPhone|iPad|iPod/.test(ua) && /WebView|wv/.test(ua) && !/Safari/.test(ua));
   if(isWebview){
     const url = location.href;
-    const isAndroid = /Android/i.test(ua);
-    if(isAndroid){
+    if(/Android/.test(ua)){
       location.href = 'intent://' + url.replace(/^https?:\/\//,'') + '#Intent;scheme=https;package=com.android.chrome;end';
     } else {
-      location.href = url; // iOS: opens in Safari
+      window.open(url, '_blank');
     }
     return;
   }
