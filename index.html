@@ -1244,9 +1244,9 @@ function renderTable(){
     const bgTd = isEd ? `<td><input class="ci r" value="${isHdr ? '' : formatInt(r.bg)}" ${ro||isHdr?'readonly':''} onchange="up(${i},'bg',nn(this.value))"></td>` : '';
     const claimVal = isHdr ? '' : formatInt((r.bg||0) * (r.pct||0)/100 * rate);
     const claimTd = isEd ? `<td><input class="ci r" value="${claimVal}" readonly style="color:#2a8a2a; font-weight:700;"></td>` : '';
-    const actTd = isEd ? `<td style="white-space:nowrap;padding:2px 3px;border:1px solid #ddd;width:44px">
-      <button onclick="insertRow(${i})" style="background:#2a8a2a;color:#fff;border:none;border-radius:3px;width:18px;height:18px;cursor:pointer;font-size:12px;line-height:1;padding:0">+</button>
-      <button onclick="deleteRow(${i})" style="background:#c00;color:#fff;border:none;border-radius:3px;width:18px;height:18px;cursor:pointer;font-size:12px;line-height:1;padding:0">✕</button>
+    const actTd = isEd ? `<td style="white-space:nowrap;padding:1px 2px;border:1px solid #ddd;width:32px;text-align:center">
+      <button onclick="insertRow(${i})" style="background:#2a8a2a;color:#fff;border:none;border-radius:3px;width:14px;height:14px;cursor:pointer;font-size:10px;line-height:1;padding:0">+</button>
+      <button onclick="deleteRow(${i})" style="background:#c00;color:#fff;border:none;border-radius:3px;width:14px;height:14px;cursor:pointer;font-size:10px;line-height:1;padding:0">✕</button>
     </td>` : '';
     tr.innerHTML=`
       <td><input class="ci r" value="${r.no}" ${ro?'readonly':''} onchange="up(${i},'no',this.value)"></td>
