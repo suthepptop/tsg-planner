@@ -711,16 +711,6 @@ function exportPDF(){
 <img src="${scImg}" style="margin-bottom:6px;border:1px solid #ddd">
 <img src="${ganttImg}" style="margin-bottom:10px;border:1px solid #ddd">
 <table>${isEd?cA:cV}<thead>${isEd?hA:hV}</thead><tbody>${tbody}${tot}</tbody></table>
-<div class="mo" id="pinMo">
-  <div class="md">
-    <h2>Admin PIN</h2>
-    <input type="password" id="pinIn" placeholder="Enter PIN" maxlength="6" inputmode="numeric" style="width:100%;padding:6px 9px;border:1px solid #ccc;border-radius:4px;font-size:14px;margin-bottom:10px;font-family:Sarabun,sans-serif">
-    <div class="ma">
-      <button class="btn" onclick="$('pinMo').classList.remove('on')">Cancel</button>
-      <button class="btn btnp" onclick="confirmPIN()">Login</button>
-    </div>
-  </div>
-</div>
 </body></html>`;
     captureAndSave(html,`TSG_${plan}_plan.pdf`);
   },400);
