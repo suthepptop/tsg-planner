@@ -511,87 +511,130 @@ function exportCurrentPDF(){
 }
 
 function exportHomePDF(){
-  toast('Generating Home PDF...');
-  const element = document.getElementById('hpg');
-  const A4W = 794;
-  const origStyle = element.style.cssText;
-  element.style.cssText = `width:${A4W}px!important;max-width:${A4W}px!important;min-width:${A4W}px!important;height:auto!important;overflow:visible!important;display:block!important;position:absolute!important;left:0!important;top:0!important;z-index:9999!important;background:#fff!important;`;
+  const w = window.open('','_blank');
+  const mat = document.getElementById('cMat');
+  const inst = document.getElementById('cInst');
   renderHome();
   setTimeout(()=>{
-    const h = element.scrollHeight;
-    const opt = {
-      margin: 10,
-      filename: 'TSG_home.pdf',
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, windowWidth: A4W, width: A4W, height: h, scrollY: 0, scrollX: 0 },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-    html2pdf().set(opt).from(element).save().then(()=>{
-      element.style.cssText = origStyle;
-      renderHome();
-      toast('✓ PDF Exported');
-    }).catch(()=>{ element.style.cssText = origStyle; toast('✗ Failed',true); });
-  }, 400);
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+      *{margin:0;padding:0;box-sizing:border-box;font-family:Sarabun,sans-serif}
+      body{background:#fff;padding:20px}
+      h2{font-size:14px;color:#1560a8;margin-bottom:12px}
+      img{width:100%;display:block;margin-bottom:16px;border:1px solid #ddd;border-radius:4px}
+      .row{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid #eee}
+      .lbl{color:#555}.val{font-weight:700}
+      .vm{color:#1560a8}.vi{color:#d97706}
+      @media print{body{padding:10px}img{page-break-inside:avoid}}
+    </style></head><body>
+    <h2>TSG Project Planner — Overview</h2>
+    <img src="${mat.toDataURL('image/png')}">
+    <img src="${inst.toDataURL('image/png')}">
+    <div class="row"><span class="lbl">Material Progress</span><span class="val vm">${document.getElementById('hmp').textContent}</span></div>
+    <div class="row"><span class="lbl">Installation Progress</span><span class="val vi">${document.getElementById('hip').textContent}</span></div>
+    </body></html>`);
+    w.document.close();
+    setTimeout(()=>{ w.print(); }, 600);
+  }, 300);
 }
 
 function exportBillingPDF(){
-  toast('Generating Billing PDF...');
-  const element = document.getElementById('bpg');
-  const A4W = 794;
-  const origStyle = element.style.cssText;
-  element.style.cssText = `width:${A4W}px!important;max-width:${A4W}px!important;min-width:${A4W}px!important;position:absolute!important;left:0!important;top:0!important;z-index:9999!important;background:#fff!important;`;
-  setTimeout(()=>{
-    const h = element.scrollHeight;
-    const opt = {
-      margin: 10,
-      filename: 'TSG_billing.pdf',
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, windowWidth: A4W, width: A4W, height: h, scrollY: 0, scrollX: 0 },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-    html2pdf().set(opt).from(element).save().then(()=>{
-      element.style.cssText = origStyle;
-      toast('✓ PDF Exported');
-    }).catch(()=>{ element.style.cssText = origStyle; toast('✗ Failed',true); });
-  }, 400);
+  const w = window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:Sarabun,sans-serif}
+    body{background:#fff;padding:20px}
+    .b-card{border:1px solid #ddd;border-radius:6px;margin-bottom:20px;overflow:hidden;page-break-inside:avoid}
+    .b-head{padding:10px 16px;font-weight:700;font-size:14px;color:#fff;display:flex;justify-content:space-between}
+    .bm{background:#1560a8}.bi{background:#d97706}
+    .b-body{padding:16px}
+    .b-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #eee;font-size:13px}
+    .b-row:last-child{border:none}
+    .b-lbl{color:#555}.b-val{font-weight:700;color:#222}
+    .b-hl{background:#f0fdf4;padding:10px;border-radius:4px;border:1px solid #bbf7d0;margin-top:10px;display:flex;justify-content:space-between}
+    .b-hl .b-lbl{color:#166534;font-weight:700}.b-hl .b-val{color:#15803d;font-size:15px}
+    .hdr{font-size:12px;color:#666;display:flex;justify-content:space-between;margin-bottom:12px}
+    @media print{@page{size:A4 portrait;margin:15mm}}
+  </style></head><body>
+  <div class="hdr"><span>${document.getElementById('bil-summary').innerHTML}</span><span>${document.getElementById('bil-asof').textContent}</span></div>
+  <div class="b-card">
+    <div class="b-head bm"><span>📦 Material & Equipment (30 / 60 / 10)</span><span>${document.getElementById('bil-m-pct').textContent}</span></div>
+    <div class="b-body">
+      <div class="b-row"><span class="b-lbl">Total Contract Budget</span><span class="b-val" style="color:#1560a8">${document.getElementById('bil-m-tot').textContent}</span></div>
+      <div class="b-row"><span class="b-lbl">Down Payment (30%)</span><span class="b-val">${document.getElementById('bil-m-down').textContent}</span></div>
+      <div class="b-row"><span class="b-lbl">Total Progress Pool (60%)</span><span class="b-val">${document.getElementById('bil-m-pool').textContent}</span></div>
+      <div class="b-row"><span class="b-lbl">After Cold Test (10%)</span><span class="b-val">${document.getElementById('bil-m-ret').textContent}</span></div>
+      <div class="b-hl"><span class="b-lbl">Current Claimable (${document.getElementById('bil-m-formula').textContent})</span><span class="b-val">${document.getElementById('bil-m-claim').textContent}</span></div>
+    </div>
+  </div>
+  <div class="b-card">
+    <div class="b-head bi"><span>🔧 Design & Installation (20 / 65 / 7.5 / 7.5)</span><span>${document.getElementById('bil-i-pct').textContent}</span></div>
+    <div class="b-body">
+      <div class="b-row"><span class="b-lbl">Total Contract Budget</span><span class="b-val" style="color:#d97706">${document.getElementById('bil-i-tot').textContent}</span></div>
+      <div class="b-row"><span class="b-lbl">Down Payment (20%)</span><span class="b-val">${document.getElementById('bil-i-down').textContent}</span></div>
+      <div class="b-row"><span class="b-lbl">Total Progress Pool (65%)</span><span class="b-val">${document.getElementById('bil-i-pool').textContent}</span></div>
+      <div class="b-row"><span class="b-lbl">Punch List (7.5%)</span><span class="b-val">${document.getElementById('bil-i-ret1').textContent}</span></div>
+      <div class="b-row"><span class="b-lbl">After Commissioning (7.5%)</span><span class="b-val">${document.getElementById('bil-i-ret2').textContent}</span></div>
+      <div class="b-hl"><span class="b-lbl">Current Claimable (${document.getElementById('bil-i-formula').textContent})</span><span class="b-val">${document.getElementById('bil-i-claim').textContent}</span></div>
+    </div>
+  </div>
+  </body></html>`);
+  w.document.close();
+  setTimeout(()=>{ w.print(); }, 400);
 }
 
 function exportPDF() {
   if(!plan) return;
-  toast('Generating PDF...');
-  const element = document.getElementById('ppg');
-  const toolbar = document.getElementById('planToolbar');
-  const wtb = element.querySelector('.wtb');
-  const A4W = 794; // portrait A4 at 96dpi
-  toolbar.style.display = 'none';
-  if(wtb) wtb.style.display = 'none';
-  const origStyle = element.style.cssText;
-  element.style.cssText = `width:${A4W}px!important;max-width:${A4W}px!important;min-width:${A4W}px!important;position:absolute!important;left:0!important;top:0!important;z-index:9999!important;background:#fff!important;`;
-  renderGantt(); renderSC();
-  setTimeout(() => {
-    const h = element.scrollHeight;
-    const opt = {
-      margin: 5,
-      filename: `TSG_${plan}_plan.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, windowWidth: A4W, width: A4W, height: h, scrollY: 0, scrollX: 0 },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-      pagebreak: { mode: ['legacy'], avoid: ['tr', '.scb'] }
-    };
-    html2pdf().set(opt).from(element).save().then(() => {
-      element.style.cssText = origStyle;
-      toolbar.style.display = 'flex';
-      if(wtb) wtb.style.display = 'flex';
-      renderGantt(); renderSC();
-      toast('✓ PDF Exported');
-    }).catch(() => {
-      element.style.cssText = origStyle;
-      toolbar.style.display = 'flex';
-      if(wtb) wtb.style.display = 'flex';
-      renderGantt(); renderSC();
-      toast('✗ Failed', true);
+  const rows = D[plan].rows;
+  const rate = plan === 'material' ? 0.60 : 0.65;
+  const sc = document.getElementById('cSC');
+  const gantt = document.getElementById('cGantt');
+  renderSC(); renderGantt();
+  setTimeout(()=>{
+    const w = window.open('','_blank');
+    const colsAdmin = `<col style="width:4%"><col style="width:8%"><col style="width:auto"><col style="width:10%"><col style="width:10%"><col style="width:8%"><col style="width:10%"><col style="width:10%"><col style="width:6%"><col style="width:10%">`;
+    const colsView  = `<col style="width:4%"><col style="width:8%"><col style="width:auto"><col style="width:11%"><col style="width:11%"><col style="width:11%"><col style="width:11%"><col style="width:7%">`;
+    const thAdmin = `<th>No.</th><th>Item No.</th><th>Description</th><th>Plan Start</th><th>Plan Finish</th><th>Budget</th><th>Act Start</th><th>Act Finish</th><th>Act%</th><th>Claimable</th>`;
+    const thView  = `<th>No.</th><th>Item No.</th><th>Description</th><th>Plan Start</th><th>Plan Finish</th><th>Act Start</th><th>Act Finish</th><th>Act%</th>`;
+    let tbody = '';
+    let totBg = 0, totClaim = 0;
+    rows.forEach(r=>{
+      const isHdr = (!r.bg||r.bg==0)&&!r.ps&&!r.pe;
+      const claim = isHdr ? 0 : (r.bg||0)*(r.pct||0)/100*rate;
+      totBg += (+r.bg||0); totClaim += claim;
+      const bg = isHdr?'background:#e8f0fb;font-weight:700;color:#1560a8;':'';
+      if(isEd){
+        tbody += `<tr style="${bg}"><td style="text-align:center">${r.no||''}</td><td>${r.itemNo||''}</td><td>${r.desc||''}</td><td>${r.ps||''}</td><td>${r.pe||''}</td><td style="text-align:right">${isHdr?'':parseInt(r.bg||0).toLocaleString('en-US')}</td><td>${r.as||''}</td><td>${r.ae||''}</td><td style="text-align:center">${isHdr?'':Number(r.pct||0).toFixed(2)+'%'}</td><td style="text-align:right;color:#2a8a2a;font-weight:700">${isHdr?'':parseInt(claim).toLocaleString('en-US')}</td></tr>`;
+      } else {
+        tbody += `<tr style="${bg}"><td style="text-align:center">${r.no||''}</td><td>${r.itemNo||''}</td><td>${r.desc||''}</td><td>${r.ps||''}</td><td>${r.pe||''}</td><td>${r.as||''}</td><td>${r.ae||''}</td><td style="text-align:center">${isHdr?'':Number(r.pct||0).toFixed(2)+'%'}</td></tr>`;
+      }
     });
-  }, 500);
+    const totalRow = isEd ? `<tr style="background:#e8f0fb;font-weight:700;border-top:2px solid #1560a8"><td colspan="5" style="text-align:right;padding:4px 8px">Total</td><td style="text-align:right;color:#1560a8">${totBg.toLocaleString('en-US',{minimumFractionDigits:2})}</td><td colspan="3"></td><td style="text-align:right;color:#2a8a2a">${totClaim.toLocaleString('en-US',{minimumFractionDigits:2})}</td></tr>` : '';
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+      *{margin:0;padding:0;box-sizing:border-box;font-family:Sarabun,sans-serif}
+      body{background:#fff;padding:12px;font-size:11px}
+      h2{font-size:13px;color:#1560a8;margin-bottom:8px}
+      img{width:100%;display:block;margin-bottom:12px;border:1px solid #ddd}
+      table{width:100%;border-collapse:collapse;font-size:10px}
+      th{background:#e8edf2;border:1px solid #bbb;padding:5px 4px;text-align:left;font-size:10px}
+      td{border:1px solid #ddd;padding:3px 4px;height:20px;vertical-align:middle}
+      tr:nth-child(even){background:#f7f9fb}
+      thead{display:table-header-group}
+      tr{page-break-inside:avoid}
+      @media print{@page{size:A4 portrait;margin:10mm}img{page-break-inside:avoid;max-height:220px}}
+    </style></head><body>
+    <h2>${plan==='material'?'📦 Material Plan':'🔧 Installation Plan'} — As of ${new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</h2>
+    <img src="${sc.toDataURL('image/png')}">
+    <img src="${gantt.toDataURL('image/png')}">
+    <table><colgroup>${isEd?colsAdmin:colsView}</colgroup><thead><tr>${isEd?thAdmin:thView}</tr></thead><tbody>${tbody}${totalRow}</tbody></table>
+    </body></html>`);
+    w.document.close();
+    setTimeout(()=>{ w.print(); }, 800);
+  }, 400);
 }
 
 function restoreSession() {
