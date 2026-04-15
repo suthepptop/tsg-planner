@@ -659,6 +659,7 @@ function exportPDF(){
     const ganttImg = document.getElementById('cGantt').toDataURL('image/png');
     const colsAdmin = `<colgroup><col style="width:4%"><col style="width:7%"><col style="width:22%"><col style="width:9%"><col style="width:9%"><col style="width:8%"><col style="width:9%"><col style="width:9%"><col style="width:6%"><col style="width:8%"></colgroup>`;
     const colsView  = `<colgroup><col style="width:5%"><col style="width:8%"><col style="width:28%"><col style="width:12%"><col style="width:12%"><col style="width:12%"><col style="width:12%"><col style="width:8%"></colgroup>`;
+    const thAdmin = `<tr><th>No.</th><th>Item No.</th><th>Description</th><th>Plan Start</th><th>Plan Finish</th><th>Budget</th><th>Act Start</th><th>Act Finish</th><th>Act%</th><th>Claimable</th></tr>`;
     const thView  = `<tr><th>No.</th><th>Item No.</th><th>Description</th><th>Plan Start</th><th>Plan Finish</th><th>Act Start</th><th>Act Finish</th><th>Act%</th></tr>`;
     let tbody='', totBg=0, totClaim=0;
     rows.forEach(r=>{
