@@ -268,6 +268,7 @@ tbody tr { page-break-inside: avoid; }
   <div class="r">
     <span id="uinfo"></span>
     <div id="gBtn"></div>
+    <button class="btn btnsm" id="pinBtn" style="color:#fff;background:transparent;border-color:rgba(255,255,255,.5)" onclick="document.getElementById('pinMo').classList.add('on')">🔑 Admin</button>
     <button class="btn btnsm" id="soBtn" style="display:none;color:#fff;background:transparent;border-color:rgba(255,255,255,.5)" onclick="signOut()">Sign Out</button>
   </div>
 </div>
@@ -426,10 +427,45 @@ tbody tr { page-break-inside: avoid; }
     </div>
   </div>
 </div>
+<div class="mo" id="pinMo">
+  <div class="md">
+    <h2>Admin PIN</h2>
+    <p>Enter PIN to access admin mode.</p>
+    <label>PIN</label>
+    <input type="password" id="pinIn" placeholder="••••••" maxlength="6" inputmode="numeric">
+    <div class="ma">
+      <button class="btn" onclick="document.getElementById('pinMo').classList.remove('on')">Cancel</button>
+      <button class="btn btnp" onclick="confirmPIN()">Confirm</button>
+    </div>
+  </div>
+</div>
 <div id="toast"></div>
 
 <script>
-const GCI='695932302309-p1rccufdkq9itb5paam78j1ll1ejb1uu.apps.googleusercontent.com';
+const ADMIN_PIN='260150';
+
+function confirmPIN(){
+  const v=$('pinIn').value.trim();
+  if(v===ADMIN_PIN){
+    isEd=true;
+    sessionStorage.setItem('isEd','true');
+    sessionStorage.setItem('email','admin');
+    $('uinfo').textContent='Admin';
+    $('pinMo').classList.remove('on');
+    $('pinBtn').style.display='none';
+    $('gBtn').style.display='none';
+    $('pinBtn').style.display='none';
+    $('soBtn').style.display='inline-block';
+    document.body.classList.add('ed');
+    showEdUI();
+    setupPaste();
+    if(plan)renderTable();
+    toast('✓ Admin access granted');
+  } else {
+    toast('✗ Wrong PIN',true);
+    $('pinIn').value='';
+  }
+}
 const EE='suthepp.top@gmail.com';
 const API='https://api.github.com/repos/suthepptop/tsg-planner/contents/data.json';
 const RAW='https://raw.githubusercontent.com/suthepptop/tsg-planner/main/data.json';
@@ -508,6 +544,7 @@ function restoreSession() {
     isEd = true;
     $('uinfo').textContent = storedEmail;
     $('gBtn').style.display = 'none';
+    $('pinBtn').style.display = 'none';
     $('soBtn').style.display = 'inline-block';
     document.body.classList.add('ed');
     showEdUI();
@@ -569,6 +606,7 @@ function signOut(){
   document.body.classList.remove('ed');
   $('uinfo').textContent='';
   $('gBtn').style.display='block';
+  $('pinBtn').style.display='inline-block';
   ['soBtn','savBtn','rstBtn','nbB'].forEach(id=>$(id).style.display='none');
   $('rwc').style.display='none';
   $('th-bg').style.display='none';
