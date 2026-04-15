@@ -156,8 +156,9 @@ body.ed .ci:not([readonly]) {
 body:not(.ed) .ci {pointer-events:none}
 
 .wtb {padding:5px 13px;background:#f4f6f8;border-top:1px solid #ddd;font-size:13px;color:#333;display:flex;gap:18px; width: 100%; font-weight: 700; flex-wrap: wrap; position:fixed; bottom:0; left:0; right:0; z-index:100;}
-.ok {color:#2a8a2a;font-weight:700}
-.wn {color:#c00;font-weight:700}
+tbody tr { page-break-inside: avoid; }
+.scs { page-break-after: avoid; }
+.gs { page-break-inside: avoid; }
 
 /* BILLING DASHBOARD */
 .bil-cont { padding: 20px; display: flex; flex-direction: column; gap: 20px; align-items: center; }
@@ -564,16 +565,13 @@ function exportPDF() {
   renderGantt();
   renderSC();
   setTimeout(() => {
-    const A4_MM = 210;
-    const A4_PX = 794;
-    const h = element.scrollHeight;
-    const mmH = (h / A4_PX) * A4_MM;
     const opt = {
-      margin: 0,
+      margin: [10, 10, 10, 10],
       filename: `TSG_${plan}_plan.pdf`,
-      image: { type: 'jpeg', quality: 1.0 },
-      html2canvas: { scale: 2, useCORS: true, windowWidth: A4_PX, width: A4_PX, height: h, scrollY: 0 },
-      jsPDF: { unit: 'mm', format: [A4_MM, mmH], orientation: 'portrait' }
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
     };
     html2pdf().set(opt).from(element).save().then(() => {
       toolbar.style.display = 'flex';
