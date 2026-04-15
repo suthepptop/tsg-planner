@@ -374,6 +374,7 @@ tbody tr { page-break-inside: avoid; }
 <div class="pg" id="ppg">
   <div class="ptb" id="planToolbar">
     <button class="btn btnsm" onclick="goHome()">← Home</button>
+    <button class="btn btnsm btnd" id="rstBtn" style="display:none" onclick="resetRows()">✕ Reset</button>
     <span class="ptit" id="ptit"></span>
     
     <div class="sp"></div>
@@ -381,7 +382,6 @@ tbody tr { page-break-inside: avoid; }
       Rows:<input type="number" id="rwn" min="1" max="300" value="16">
       <button class="btn btnsm" onclick="applyRows()">Apply</button>
     </div>
-    <button class="btn btnsm btnd" id="rstBtn" style="display:none" onclick="resetRows()">✕ Reset Template</button>
     <button class="btn btnsm btnp" id="savBtn" style="display:none" onclick="saveData()">💾 Save</button>
   </div>
   
