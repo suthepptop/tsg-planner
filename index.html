@@ -517,93 +517,98 @@ function exportCurrentPDF(){
 function captureAndSave(htmlContent, filename){
   toast('Generating PDF...');
   const iframe = document.createElement('iframe');
-  iframe.style.cssText = 'position:fixed;top:0;left:0;width:794px;height:1122px;border:none;opacity:0;pointer-events:none;z-index:-1;';
+  iframe.style.cssText = 'position:fixed;top:0;left:0;width:794px;height:2000px;border:none;visibility:hidden;z-index:9999;';
   document.body.appendChild(iframe);
   const idoc = iframe.contentDocument || iframe.contentWindow.document;
-  idoc.open();
-  idoc.write(htmlContent);
-  idoc.close();
+  idoc.open(); idoc.write(htmlContent); idoc.close();
   setTimeout(()=>{
-    iframe.style.height = idoc.body.scrollHeight + 'px';
+    const totalH = idoc.body.scrollHeight;
+    iframe.style.height = totalH + 'px';
     const {jsPDF} = window.jspdf;
     const pdf = new jsPDF({unit:'pt', format:'a4', orientation:'portrait'});
-    const pW = pdf.internal.pageSize.getWidth();   // 595pt
-    const pH = pdf.internal.pageSize.getHeight();  // 842pt
-    const margin = 28; // ~10mm in pt
+    const pW = pdf.internal.pageSize.getWidth();
+    const pH = pdf.internal.pageSize.getHeight();
+    const margin = 28;
     const contentW = pW - margin*2;
+
+    // Get thead height and row positions BEFORE html2canvas
+    const thead = idoc.querySelector('thead');
+    const trows = Array.from(idoc.querySelectorAll('tbody tr, tfoot tr'));
+    const theadH = thead ? thead.offsetHeight : 0;
+    const rowBottoms = trows.map(r => r.offsetTop + r.offsetHeight); // px in doc
+
     window.html2canvas(idoc.body,{
       scale:2, useCORS:true, allowTaint:true,
       backgroundColor:'#ffffff', logging:false,
-      width:794, windowWidth:794,
-      height:idoc.body.scrollHeight
+      width:794, windowWidth:794, height:totalH
     }).then(canvas=>{
       document.body.removeChild(iframe);
-      const imgH = canvas.height * contentW / canvas.width;
-      const pageH = pH - margin*2;
-      const sc = canvas.height / imgH; // canvas px per pt
+      const ratio = contentW / canvas.width; // pt per canvas-px
+      const imgTotalPt = canvas.height * ratio + 2; // +2pt buffer for last border
+      const pageContentH = pH - margin*2;
 
-      // Capture thead separately for repeat
-      const thead = idoc.querySelector('thead');
-      let theadPt = 0;
-      if(thead){
-        const theadH_px = thead.offsetHeight * 2; // scale:2
-        theadPt = theadH_px / sc;
-      }
+      // thead height in pt (scale:2 so *2)
+      const theadPt = theadH * 2 * ratio;
 
-      // Row bottom positions in pt
-      const trows = Array.from(idoc.querySelectorAll('tbody tr'));
-      const rowEndsPt = trows.map(r=>(r.offsetTop + r.offsetHeight) * 2 / sc);
+      // row bottom positions in pt
+      const rowEndsPt = rowBottoms.map(y => y * 2 * ratio);
 
-      // Capture thead as image
-      let theadImgData = null;
-      if(thead){
+      // Extract thead strip from canvas
+      let theadImg = null;
+      if(thead && theadH > 0){
         const tc = document.createElement('canvas');
-        const theadH_px = Math.ceil(thead.offsetHeight * 2);
-        const theadTop_px = Math.round(thead.getBoundingClientRect().top - idoc.body.getBoundingClientRect().top) * 2;
         tc.width = canvas.width;
-        tc.height = theadH_px;
-        tc.getContext('2d').drawImage(canvas, 0, theadTop_px, canvas.width, theadH_px, 0, 0, canvas.width, theadH_px);
-        theadImgData = tc.toDataURL('image/jpeg',0.95);
+        tc.height = Math.ceil(theadH * 2);
+        tc.getContext('2d').drawImage(canvas, 0, thead.offsetTop*2, canvas.width, theadH*2, 0, 0, canvas.width, theadH*2);
+        theadImg = tc.toDataURL('image/jpeg', 0.95);
       }
 
-      let yPt=0, page=0;
-      while(yPt < imgH){
-        if(page>0) pdf.addPage();
-        const headerH = page>0 ? theadPt : 0;
-        const avail = pageH - headerH;
+      let yPt = 0, page = 0;
+      while(yPt < imgTotalPt){
+        if(page > 0) pdf.addPage();
+        const extraH = (page > 0 && theadImg) ? theadPt : 0;
+        const avail = pageContentH - extraH;
         let cutPt = yPt + avail;
-        if(cutPt < imgH){
-          // Snap to last row end that fits
-          const snap = rowEndsPt.filter(y=>y>yPt && y<=cutPt).pop();
-          if(snap) cutPt = snap;
-          else {
-            // No row fits — force at least one row
-            const next = rowEndsPt.find(y=>y>yPt);
+
+        if(cutPt < imgTotalPt){
+          // Snap to last row bottom that fits
+          const fit = rowEndsPt.filter(y => y > yPt && y <= cutPt);
+          if(fit.length > 0){
+            cutPt = fit[fit.length-1];
+          } else {
+            // Force next row boundary even if it slightly overflows
+            const next = rowEndsPt.find(y => y > yPt);
             if(next) cutPt = next;
           }
-        } else cutPt = imgH;
+        } else {
+          cutPt = imgTotalPt; // Always capture full remaining content
+        }
 
         let drawY = margin;
 
-        // Draw repeated thead on pages after first
-        if(page>0 && theadImgData && theadPt>0){
-          pdf.addImage(theadImgData,'JPEG',margin,drawY,contentW,theadPt);
+        // Repeat thead on pages 2+
+        if(page > 0 && theadImg){
+          pdf.addImage(theadImg, 'JPEG', margin, drawY, contentW, theadPt);
           drawY += theadPt;
         }
 
         const slicePt = cutPt - yPt;
-        const srcY = yPt * sc;
-        const srcH = slicePt * sc;
+        const srcY = Math.round(yPt / ratio);
+        const srcH = Math.round(slicePt / ratio);
         const tmp = document.createElement('canvas');
         tmp.width = canvas.width;
-        tmp.height = Math.ceil(srcH);
-        tmp.getContext('2d').drawImage(canvas,0,srcY,canvas.width,srcH,0,0,canvas.width,srcH);
-        pdf.addImage(tmp.toDataURL('image/jpeg',0.92),'JPEG',margin,drawY,contentW,slicePt);
-        yPt=cutPt; page++;
+        tmp.height = srcH;
+        tmp.getContext('2d').drawImage(canvas, 0, srcY, canvas.width, srcH, 0, 0, canvas.width, srcH);
+        pdf.addImage(tmp.toDataURL('image/jpeg',0.92), 'JPEG', margin, drawY, contentW, slicePt);
+
+        yPt = cutPt;
+        page++;
       }
       pdf.save(filename);
       toast('✓ Downloaded');
-    }).catch(e=>{console.error(e);toast('✗ Failed',true);});
+    }).catch(e=>{ document.body.removeChild(iframe); console.error(e); toast('✗ Failed',true); });
+  }, 800);
+}
   },600);
 }
 
@@ -1193,9 +1198,9 @@ function renderGantt(){
   const isMob = window.innerWidth <= 768;
   const W = isMob ? window.innerWidth : Math.max(sec.getBoundingClientRect().width || sec.offsetWidth, 600);
   const LW = Math.floor(W * (isMob ? 0.30 : 0.35)); 
-  const HH = isMob ? 28 : 34;
-  const LH = isMob ? 20 : 26;
-  const baseRH = isMob ? 24 : 28;
+  const HH = isMob ? 28 : 38;
+  const LH = isMob ? 20 : 28;
+  const baseRH = isMob ? 24 : 34;
   const tmpCtx = cv.getContext('2d');
   const maxW = LW - 10;
   const getLines = (ctx, text, maxWidth) => {
@@ -1217,7 +1222,7 @@ function renderGantt(){
       const lbl = (r.itemNo ? r.itemNo + ' ' : '') + (r.desc || '');
       const isDesc = !!r.desc;
       const isHdr = (!r.bg || r.bg == 0) && !r.ps && !r.pe;
-      tmpCtx.font = (isDesc ? (isMob?'10px ':'13px ') : (isMob?'italic 9px ':'italic 12px ')) + FN;
+      tmpCtx.font = (isDesc ? (isMob?'11px ':'15px ') : (isMob?'italic 10px ':'italic 13px ')) + FN;
       if (isHdr) tmpCtx.font = 'bold ' + tmpCtx.font; 
       const lines = getLines(tmpCtx, lbl || ('row '+r.no), maxW);
       const rh = Math.max(baseRH, lines.length * (isMob?14:18) + 12);
@@ -1236,12 +1241,12 @@ function renderGantt(){
   ms.forEach((m,i)=>{
     const x1=Math.max(LW,dx(m)),x2=Math.min(W,dx(new Date(m.getFullYear(),m.getMonth()+1,1)));
     ctx.fillStyle=i%2?'#1050a0':'#1560a8';ctx.fillRect(x1,0,x2-x1,HH);
-    ctx.fillStyle='#fff';ctx.font='bold '+(isMob?'10px ':'13px ')+FN;ctx.textAlign='center';
+    ctx.fillStyle='#fff';ctx.font='bold '+(isMob?'11px ':'15px ')+FN;ctx.textAlign='center';
     ctx.fillText(m.toLocaleString('default',{month:'short'})+"'"+String(m.getFullYear()).slice(2),(x1+x2)/2,HH - (isMob?8:10));
     if(x1>LW){ctx.strokeStyle='#e0e0e0';ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(x1,HH);ctx.lineTo(x1,H-LH);ctx.stroke();}
   });
   ctx.fillStyle='#1560a8';ctx.fillRect(0,0,LW,HH);
-  ctx.fillStyle='#fff';ctx.font='bold '+(isMob?'10px ':'13px ')+FN;ctx.textAlign='center';ctx.fillText('Item / Description',LW/2,HH - (isMob?8:10));
+  ctx.fillStyle='#fff';ctx.font='bold '+(isMob?'11px ':'15px ')+FN;ctx.textAlign='center';ctx.fillText('Item / Description',LW/2,HH - (isMob?8:10));
   ctx.strokeStyle='#999';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(LW,0);ctx.lineTo(LW,H);ctx.stroke();
   let y = HH;
   rowData.forEach((rd, i) => {
@@ -1252,7 +1257,7 @@ function renderGantt(){
     ctx.strokeStyle=rd.isHdr ? '#1560a8' : '#e5e5e5';
     ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(0,y+RH);ctx.lineTo(W,y+RH);ctx.stroke();
     ctx.fillStyle=rd.isHdr ? '#1560a8' : (rd.isDesc?'#111':'#aaa');
-    let fStyle = (rd.isDesc ? (isMob?'10px ':'13px ') : (isMob?'italic 9px ':'italic 12px ')) + FN;
+    let fStyle = (rd.isDesc ? (isMob?'11px ':'15px ') : (isMob?'italic 10px ':'italic 13px ')) + FN;
     if (rd.isHdr) fStyle = 'bold ' + fStyle;
     ctx.font = fStyle;
     ctx.textAlign='left';
@@ -1268,9 +1273,9 @@ function renderGantt(){
             const pH=isMob?10:14, pY=y+(RH - (isMob?20:26))/2; 
             ctx.fillStyle='#1560a8';
             ctx.beginPath();if(ctx.roundRect)ctx.roundRect(bx,pY,bw,pH,3);else ctx.rect(bx,pY,bw,pH);ctx.fill();
-            if(bw>26){ctx.fillStyle='#fff';ctx.font='bold '+(isMob?'8px ':'10px ')+FN;ctx.textAlign='center';ctx.fillText(dd(s,e)+1+'d',bx+bw/2,pY+(isMob?8:10));}
+            if(bw>26){ctx.fillStyle='#fff';ctx.font='bold '+(isMob?'9px ':'12px ')+FN;ctx.textAlign='center';ctx.fillText(dd(s,e)+1+'d',bx+bw/2,pY+(isMob?8:10));}
             const mY=pY+(isMob?8:11);
-            ctx.fillStyle='#666';ctx.font=(isMob?'8px ':'10px ')+FN;
+            ctx.fillStyle='#666';ctx.font=(isMob?'9px ':'12px ')+FN;
             ctx.textAlign='right';ctx.fillText(fd(r.ps),bx-3,mY);
             ctx.textAlign='left';ctx.fillText(fd(r.pe),bx+bw+3,mY);
             const as=pd(r.as||r.ps),ae=pd(r.ae||r.pe);
@@ -1285,7 +1290,7 @@ function renderGantt(){
                     ctx.strokeStyle='#000';ctx.lineWidth=isMob?2:3;ctx.lineCap='round';
                     ctx.beginPath();ctx.moveTo(ax,mAY);ctx.lineTo(rx,mAY);ctx.stroke();
                     ctx.lineCap='butt';ctx.lineWidth=1;
-                    ctx.fillStyle='#000';ctx.font='bold '+(isMob?'8px ':'10px ')+FN;ctx.textAlign='right';
+                    ctx.fillStyle='#000';ctx.font='bold '+(isMob?'9px ':'12px ')+FN;ctx.textAlign='right';
                     ctx.fillText(Number(pct).toFixed(2)+'%',ax-3,aY+(isMob?7:8));
                 }
             }
@@ -1296,12 +1301,12 @@ function renderGantt(){
   {const tc=today<ps?ps:today>pe?pe:today,tx=dx(tc);
   ctx.strokeStyle='#c00';ctx.lineWidth=2;ctx.setLineDash([5,3]);
   ctx.beginPath();ctx.moveTo(tx,HH);ctx.lineTo(tx,H-LH);ctx.stroke();ctx.setLineDash([]);
-  ctx.fillStyle='#c00';ctx.font='bold '+(isMob?'9px ':'11px ')+FN;ctx.textAlign='center';ctx.fillText('TODAY',tx,HH+(isMob?10:13));}
+  ctx.fillStyle='#c00';ctx.font='bold '+(isMob?'10px ':'13px ')+FN;ctx.textAlign='center';ctx.fillText('TODAY',tx,HH+(isMob?10:13));}
   ctx.fillStyle='#f4f6f8';ctx.fillRect(0,H-LH,W,LH);
   ctx.strokeStyle='#ddd';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,H-LH);ctx.lineTo(W,H-LH);ctx.stroke();
   const ly=H-LH+(isMob?7:9);
   ctx.fillStyle='#1560a8';ctx.fillRect(LW+8,ly-5,22,9);
-  ctx.fillStyle='#333';ctx.font=(isMob?'9px ':'11px ')+FN;ctx.textAlign='left';ctx.fillText('Plan',LW+34,ly+(isMob?3:2));
+  ctx.fillStyle='#333';ctx.font=(isMob?'10px ':'13px ')+FN;ctx.textAlign='left';ctx.fillText('Plan',LW+34,ly+(isMob?3:2));
   ctx.fillStyle='#FFD700';ctx.fillRect(LW+(isMob?60:74),ly-5,22,9);ctx.strokeStyle='#aaa';ctx.lineWidth=.5;ctx.strokeRect(LW+(isMob?60:74),ly-5,22,9);
   ctx.fillStyle='#333';ctx.fillText('Actual',LW+(isMob?86:100),ly+(isMob?3:2));
   ctx.strokeStyle='#000';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(LW+(isMob?62:76),ly);ctx.lineTo(LW+(isMob?80:94),ly);ctx.stroke();
