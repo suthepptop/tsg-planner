@@ -550,7 +550,7 @@ function exportHomePDF(){
   renderHome();
   setTimeout(()=>{
     const div = document.createElement('div');
-    div.style.cssText = 'width:794px;background:#fff;padding:20px;font-family:Sarabun,sans-serif;position:fixed;left:-9999px;top:0;';
+    div.style.cssText = 'width:794px;background:#fff;padding:20px;font-family:Sarabun,sans-serif;position:fixed;top:0;left:0;opacity:0;pointer-events:none;z-index:-1;';
     const mat = document.getElementById('cMat').toDataURL('image/png');
     const inst = document.getElementById('cInst').toDataURL('image/png');
     const mp = document.getElementById('hmp').textContent;
@@ -569,7 +569,7 @@ function exportHomePDF(){
 
 function exportBillingPDF(){
   const div = document.createElement('div');
-  div.style.cssText = 'width:794px;background:#fff;padding:20px;font-family:Sarabun,sans-serif;position:fixed;left:-9999px;top:0;';
+  div.style.cssText = 'width:794px;background:#fff;padding:20px;font-family:Sarabun,sans-serif;position:fixed;top:0;left:0;opacity:0;pointer-events:none;z-index:-1;';
   const card = (title, headCls, pct, rows) => `
     <div style="border:1px solid #ddd;border-radius:6px;margin-bottom:16px;overflow:hidden">
       <div style="background:${headCls};color:#fff;padding:10px 16px;font-weight:700;font-size:13px;display:flex;justify-content:space-between"><span>${title}</span><span>${pct}</span></div>
@@ -620,7 +620,7 @@ function exportPDF(){
     });
     const totRow = isEd?`<tr style="background:#e8f0fb;font-weight:700;border-top:2px solid #1560a8"><td colspan="5" style="text-align:right;padding:4px 8px">Total</td><td style="text-align:right;color:#1560a8">${totBg.toLocaleString('en-US',{minimumFractionDigits:2})}</td><td colspan="3"></td><td style="text-align:right;color:#2a8a2a">${totClaim.toLocaleString('en-US',{minimumFractionDigits:2})}</td></tr>`:'';
     const div = document.createElement('div');
-    div.style.cssText='width:794px;background:#fff;padding:12px;font-family:Sarabun,sans-serif;position:fixed;left:-9999px;top:0;';
+    div.style.cssText='width:794px;background:#fff;padding:12px;font-family:Sarabun,sans-serif;position:fixed;top:0;left:0;opacity:0;pointer-events:none;z-index:-1;';
     div.innerHTML=`
       <div style="font-size:13px;font-weight:700;color:#1560a8;margin-bottom:8px">${plan==='material'?'📦 Material Plan':'🔧 Installation Plan'} — As of ${new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</div>
       <img src="${scImg}" style="width:100%;display:block;margin-bottom:8px;border:1px solid #ddd;max-height:180px;object-fit:contain">
@@ -893,7 +893,7 @@ async function loadData() {
     const r = await fetch(API + '?t=' + Date.now(), { headers });
     if (!r.ok) { 
         if ((r.status === 403 || r.status === 404) && !pat) {
-            if(isEd) {
+            if(isEd || sessionStorage.getItem('isEd')==='true') {
                 patAction = 'load';
                 $('patMo').classList.add('on');
                 toast('GitHub Limit Reached. Enter PAT to load data.', true);
