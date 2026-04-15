@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no, viewport-fit=cover">
 <meta http-equiv="Cache-Control" content="no-cache">
 <title>TSG Project Planner</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
@@ -505,24 +503,6 @@ function exportExcel() {
   toast('✓ Excel (CSV) Exported');
 }
 
-function doPDF(el, filename){
-  const style = document.createElement('style');
-  style.id = 'printStyle';
-  style.textContent = `@media print {@page{size:A4 portrait;margin:10mm}body>*:not(#printTarget){display:none!important}#printTarget{display:block!important;position:static!important;width:100%!important}#printTarget table{width:100%!important;table-layout:fixed!important;border-collapse:collapse!important}#printTarget th,#printTarget td{border:1px solid #ccc!important;padding:3px!important;font-size:9px!important;word-wrap:break-word!important}#printTarget thead{display:table-header-group!important}#printTarget tr{page-break-inside:avoid!important}#printTarget img{max-width:100%!important}}`;
-  el.id = 'printTarget';
-  el.style.cssText = 'position:static;width:100%;background:#fff;';
-  document.head.appendChild(style);
-  document.body.appendChild(el);
-  setTimeout(()=>{
-    window.print();
-    setTimeout(()=>{
-      document.head.removeChild(style);
-      if(el.parentNode) document.body.removeChild(el);
-      el.id='';
-    },1000);
-  },400);
-}
-
 function exportCurrentPDF(){
   const lb=sessionStorage.getItem('lastPage');
   const lp=sessionStorage.getItem('lastPlan');
@@ -531,25 +511,69 @@ function exportCurrentPDF(){
   else exportHomePDF();
 }
 
+function openPDFTab(html, filename){
+  const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.target = '_blank';
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 5000);
+  toast('✓ PDF ready — use browser Save as PDF');
+}
+
+function pdfBase(){
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:Sarabun,sans-serif}
+body{background:#fff;padding:12mm}
+@page{size:A4 portrait;margin:10mm}
+@media print{body{padding:0}button{display:none!important}}
+.dl{position:fixed;top:10px;right:10px;background:#1560a8;color:#fff;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-size:13px;font-family:Sarabun,sans-serif;z-index:999}
+img{max-width:100%;display:block}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+th{background:#e8edf2;border:1px solid #bbb;padding:4px 3px;font-size:9px;text-align:left;word-break:break-word}
+td{border:1px solid #ddd;padding:3px;font-size:9px;vertical-align:middle;word-break:break-word}
+tr:nth-child(even) td{background:#f7f9fb}
+thead{display:table-header-group}
+tr{page-break-inside:avoid;break-inside:avoid}
+</style></head><body>
+<button class="dl" onclick="window.print()">⬇ Save as PDF</button>`;
+}
+
 function exportHomePDF(){
   renderHome();
   setTimeout(()=>{
     const mat=document.getElementById('cMat').toDataURL('image/png');
     const inst=document.getElementById('cInst').toDataURL('image/png');
-    const div=document.createElement('div');
-    div.innerHTML=`<div style="font-size:14px;font-weight:700;color:#1560a8;margin-bottom:12px">TSG Project Planner — Overview — ${new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</div><img src="${mat}" style="width:100%;display:block;margin-bottom:12px;border:1px solid #ddd"><img src="${inst}" style="width:100%;display:block;margin-bottom:16px;border:1px solid #ddd"><div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;font-size:13px"><span>Material Progress</span><span style="color:#1560a8;font-weight:700">${document.getElementById('hmp').textContent}</span></div><div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px"><span>Installation Progress</span><span style="color:#d97706;font-weight:700">${document.getElementById('hip').textContent}</span></div>`;
-    doPDF(div,'TSG_home.pdf');
+    const mp=document.getElementById('hmp').textContent;
+    const ip=document.getElementById('hip').textContent;
+    const html=pdfBase()+`
+<div style="font-size:14px;font-weight:700;color:#1560a8;margin-bottom:12px">TSG Project Planner — Overview — ${new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</div>
+<img src="${mat}" style="margin-bottom:10px;border:1px solid #ddd">
+<img src="${inst}" style="margin-bottom:14px;border:1px solid #ddd">
+<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;font-size:13px"><span>Material Progress</span><span style="color:#1560a8;font-weight:700">${mp}</span></div>
+<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px"><span>Installation Progress</span><span style="color:#d97706;font-weight:700">${ip}</span></div>
+</body></html>`;
+    openPDFTab(html,'TSG_home.pdf');
   },300);
 }
 
 function exportBillingPDF(){
   const g=id=>document.getElementById(id).textContent;
-  const card=(title,bg,pct,body)=>`<div style="border:1px solid #ddd;border-radius:6px;margin-bottom:16px;overflow:hidden"><div style="background:${bg};color:#fff;padding:10px 16px;font-weight:700;font-size:13px;display:flex;justify-content:space-between"><span>${title}</span><span>${pct}</span></div><div style="padding:14px">${body}</div></div>`;
-  const row=(l,v,c='#222')=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;font-size:13px"><span style="color:#555">${l}</span><span style="font-weight:700;color:${c}">${v}</span></div>`;
-  const hl=(l,v)=>`<div style="background:#f0fdf4;padding:10px;border-radius:4px;border:1px solid #bbf7d0;margin-top:10px;display:flex;justify-content:space-between"><span style="color:#166534;font-weight:700">${l}</span><span style="color:#15803d;font-weight:700;font-size:15px">${v}</span></div>`;
-  const div=document.createElement('div');
-  div.innerHTML=`<div style="font-size:12px;color:#666;display:flex;justify-content:space-between;margin-bottom:16px"><span>${document.getElementById('bil-summary').innerHTML}</span><span>${g('bil-asof')}</span></div>${card('📦 Material & Equipment (30/60/10)','#1560a8',g('bil-m-pct'),row('Total Contract Budget',g('bil-m-tot'),'#1560a8')+row('Down Payment (30%)',g('bil-m-down'))+row('Progress Pool (60%)',g('bil-m-pool'))+row('After Cold Test (10%)',g('bil-m-ret'))+hl('Current Claimable ('+g('bil-m-formula')+')',g('bil-m-claim')))}${card('🔧 Design & Installation (20/65/7.5/7.5)','#d97706',g('bil-i-pct'),row('Total Contract Budget',g('bil-i-tot'),'#d97706')+row('Down Payment (20%)',g('bil-i-down'))+row('Progress Pool (65%)',g('bil-i-pool'))+row('Punch List (7.5%)',g('bil-i-ret1'))+row('After Commissioning (7.5%)',g('bil-i-ret2'))+hl('Current Claimable ('+g('bil-i-formula')+')',g('bil-i-claim')))}`;
-  doPDF(div,'TSG_billing.pdf');
+  const card=(title,bg,pct,body)=>`<div style="border:1px solid #ddd;border-radius:6px;margin-bottom:14px;overflow:hidden;page-break-inside:avoid"><div style="background:${bg};color:#fff;padding:9px 14px;font-weight:700;font-size:13px;display:flex;justify-content:space-between"><span>${title}</span><span>${pct}</span></div><div style="padding:12px">${body}</div></div>`;
+  const row=(l,v,c='#222')=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;font-size:12px"><span style="color:#555">${l}</span><span style="font-weight:700;color:${c}">${v}</span></div>`;
+  const hl=(l,v)=>`<div style="background:#f0fdf4;padding:9px;border-radius:4px;border:1px solid #bbf7d0;margin-top:8px;display:flex;justify-content:space-between"><span style="color:#166534;font-weight:700">${l}</span><span style="color:#15803d;font-weight:700;font-size:14px">${v}</span></div>`;
+  const html=pdfBase()+`
+<div style="font-size:12px;color:#666;display:flex;justify-content:space-between;margin-bottom:14px"><span>${document.getElementById('bil-summary').innerHTML}</span><span>${g('bil-asof')}</span></div>
+${card('📦 Material & Equipment (30/60/10)','#1560a8',g('bil-m-pct'),row('Total Contract Budget',g('bil-m-tot'),'#1560a8')+row('Down Payment (30%)',g('bil-m-down'))+row('Progress Pool (60%)',g('bil-m-pool'))+row('After Cold Test (10%)',g('bil-m-ret'))+hl('Current Claimable ('+g('bil-m-formula')+')',g('bil-m-claim')))}
+${card('🔧 Design & Installation (20/65/7.5/7.5)','#d97706',g('bil-i-pct'),row('Total Contract Budget',g('bil-i-tot'),'#d97706')+row('Down Payment (20%)',g('bil-i-down'))+row('Progress Pool (65%)',g('bil-i-pool'))+row('Punch List (7.5%)',g('bil-i-ret1'))+row('After Commissioning (7.5%)',g('bil-i-ret2'))+hl('Current Claimable ('+g('bil-i-formula')+')',g('bil-i-claim')))}
+</body></html>`;
+  openPDFTab(html,'TSG_billing.pdf');
 }
 
 function exportPDF(){
@@ -576,9 +600,13 @@ function exportPDF(){
         :`<tr style="${bg}"><td>${r.no||''}</td><td>${r.itemNo||''}</td><td>${r.desc||''}</td><td>${r.ps||''}</td><td>${r.pe||''}</td><td>${actS}</td><td>${actE}</td><td style="text-align:center">${isHdr?'':Number(r.pct||0).toFixed(2)+'%'}</td></tr>`;
     });
     const totRow=isEd?`<tr style="background:#e8f0fb;font-weight:700"><td colspan="5" style="text-align:right">Total</td><td style="text-align:right;color:#1560a8">${totBg.toLocaleString('en-US',{minimumFractionDigits:2})}</td><td colspan="3"></td><td style="text-align:right;color:#2a8a2a">${totClaim.toLocaleString('en-US',{minimumFractionDigits:2})}</td></tr>`:'';
-    const div=document.createElement('div');
-    div.innerHTML=`<div style="font-size:13px;font-weight:700;color:#1560a8;margin-bottom:8px">${plan==='material'?'📦 Material Plan':'🔧 Installation Plan'} — As of ${new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</div><img src="${scImg}" style="width:100%;display:block;margin-bottom:8px;border:1px solid #ddd"><img src="${ganttImg}" style="width:100%;display:block;margin-bottom:12px;border:1px solid #ddd"><table>${isEd?colsAdmin:colsView}<thead>${isEd?thAdmin:thView}</thead><tbody>${tbody}${totRow}</tbody></table>`;
-    doPDF(div,`TSG_${plan}_plan.pdf`);
+    const html=pdfBase()+`
+<div style="font-size:13px;font-weight:700;color:#1560a8;margin-bottom:8px">${plan==='material'?'📦 Material Plan':'🔧 Installation Plan'} — As of ${new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</div>
+<img src="${scImg}" style="margin-bottom:8px;border:1px solid #ddd">
+<img src="${ganttImg}" style="margin-bottom:10px;border:1px solid #ddd">
+<table>${isEd?colsAdmin:colsView}<thead>${isEd?thAdmin:thView}</thead><tbody>${tbody}${totRow}</tbody></table>
+</body></html>`;
+    openPDFTab(html,`TSG_${plan}_plan.pdf`);
   },400);
 }
 
