@@ -540,27 +540,65 @@ function captureAndSave(htmlContent, filename){
       document.body.removeChild(iframe);
       const imgH = canvas.height * contentW / canvas.width;
       const pageH = pH - margin*2;
-      // Get row boundaries for clean page breaks
-      const rows = Array.from(idoc.querySelectorAll('tr'));
-      const bodyTop = idoc.body.getBoundingClientRect ? idoc.body.getBoundingClientRect().top : 0;
-      const scale2 = canvas.height / idoc.body.scrollHeight;
-      const rowEnds = rows.map(r=>(r.offsetTop + r.offsetHeight) * scale2 * (imgH/canvas.height));
+      const sc = canvas.height / imgH; // canvas px per pt
+
+      // Capture thead separately for repeat
+      const thead = idoc.querySelector('thead');
+      let theadPt = 0;
+      if(thead){
+        const theadH_px = thead.offsetHeight * 2; // scale:2
+        theadPt = theadH_px / sc;
+      }
+
+      // Row bottom positions in pt
+      const trows = Array.from(idoc.querySelectorAll('tbody tr'));
+      const rowEndsPt = trows.map(r=>(r.offsetTop + r.offsetHeight) * 2 / sc);
+
+      // Capture thead as image
+      let theadImgData = null;
+      if(thead){
+        const tc = document.createElement('canvas');
+        const theadH_px = Math.ceil(thead.offsetHeight * 2);
+        const theadTop_px = Math.round(thead.getBoundingClientRect().top - idoc.body.getBoundingClientRect().top) * 2;
+        tc.width = canvas.width;
+        tc.height = theadH_px;
+        tc.getContext('2d').drawImage(canvas, 0, theadTop_px, canvas.width, theadH_px, 0, 0, canvas.width, theadH_px);
+        theadImgData = tc.toDataURL('image/jpeg',0.95);
+      }
+
       let yPt=0, page=0;
       while(yPt < imgH){
         if(page>0) pdf.addPage();
-        let cutPt = yPt + pageH;
+        const headerH = page>0 ? theadPt : 0;
+        const avail = pageH - headerH;
+        let cutPt = yPt + avail;
         if(cutPt < imgH){
-          const snap = rowEnds.filter(y=>y>yPt && y<=cutPt).pop();
-          if(snap) cutPt=snap;
-        } else cutPt=imgH;
+          // Snap to last row end that fits
+          const snap = rowEndsPt.filter(y=>y>yPt && y<=cutPt).pop();
+          if(snap) cutPt = snap;
+          else {
+            // No row fits — force at least one row
+            const next = rowEndsPt.find(y=>y>yPt);
+            if(next) cutPt = next;
+          }
+        } else cutPt = imgH;
+
+        let drawY = margin;
+
+        // Draw repeated thead on pages after first
+        if(page>0 && theadImgData && theadPt>0){
+          pdf.addImage(theadImgData,'JPEG',margin,drawY,contentW,theadPt);
+          drawY += theadPt;
+        }
+
         const slicePt = cutPt - yPt;
-        const srcY = yPt * canvas.height / imgH;
-        const srcH = slicePt * canvas.height / imgH;
+        const srcY = yPt * sc;
+        const srcH = slicePt * sc;
         const tmp = document.createElement('canvas');
         tmp.width = canvas.width;
         tmp.height = Math.ceil(srcH);
         tmp.getContext('2d').drawImage(canvas,0,srcY,canvas.width,srcH,0,0,canvas.width,srcH);
-        pdf.addImage(tmp.toDataURL('image/jpeg',0.92),'JPEG',margin,margin,contentW,slicePt);
+        pdf.addImage(tmp.toDataURL('image/jpeg',0.92),'JPEG',margin,drawY,contentW,slicePt);
         yPt=cutPt; page++;
       }
       pdf.save(filename);
