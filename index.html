@@ -763,7 +763,7 @@ function buildSCData(rows,snapData){
 function drawSC(svgElem,rows,snapData,planColor,actColor,title){
   const svg=svgElem;
   while(svg.firstChild)svg.removeChild(svg.firstChild);
-  const W=svg.parentElement.offsetWidth||600;
+  const W=Math.max(svg.getBoundingClientRect().width||svg.parentElement?.getBoundingClientRect().width||window.innerWidth-40,300);
   const H=parseInt(svg.getAttribute('height'))||220;
   svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
   const PL=44,PR=20,PT=36,PB=28;
@@ -1068,20 +1068,20 @@ function renderFooter(){
 function renderSC_plan(){
   const svg=$('svgSC');
   if(!svg||!plan)return;
-  requestAnimationFrame(()=>{
+  setTimeout(()=>{
     const color=plan==='material'?'#1560a8':'#d97706';
     drawSC(svg,D[plan].rows,D[plan].snap,color,'#15803d',plan==='material'?'Material S-Curve':'Installation S-Curve');
-  });
+  },50);
 }
 
 function renderHome(){
   const mp=calcP(D.material.rows),ip=calcP(D.installation.rows);
   $('hmp').textContent=mp+'%';$('hip').textContent=ip+'%';
   $('hmb').style.width=mp+'%';$('hib').style.width=ip+'%';
-  requestAnimationFrame(()=>{
+  setTimeout(()=>{
     drawSC($('svgMatSC'),D.material.rows,D.material.snap,'#1560a8','#15803d','Material S-Curve');
     drawSC($('svgInstSC'),D.installation.rows,D.installation.snap,'#d97706','#15803d','Installation S-Curve');
-  });
+  },50);
 }
 
 // ── FIELD UPDATES ──
