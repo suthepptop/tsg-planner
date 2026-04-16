@@ -80,7 +80,7 @@ html, body {
 
 /* GANTT */
 .gs {background:#fff;border-bottom:1px solid #ddd;overflow-x:hidden; width: 100%; max-width: 100%;}
-.gs canvas {display:block; max-width: 100%;}
+.gs svg {display:block; max-width: 100%;}
 
 /* TABLE */
 .ts {background:#fff; width: 100%; max-width: 100%; padding-bottom: 36px;}
@@ -374,7 +374,7 @@ tbody tr { page-break-inside: avoid; }
   </div>
   
   <div class="scs"><div class="scb"><div id="cSC" data-height="260" style="width:100%;"></div></div></div>
-  <div class="gs" id="gsec"><canvas id="cGantt"></canvas></div>
+  <div class="gs" id="gsec"></div>
   
   <div class="ts">
     <div class="tw">
@@ -645,7 +645,6 @@ function exportBillingPDF(){
   const row=(l,v,c='#222')=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;font-size:12px"><span style="color:#555">${l}</span><span style="font-weight:700;color:${c}">${v}</span></div>`;
   const hl=(l,v)=>`<div style="background:#f0fdf4;padding:8px;border-radius:4px;border:1px solid #bbf7d0;margin-top:8px;display:flex;justify-content:space-between"><span style="color:#166534;font-weight:700;font-size:12px">${l}</span><span style="color:#15803d;font-weight:700;font-size:13px">${v}</span></div>`;
   
-  // Custom fetch inputs for Previous Payment
   const mPrevVal = D.material.prevPayment ? formatTHB(D.material.prevPayment) + ' THB' : '0.00 THB';
   const iPrevVal = D.installation.prevPayment ? formatTHB(D.installation.prevPayment) + ' THB' : '0.00 THB';
 
@@ -664,9 +663,12 @@ function exportPDF(){
     const rows=D[plan].rows;
     const rate=plan==='material'?0.60:0.65;
     const scContainer=document.getElementById('cSC');
-    const ganttCanvas=document.getElementById('cGantt');
+    const ganttContainer=document.getElementById('gsec');
 
-    window.html2canvas(scContainer, {scale: 2}).then(scCanvas => {
+    Promise.all([
+      window.html2canvas(scContainer, {scale: 2}),
+      window.html2canvas(ganttContainer, {scale: 2})
+    ]).then(([scCanvas, ganttCanvas]) => {
       const {jsPDF}=window.jspdf;
       const pdf=new jsPDF({unit:'pt',format:'a4',orientation:'portrait'});
       const pW=pdf.internal.pageSize.getWidth();
@@ -674,7 +676,7 @@ function exportPDF(){
       const margin=28;
       const contentW=pW-margin*2;
 
-      // PAGE 1+: S-Curve (fit on first page top)
+      // PAGE 1+: S-Curve
       const scRatio=contentW/scCanvas.width;
       const scH=scCanvas.height*scRatio;
       pdf.addImage(scCanvas.toDataURL('image/jpeg',0.92),'JPEG',margin,margin,contentW,scH);
@@ -1343,18 +1345,19 @@ function setupPaste(){
 }
 
 function renderGantt(){
-  const cv=$('cGantt'),sec=$('gsec');
-  if(!cv||!plan)return;
-  const rows=D[plan].rows;
-  const{start:ps,end:pe,days:td}=getRange(rows);
-  const today=new Date();
+  const sec = $('gsec');
+  if(!sec || !plan) return;
+  const rows = D[plan].rows;
+  const {start:ps, end:pe, days:td} = getRange(rows);
+  const today = new Date();
   const isMob = window.innerWidth <= 768;
   const W = isMob ? window.innerWidth : Math.max(sec.getBoundingClientRect().width || sec.offsetWidth, 600);
   const LW = Math.floor(W * (isMob ? 0.30 : 0.35)); 
   const HH = isMob ? 30 : 44;
   const LH = isMob ? 22 : 32;
   const baseRH = isMob ? 28 : 42;
-  const tmpCtx = cv.getContext('2d');
+  
+  const tmpCtx = document.createElement('canvas').getContext('2d');
   const maxW = LW - 10;
   const getLines = (ctx, text, maxWidth) => {
       if(!text) return [''];
@@ -1371,99 +1374,115 @@ function renderGantt(){
       if(curr) lines.push(curr);
       return lines;
   };
+
   const rowData = rows.map((r, i) => {
       const lbl = (r.itemNo ? r.itemNo + ' ' : '') + (r.desc || '');
       const isDesc = !!r.desc;
       const isHdr = (!r.bg || r.bg == 0) && !r.ps && !r.pe;
-      tmpCtx.font = (isDesc ? (isMob?'13px ':'17px ') : (isMob?'italic 12px ':'italic 15px ')) + FN;
-      if (isHdr) tmpCtx.font = 'bold ' + tmpCtx.font; 
+      tmpCtx.font = (isHdr ? 'bold ' : '') + (isDesc ? (isMob?'13px ':'17px ') : (isMob?'italic 12px ':'italic 15px ')) + FN;
       const lines = getLines(tmpCtx, lbl || ('row '+r.no), maxW);
       const rh = Math.max(baseRH, lines.length * (isMob?16:22) + 12);
       return { r, lines, rh, isDesc, isHdr };
   });
+
   const totalRH = rowData.reduce((sum, rd) => sum + rd.rh, 0);
   const H = HH + totalRH + LH;
-  cv.width=W;cv.height=H;cv.style.width=W+'px';cv.style.height=H+'px';
-  const ctx=cv.getContext('2d');
-  const BW=W-LW;
-  const gx=d=>LW+(d/td)*BW;
-  const dx=d=>gx(dd(ps,d));
-  ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
-  const ms=[];let mc=new Date(ps.getFullYear(),ps.getMonth(),1);
+  
+  const BW = W - LW;
+  const gx = d => LW + (d / td) * BW;
+  const dx = d => gx(dd(ps, d));
+
+  let svg = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="background:#fff; font-family:${FN};">`;
+  
+  const ms=[]; let mc=new Date(ps.getFullYear(),ps.getMonth(),1);
   while(mc<=pe){ms.push(new Date(mc));mc=new Date(mc.getFullYear(),mc.getMonth()+1,1);}
   ms.forEach((m,i)=>{
-    const x1=Math.max(LW,dx(m)),x2=Math.min(W,dx(new Date(m.getFullYear(),m.getMonth()+1,1)));
-    ctx.fillStyle=i%2?'#1050a0':'#1560a8';ctx.fillRect(x1,0,x2-x1,HH);
-    ctx.fillStyle='#fff';ctx.font='bold '+(isMob?'13px ':'17px ')+FN;ctx.textAlign='center';
-    ctx.fillText(m.toLocaleString('default',{month:'short'})+"'"+String(m.getFullYear()).slice(2),(x1+x2)/2,HH - (isMob?8:10));
-    if(x1>LW){ctx.strokeStyle='#e0e0e0';ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(x1,HH);ctx.lineTo(x1,H-LH);ctx.stroke();}
+    const x1 = Math.max(LW, dx(m)), x2 = Math.min(W, dx(new Date(m.getFullYear(), m.getMonth()+1, 1)));
+    const fill = i%2 ? '#1050a0' : '#1560a8';
+    svg += `<rect x="${x1}" y="0" width="${x2-x1}" height="${HH}" fill="${fill}"/>`;
+    const mStr = m.toLocaleString('default',{month:'short'}) + "'" + String(m.getFullYear()).slice(2);
+    svg += `<text x="${(x1+x2)/2}" y="${HH - (isMob?8:10)}" font-size="${isMob?13:17}" font-weight="bold" fill="#fff" text-anchor="middle">${mStr}</text>`;
+    if(x1>LW) svg += `<line x1="${x1}" y1="${HH}" x2="${x1}" y2="${H-LH}" stroke="#e0e0e0" stroke-width="0.5"/>`;
   });
-  ctx.fillStyle='#1560a8';ctx.fillRect(0,0,LW,HH);
-  ctx.fillStyle='#fff';ctx.font='bold '+(isMob?'13px ':'17px ')+FN;ctx.textAlign='center';ctx.fillText('Item / Description',LW/2,HH - (isMob?8:10));
-  ctx.strokeStyle='#999';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(LW,0);ctx.lineTo(LW,H);ctx.stroke();
+  
+  svg += `<rect x="0" y="0" width="${LW}" height="${HH}" fill="#1560a8"/>`;
+  svg += `<text x="${LW/2}" y="${HH - (isMob?8:10)}" font-size="${isMob?13:17}" font-weight="bold" fill="#fff" text-anchor="middle">Item / Description</text>`;
+  svg += `<line x1="${LW}" y1="0" x2="${LW}" y2="${H}" stroke="#999" stroke-width="1"/>`;
+  
   let y = HH;
   rowData.forEach((rd, i) => {
     const r = rd.r;
     const RH = rd.rh;
-    if (rd.isHdr) { ctx.fillStyle = '#e8f0fb'; } else { ctx.fillStyle=i%2?'#fff':'#f7f9fb'; }
-    ctx.fillRect(0,y,W,RH);
-    ctx.strokeStyle=rd.isHdr ? '#1560a8' : '#e5e5e5';
-    ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(0,y+RH);ctx.lineTo(W,y+RH);ctx.stroke();
-    ctx.fillStyle=rd.isHdr ? '#1560a8' : (rd.isDesc?'#111':'#aaa');
-    let fStyle = (rd.isDesc ? (isMob?'13px ':'17px ') : (isMob?'italic 12px ':'italic 15px ')) + FN;
-    if (rd.isHdr) fStyle = 'bold ' + fStyle;
-    ctx.font = fStyle;
-    ctx.textAlign='left';
+    const bgFill = rd.isHdr ? '#e8f0fb' : (i%2 ? '#fff' : '#f7f9fb');
+    svg += `<rect x="0" y="${y}" width="${W}" height="${RH}" fill="${bgFill}"/>`;
+    
+    const lineStroke = rd.isHdr ? '#1560a8' : '#e5e5e5';
+    svg += `<line x1="0" y1="${y+RH}" x2="${W}" y2="${y+RH}" stroke="${lineStroke}" stroke-width="0.5"/>`;
+    
+    const txtFill = rd.isHdr ? '#1560a8' : (rd.isDesc ? '#111' : '#aaa');
+    const txtWeight = rd.isHdr ? 'bold' : 'normal';
+    const txtStyle = rd.isDesc ? 'normal' : 'italic';
+    const txtSize = rd.isDesc ? (isMob?13:17) : (isMob?12:15);
+    
     rd.lines.forEach((line, li) => {
         const lh = isMob ? 14 : 18;
         const textStartY = y + (RH - (rd.lines.length * lh)) / 2 + (isMob?10:13);
-        ctx.fillText(line, 5, textStartY + li * lh);
+        const safeText = line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        svg += `<text x="5" y="${textStartY + li * lh}" font-size="${txtSize}" font-weight="${txtWeight}" font-style="${txtStyle}" fill="${txtFill}">${safeText}</text>`;
     });
+    
     if (!rd.isHdr) {
-        const s=pd(r.ps),e=pd(r.pe);
+        const s=pd(r.ps), e=pd(r.pe);
         if(s && e){
-            const bx=dx(s),ex=dx(e),bw=Math.max(ex-bx,3);
+            const bx=dx(s), ex=dx(e), bw=Math.max(ex-bx, 3);
             const pH=isMob?10:14, pY=y+(RH - (isMob?20:26))/2; 
-            ctx.fillStyle='#1560a8';
-            ctx.beginPath();if(ctx.roundRect)ctx.roundRect(bx,pY,bw,pH,3);else ctx.rect(bx,pY,bw,pH);ctx.fill();
-            if(bw>26){ctx.fillStyle='#fff';ctx.font='bold '+(isMob?'11px ':'14px ')+FN;ctx.textAlign='center';ctx.fillText(dd(s,e)+1+'d',bx+bw/2,pY+(isMob?8:10));}
+            svg += `<rect x="${bx}" y="${pY}" width="${bw}" height="${pH}" rx="3" ry="3" fill="#1560a8"/>`;
+            
+            if(bw>26){
+                svg += `<text x="${bx+bw/2}" y="${pY+(isMob?8:11)}" font-size="${isMob?11:14}" font-weight="bold" fill="#fff" text-anchor="middle">${dd(s,e)+1}d</text>`;
+            }
+            
             const mY=pY+(isMob?8:11);
-            ctx.fillStyle='#666';ctx.font=(isMob?'11px ':'14px ')+FN;
-            ctx.textAlign='right';ctx.fillText(fd(r.ps),bx-3,mY);
-            ctx.textAlign='left';ctx.fillText(fd(r.pe),bx+bw+3,mY);
-            const as=pd(r.as||r.ps),ae=pd(r.ae||r.pe);
+            svg += `<text x="${bx-3}" y="${mY}" font-size="${isMob?11:14}" fill="#666" text-anchor="end">${fd(r.ps)}</text>`;
+            svg += `<text x="${bx+bw+3}" y="${mY}" font-size="${isMob?11:14}" fill="#666" text-anchor="start">${fd(r.pe)}</text>`;
+            
+            const as=pd(r.as||r.ps), ae=pd(r.ae||r.pe);
             if(as && ae){
-                const ax=dx(as),aex=dx(ae),aw=Math.max(aex-ax,3);
+                const ax=dx(as), aex=dx(ae), aw=Math.max(aex-ax, 3);
                 const aH=isMob?8:10, aY=pY+pH+2;
-                ctx.fillStyle='#FFD700';
-                ctx.beginPath();if(ctx.roundRect)ctx.roundRect(ax,aY,aw,aH,3);else ctx.rect(ax,aY,aw,aH);ctx.fill();
+                svg += `<rect x="${ax}" y="${aY}" width="${aw}" height="${aH}" rx="3" ry="3" fill="#FFD700"/>`;
+                
                 const pct=+r.pct||0;
                 if(pct>0){
                     const rx=ax+(pct/100)*aw, mAY=aY+aH/2;
-                    ctx.strokeStyle='#000';ctx.lineWidth=isMob?2:3;ctx.lineCap='round';
-                    ctx.beginPath();ctx.moveTo(ax,mAY);ctx.lineTo(rx,mAY);ctx.stroke();
-                    ctx.lineCap='butt';ctx.lineWidth=1;
-                    ctx.fillStyle='#000';ctx.font='bold '+(isMob?'11px ':'14px ')+FN;ctx.textAlign='right';
-                    ctx.fillText(Number(pct).toFixed(2)+'%',ax-3,aY+(isMob?7:8));
+                    svg += `<line x1="${ax}" y1="${mAY}" x2="${rx}" y2="${mAY}" stroke="#000" stroke-width="${isMob?2:3}" stroke-linecap="round"/>`;
+                    svg += `<text x="${ax-3}" y="${aY+(isMob?7:8)}" font-size="${isMob?11:14}" font-weight="bold" fill="#000" text-anchor="end">${Number(pct).toFixed(2)}%</text>`;
                 }
             }
         }
     }
     y += RH;
   });
-  {const tc=today<ps?ps:today>pe?pe:today,tx=dx(tc);
-  ctx.strokeStyle='#c00';ctx.lineWidth=2;ctx.setLineDash([5,3]);
-  ctx.beginPath();ctx.moveTo(tx,HH);ctx.lineTo(tx,H-LH);ctx.stroke();ctx.setLineDash([]);
-  ctx.fillStyle='#c00';ctx.font='bold '+(isMob?'12px ':'15px ')+FN;ctx.textAlign='center';ctx.fillText('TODAY',tx,HH+(isMob?10:13));}
-  ctx.fillStyle='#f4f6f8';ctx.fillRect(0,H-LH,W,LH);
-  ctx.strokeStyle='#ddd';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,H-LH);ctx.lineTo(W,H-LH);ctx.stroke();
-  const ly=H-LH+(isMob?7:9);
-  ctx.fillStyle='#1560a8';ctx.fillRect(LW+8,ly-5,22,9);
-  ctx.fillStyle='#333';ctx.font=(isMob?'12px ':'15px ')+FN;ctx.textAlign='left';ctx.fillText('Plan',LW+34,ly+(isMob?3:2));
-  ctx.fillStyle='#FFD700';ctx.fillRect(LW+(isMob?60:74),ly-5,22,9);ctx.strokeStyle='#aaa';ctx.lineWidth=.5;ctx.strokeRect(LW+(isMob?60:74),ly-5,22,9);
-  ctx.fillStyle='#333';ctx.fillText('Actual',LW+(isMob?86:100),ly+(isMob?3:2));
-  ctx.strokeStyle='#000';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(LW+(isMob?62:76),ly);ctx.lineTo(LW+(isMob?80:94),ly);ctx.stroke();
-  ctx.lineWidth=1;ctx.fillStyle='#333';ctx.fillText('(black=Act%)',LW+(isMob?124:148),ly+(isMob?3:2));
+  
+  const tc = today < ps ? ps : (today > pe ? pe : today);
+  const tx = dx(tc);
+  svg += `<line x1="${tx}" y1="${HH}" x2="${tx}" y2="${H-LH}" stroke="#c00" stroke-width="2" stroke-dasharray="5,3"/>`;
+  svg += `<text x="${tx}" y="${HH+(isMob?10:13)}" font-size="${isMob?12:15}" font-weight="bold" fill="#c00" text-anchor="middle">TODAY</text>`;
+  
+  svg += `<rect x="0" y="${H-LH}" width="${W}" height="${LH}" fill="#f4f6f8"/>`;
+  svg += `<line x1="0" y1="${H-LH}" x2="${W}" y2="${H-LH}" stroke="#ddd" stroke-width="1"/>`;
+  const ly = H-LH+(isMob?7:9);
+  svg += `<rect x="${LW+8}" y="${ly-5}" width="22" height="9" fill="#1560a8"/>`;
+  svg += `<text x="${LW+34}" y="${ly+(isMob?4:3)}" font-size="${isMob?12:15}" fill="#333">Plan</text>`;
+  
+  svg += `<rect x="${LW+(isMob?60:74)}" y="${ly-5}" width="22" height="9" fill="#FFD700" stroke="#aaa" stroke-width="0.5"/>`;
+  svg += `<text x="${LW+(isMob?86:100)}" y="${ly+(isMob?4:3)}" font-size="${isMob?12:15}" fill="#333">Actual</text>`;
+  
+  svg += `<line x1="${LW+(isMob?62:76)}" y1="${ly}" x2="${LW+(isMob?80:94)}" y2="${ly}" stroke="#000" stroke-width="3"/>`;
+  svg += `<text x="${LW+(isMob?124:148)}" y="${ly+(isMob?4:3)}" font-size="${isMob?12:15}" fill="#333">(black=Act%)</text>`;
+  
+  svg += `</svg>`;
+  sec.innerHTML = svg;
 }
 
 function buildC(rows, snapData){
