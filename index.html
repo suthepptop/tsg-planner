@@ -239,11 +239,11 @@ body.ed .paste-hint{display:inline-block}
   <div class="h-main">
     <div class="h-chart">
       <div class="h-chart-title">Material S-Curve</div>
-      <canvas id="svgMatSC" height="220" style="display:block;width:100%"></canvas>
+      <canvas id="svgMatSC" height="220" style="display:block;max-width:100%"></canvas>
     </div>
     <div class="h-chart">
       <div class="h-chart-title">Installation S-Curve</div>
-      <canvas id="svgInstSC" height="220" style="display:block;width:100%"></canvas>
+      <canvas id="svgInstSC" height="220" style="display:block;max-width:100%"></canvas>
     </div>
   </div>
 </div>
@@ -261,7 +261,7 @@ body.ed .paste-hint{display:inline-block}
   <!-- S-Curve -->
   <div class="sc-wrap">
     <div class="sc-inner">
-      <canvas id="svgSC" height="220" style="display:block;width:100%"></canvas>
+      <canvas id="svgSC" height="220" style="display:block;max-width:100%"></canvas>
     </div>
   </div>
   <!-- Gantt + Table combined -->
@@ -661,7 +661,8 @@ function onLogin(resp){
 // ── PDF EXPORT ──
 function exportAllPDF(){
   toast('Generating PDF...');
-  // Ensure S-curves are drawn with correct data
+  if(!window.jspdf){toast('PDF library not loaded',true);return;}
+  // Draw S-curves at window width
   drawSC($('svgMatSC'),D.material.rows,D.material.snap,'#1560a8','#15803d','Material S-Curve');
   drawSC($('svgInstSC'),D.installation.rows,D.installation.snap,'#d97706','#15803d','Installation S-Curve');
   if(plan) drawSC($('svgSC'),D[plan].rows,D[plan].snap,plan==='material'?'#1560a8':'#d97706','#15803d',plan==='material'?'Material S-Curve':'Installation S-Curve');
@@ -967,9 +968,19 @@ function buildSCData(rows,snapData){
 
 function drawSC(cvElem,rows,snapData,planColor,actColor,title){
   const cv=cvElem;
-  const W=cv.offsetWidth||cv.parentElement?.offsetWidth||cv.parentElement?.parentElement?.offsetWidth||window.innerWidth-240;
+  if(!cv)return;
+  // Get actual container width
+  const parent=cv.parentElement;
+  const grandparent=parent?parent.parentElement:null;
+  const W=Math.max(
+    parent?parent.clientWidth||parent.offsetWidth:0,
+    grandparent?grandparent.clientWidth||grandparent.offsetWidth:0,
+    window.innerWidth-250,
+    300
+  );
   const H=220;
   cv.width=W; cv.height=H;
+  cv.style.width=W+'px';
   const ctx=cv.getContext('2d');
   ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,H);
   const PL=44,PR=20,PT=36,PB=28;
@@ -1277,12 +1288,14 @@ function renderFooter(){
 }
 
 function renderSC_plan(){
-  const svg=$('svgSC');
-  if(!svg||!plan)return;
-  setTimeout(()=>{
+  const cv=$('svgSC');
+  if(!cv||!plan)return;
+  const draw=()=>{
     const color=plan==='material'?'#1560a8':'#d97706';
-    drawSC(svg,D[plan].rows,D[plan].snap,color,'#15803d',plan==='material'?'Material S-Curve':'Installation S-Curve');
-  },100);
+    drawSC(cv,D[plan].rows,D[plan].snap,color,'#15803d',plan==='material'?'Material S-Curve':'Installation S-Curve');
+  };
+  draw();
+  setTimeout(draw,150);
 }
 
 function renderHome(){
@@ -1293,8 +1306,10 @@ function renderHome(){
     drawSC($('svgMatSC'),D.material.rows,D.material.snap,'#1560a8','#15803d','Material S-Curve');
     drawSC($('svgInstSC'),D.installation.rows,D.installation.snap,'#d97706','#15803d','Installation S-Curve');
   };
-  setTimeout(drawHome,100);
-  setTimeout(drawHome,400);
+  // Draw immediately and again after delays to catch layout
+  drawHome();
+  setTimeout(drawHome,150);
+  setTimeout(drawHome,500);
 }
 
 // ── FIELD UPDATES ──
