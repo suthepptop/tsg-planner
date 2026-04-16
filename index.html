@@ -708,7 +708,14 @@ function renderAll(){
   const lp=sessionStorage.getItem('lastPlan');
   if(lb==='billing')requestAnimationFrame(goBilling);
   else if(lp)requestAnimationFrame(()=>goPlan(lp));
-  else{showPg('hpg');requestAnimationFrame(renderHome);}
+  else{
+    showPg('hpg');
+    requestAnimationFrame(()=>{
+      renderHome();
+      // Draw again after layout settles
+      setTimeout(renderHome, 300);
+    });
+  }
 }
 
 // ── SVG HELPERS ──
@@ -762,18 +769,15 @@ function buildSCData(rows,snapData){
 
 function drawSC(svgElem,rows,snapData,planColor,actColor,title){
   const svg=svgElem;
-  const H=parseInt(svg.getAttribute('height'))||220;
-  // Force explicit pixel width on SVG so getBoundingClientRect works
-  svg.style.width='100%';
-  svg.style.display='block';
-  const W=Math.max(
-    svg.getBoundingClientRect().width,
-    svg.parentElement?.getBoundingClientRect().width||0,
-    svg.parentElement?.parentElement?.getBoundingClientRect().width||0,
-    300
-  );
+  const H=220;
+  // Walk up DOM to find a container with real pixel width
+  let W=0;
+  let el=svg;
+  while(el&&W<100){el=el.parentElement;if(el)W=el.offsetWidth||el.clientWidth||0;}
+  if(W<100)W=window.innerWidth-40;
   svg.setAttribute('width',W);
   svg.setAttribute('height',H);
+  svg.style.display='block';
   while(svg.firstChild)svg.removeChild(svg.firstChild);
   svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
   const PL=44,PR=20,PT=36,PB=28;
@@ -951,6 +955,7 @@ function renderPlan(){
   renderRows();
   renderFooter();
   renderSC_plan();
+  setTimeout(renderSC_plan, 300); // redraw after layout settles
 }
 
 function getTableW(){
@@ -1081,17 +1086,19 @@ function renderSC_plan(){
   setTimeout(()=>{
     const color=plan==='material'?'#1560a8':'#d97706';
     drawSC(svg,D[plan].rows,D[plan].snap,color,'#15803d',plan==='material'?'Material S-Curve':'Installation S-Curve');
-  },200);
+  },100);
 }
 
 function renderHome(){
   const mp=calcP(D.material.rows),ip=calcP(D.installation.rows);
   $('hmp').textContent=mp+'%';$('hip').textContent=ip+'%';
   $('hmb').style.width=mp+'%';$('hib').style.width=ip+'%';
-  setTimeout(()=>{
+  const drawHome=()=>{
     drawSC($('svgMatSC'),D.material.rows,D.material.snap,'#1560a8','#15803d','Material S-Curve');
     drawSC($('svgInstSC'),D.installation.rows,D.installation.snap,'#d97706','#15803d','Installation S-Curve');
-  },200);
+  };
+  setTimeout(drawHome,100);
+  setTimeout(drawHome,400);
 }
 
 // ── FIELD UPDATES ──
