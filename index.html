@@ -238,11 +238,11 @@ body.ed .paste-hint{display:inline-block}
   <div class="h-main">
     <div class="h-chart">
       <div class="h-chart-title">Material S-Curve</div>
-      <canvas id="svgMatSC" height="220" style="display:block;max-width:100%"></canvas>
+      <canvas id="svgMatSC" width="600" height="220" style="display:block;width:100%;height:220px"></canvas>
     </div>
     <div class="h-chart">
       <div class="h-chart-title">Installation S-Curve</div>
-      <canvas id="svgInstSC" height="220" style="display:block;max-width:100%"></canvas>
+      <canvas id="svgInstSC" width="600" height="220" style="display:block;width:100%;height:220px"></canvas>
     </div>
   </div>
 </div>
@@ -260,7 +260,7 @@ body.ed .paste-hint{display:inline-block}
   <!-- S-Curve -->
   <div class="sc-wrap">
     <div class="sc-inner">
-      <canvas id="svgSC" height="220" style="display:block;max-width:100%"></canvas>
+      <canvas id="svgSC" width="600" height="220" style="display:block;width:100%;height:220px"></canvas>
     </div>
   </div>
   <!-- Gantt + Table combined -->
@@ -659,17 +659,15 @@ function onLogin(resp){
 
 // ── PDF EXPORT ──
 function exportAllPDF(){
-  if(!window.jspdf||!window.jspdf.jsPDF){
-    toast('Please wait, loading PDF library...',true);
-    setTimeout(exportAllPDF,1000);
-    return;
-  }
+  try{
+  const jsPDFLib=window.jspdf&&window.jspdf.jsPDF;
+  if(!jsPDFLib){toast('PDF not ready, try again',true);return;}
   toast('Generating PDF...');
   // Draw S-curves at window width
   drawSC($('svgMatSC'),D.material.rows,D.material.snap,'#1560a8','#15803d','Material S-Curve');
   drawSC($('svgInstSC'),D.installation.rows,D.installation.snap,'#d97706','#15803d','Installation S-Curve');
   if(plan) drawSC($('svgSC'),D[plan].rows,D[plan].snap,plan==='material'?'#1560a8':'#d97706','#15803d',plan==='material'?'Material S-Curve':'Installation S-Curve');
-  const {jsPDF}=window.jspdf;
+  const jsPDF=jsPDFLib;
   const pdf=new jsPDF({unit:'pt',format:'a4',orientation:'portrait'});
   const pW=pdf.internal.pageSize.getWidth();
   const pH=pdf.internal.pageSize.getHeight();
@@ -852,6 +850,7 @@ function svgToImg(svgEl,w,h){
 
   pdf.save('TSG_Project_Report.pdf');
   toast('✓ PDF Downloaded');
+  }catch(e){console.error(e);toast('✗ PDF Error: '+e.message,true);}
 }
 
 function restoreSession(){
@@ -878,6 +877,7 @@ function goPlan(p){
   $(p==='material'?'nbM':'nbI').classList.add('on');
   showPg('ppg');
   renderPlan();
+  setTimeout(renderSC_plan,300);
 }
 
 function goHome(){
@@ -912,11 +912,8 @@ function renderAll(){
   else if(lp)requestAnimationFrame(()=>goPlan(lp));
   else{
     showPg('hpg');
-    requestAnimationFrame(()=>{
-      renderHome();
-      // Draw again after layout settles
-      setTimeout(renderHome, 300);
-    });
+    renderHome();
+    setTimeout(renderHome, 300);
   }
 }
 
@@ -972,17 +969,11 @@ function buildSCData(rows,snapData){
 function drawSC(cvElem,rows,snapData,planColor,actColor,title){
   const cv=cvElem;
   if(!cv)return;
-  // Walk up to find real width
-  let W=0;
-  let el=cv.parentElement;
-  while(el && W<100){
-    W=el.getBoundingClientRect().width||el.offsetWidth||el.clientWidth||0;
-    el=el.parentElement;
-  }
-  if(W<100) W=window.innerWidth-40;
+  // Use window width - most reliable approach
+  const W=Math.max(window.innerWidth-40,300);
   const H=220;
-  cv.style.width=W+'px';
   cv.width=W; cv.height=H;
+  cv.style.width='100%'; cv.style.height=H+'px';
   const ctx=cv.getContext('2d');
   ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,H);
   const PL=44,PR=20,PT=36,PB=28;
@@ -1497,6 +1488,16 @@ window.onload=()=>{
   google.accounts.id.initialize({client_id:GCI,callback:onLogin,auto_select:true});
   google.accounts.id.renderButton($('gBtn'),{theme:'filled_blue',size:'small',text:'signin_with',shape:'rectangular'});
   loadData();
+  // Draw S-curves after DOM is ready regardless of data load
+  setTimeout(()=>{
+    initD();
+    if(plan) renderSC_plan();
+    else renderHome();
+    setTimeout(()=>{
+      if(plan) renderSC_plan();
+      else renderHome();
+    },400);
+  },200);
 };
 </script>
 </body>
