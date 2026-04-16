@@ -55,7 +55,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--gray)}
 .prog-bar{height:5px;background:#e0e0e0;border-radius:3px;margin-bottom:8px;overflow:hidden}
 .prog-fill{height:100%;border-radius:3px;transition:width .4s}
 .h-main{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:16px;align-items:center;background:var(--gray)}
-.h-chart{width:min(100%,700px);background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px}
+.h-chart{width:100%;max-width:700px;display:block;background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px}
 .h-chart-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px}
 
 /* ── PLAN PAGE ── */
@@ -72,8 +72,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--gray)}
 .tbtn-g{border-color:var(--green);color:var(--green)}
 
 /* ── S-CURVE ── */
-.sc-wrap{padding:12px 16px;background:#fff;border-bottom:1px solid var(--border)}
-.sc-inner{max-width:100%;margin:0 auto}
+.sc-wrap{padding:12px 16px;background:#fff;border-bottom:1px solid var(--border);display:block;width:100%}
+.sc-inner{width:100%;display:block}
 
 /* ── GANTT+TABLE COMBINED ── */
 .gt-wrap{flex:1;overflow:auto;background:#fff}
@@ -110,7 +110,6 @@ body.ed .td input:not([readonly]){cursor:text}
 .hdr-row .td input{font-weight:700;color:var(--blue)}
 
 /* Gantt SVG cell */
-.c-gantt{padding:0;overflow:hidden}
 .gantt-svg-cell{width:100%;height:var(--rh);display:block}
 .hdr-row .c-gantt{background:var(--blue-light)}
 
@@ -660,8 +659,12 @@ function onLogin(resp){
 
 // ── PDF EXPORT ──
 function exportAllPDF(){
+  if(!window.jspdf||!window.jspdf.jsPDF){
+    toast('Please wait, loading PDF library...',true);
+    setTimeout(exportAllPDF,1000);
+    return;
+  }
   toast('Generating PDF...');
-  if(!window.jspdf){toast('PDF library not loaded',true);return;}
   // Draw S-curves at window width
   drawSC($('svgMatSC'),D.material.rows,D.material.snap,'#1560a8','#15803d','Material S-Curve');
   drawSC($('svgInstSC'),D.installation.rows,D.installation.snap,'#d97706','#15803d','Installation S-Curve');
@@ -969,18 +972,17 @@ function buildSCData(rows,snapData){
 function drawSC(cvElem,rows,snapData,planColor,actColor,title){
   const cv=cvElem;
   if(!cv)return;
-  // Get actual container width
-  const parent=cv.parentElement;
-  const grandparent=parent?parent.parentElement:null;
-  const W=Math.max(
-    parent?parent.clientWidth||parent.offsetWidth:0,
-    grandparent?grandparent.clientWidth||grandparent.offsetWidth:0,
-    window.innerWidth-250,
-    300
-  );
+  // Walk up to find real width
+  let W=0;
+  let el=cv.parentElement;
+  while(el && W<100){
+    W=el.getBoundingClientRect().width||el.offsetWidth||el.clientWidth||0;
+    el=el.parentElement;
+  }
+  if(W<100) W=window.innerWidth-40;
   const H=220;
-  cv.width=W; cv.height=H;
   cv.style.width=W+'px';
+  cv.width=W; cv.height=H;
   const ctx=cv.getContext('2d');
   ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,H);
   const PL=44,PR=20,PT=36,PB=28;
