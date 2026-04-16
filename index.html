@@ -2,609 +2,439 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no, viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache">
 <title>TSG Project Planner</title>
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
 <style>
-:root{
-  --blue:#1560a8;--blue-dark:#0f4a8a;--blue-light:#e8f0fb;
-  --amber:#d97706;--amber-light:#fef3e2;
-  --green:#15803d;--green-light:#f0fdf4;
-  --red:#dc2626;--gray:#f4f6f8;--border:#dde1e7;
-  --text:#1a1a2e;--text2:#555;--text3:#888;
-  --rh:32px;--fsize:12px;
+* {box-sizing:border-box;margin:0;padding:0;font-family:Sarabun,sans-serif}
+html, body {
+  width: 100%; 
+  max-width: 100%; 
+  overflow-x: hidden; 
+  position: relative; 
+  background:#f4f6f8;
+  color:#222;
+  overscroll-behavior-x: none;
 }
-*{box-sizing:border-box;margin:0;padding:0;font-family:Sarabun,sans-serif}
-html,body{width:100%;height:100%;overflow:hidden;background:var(--gray)}
 
-/* ── TOP BAR ── */
-#bar{position:fixed;top:0;left:0;right:0;z-index:300;height:48px;background:var(--blue);display:flex;align-items:center;gap:8px;padding:0 14px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
-#bar h1{font-size:13px;font-weight:700;color:#fff;letter-spacing:.5px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tnav{display:flex;gap:4px}
-.tnb{padding:4px 10px;border-radius:20px;border:1.5px solid rgba(255,255,255,.4);background:transparent;color:#fff;font-size:11px;cursor:pointer;font-family:Sarabun,sans-serif;transition:.15s}
-.tnb:hover{background:rgba(255,255,255,.2)}
-.tnb.on{background:#fff;color:var(--blue);font-weight:700;border-color:#fff}
-.bar-r{display:flex;align-items:center;gap:6px}
-#uinfo{font-size:11px;color:rgba(255,255,255,.85);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bbtn{padding:4px 10px;border-radius:4px;border:1.5px solid rgba(255,255,255,.5);background:transparent;color:#fff;font-size:11px;cursor:pointer;font-family:Sarabun,sans-serif;white-space:nowrap}
-.bbtn:hover{background:rgba(255,255,255,.15)}
+#bar {position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;gap:8px;padding:0 12px;min-height:44px;background:#1560a8;border-bottom:2px solid #0f4a8a;flex-wrap:wrap; width: 100%;}
+#bar h1 {font-size:13px;font-weight:700;color:#fff;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#bar .r {display:flex;align-items:center;gap:6px}
+#uinfo {font-size:11px;color:rgba(255,255,255,.85)}
 
-/* ── MAIN LAYOUT ── */
-#app{position:fixed;top:48px;left:0;right:0;bottom:0;overflow:hidden}
-.pg{display:none;width:100%;height:100%}
-.pg.on{display:flex;flex-direction:column}
+.tnav {display:flex;gap:4px;flex-wrap:wrap}
+.tnb {padding:3px 9px;border-radius:4px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.15);color:#fff;font-size:11px;cursor:pointer;font-family:Sarabun,sans-serif;white-space:nowrap}
+.tnb:hover {background:rgba(255,255,255,.3)}
+.tnb.on {background:rgba(255,255,255,.9);color:#1560a8;font-weight:700}
 
-/* ── HOME PAGE ── */
-#hpg.on{display:flex;flex-direction:row;overflow:hidden}
-.h-sidebar{width:200px;min-width:200px;background:#fff;border-right:1px solid var(--border);padding:16px 12px;display:flex;flex-direction:column;gap:8px;overflow-y:auto}
-.h-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
-.plan-btn{width:100%;padding:12px;border-radius:8px;border:1px solid var(--border);background:#fff;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px;transition:.15s}
-.plan-btn:hover{border-color:var(--blue);background:var(--blue-light)}
-.plan-icon{width:32px;height:32px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px}
-.pm-icon{background:var(--blue-light)}
-.pi-icon{background:var(--amber-light)}
-.plan-title{font-size:12px;font-weight:700;color:var(--text)}
-.plan-sub{font-size:10px;color:var(--text3)}
-.prog-section{margin-top:8px;padding-top:12px;border-top:1px solid var(--border)}
-.prog-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
-.prog-label{font-size:11px;color:var(--text2)}
-.prog-val{font-size:11px;font-weight:700}
-.prog-bar{height:5px;background:#e0e0e0;border-radius:3px;margin-bottom:8px;overflow:hidden}
-.prog-fill{height:100%;border-radius:3px;transition:width .4s}
-.h-main{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:16px;align-items:center;background:var(--gray)}
-.h-chart{width:100%;max-width:700px;display:block;background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px}
-.h-chart-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px}
+.btn {padding:5px 13px;border-radius:4px;border:1px solid #aaa;background:#fff;color:#222;font-size:12px;font-family:Sarabun,sans-serif;cursor:pointer}
+.btn:hover {background:#f0f0f0}
+.btnp {background:#1560a8;border-color:#1560a8;color:#fff}
+.btnp:hover {background:#0f4a8a}
+.btnd {border-color:#c00;color:#c00}
+.btnsm {padding:3px 9px;font-size:11px}
 
-/* ── PLAN PAGE ── */
-#ppg.on{display:flex;flex-direction:column}
-.plan-toolbar{position:sticky;top:0;z-index:200;background:#fff;border-bottom:1px solid var(--border);padding:8px 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-.plan-title-text{font-size:14px;font-weight:700;color:var(--blue)}
-.sp{flex:1}
-.tbtn{padding:5px 12px;border-radius:5px;border:1px solid var(--border);background:#fff;font-size:11px;cursor:pointer;font-family:Sarabun,sans-serif;color:var(--text2);transition:.15s}
-.tbtn:hover{background:var(--gray);border-color:#aaa}
-.tbtn-p{background:var(--blue);border-color:var(--blue);color:#fff}
-.tbtn-p:hover{background:var(--blue-dark)}
-.tbtn-d{border-color:#dc2626;color:#dc2626}
-.tbtn-d:hover{background:#fef2f2}
-.tbtn-g{border-color:var(--green);color:var(--green)}
+.pg {display:none; width: 100%; max-width: 100%;}
+.pg.on {display:block; padding-top: 88px;}
+#hpg.on {display:flex;height:calc(100vh - 44px);overflow:hidden; width: 100%; background:#fff; padding-top: 44px;}
 
-/* ── S-CURVE ── */
-.sc-wrap{padding:12px 16px;background:#fff;border-bottom:1px solid var(--border);display:block;width:100%}
-.sc-inner{width:100%;display:block}
+/* HOME */
+.hsb {width:190px;min-width:190px;background:#f4f6f8;border-right:1px solid #ddd;display:flex;flex-direction:column;padding:14px 12px;gap:10px;overflow-y:auto}
+.hslb {font-size:10px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.pb {width:100%;padding:10px;border-radius:6px;border:1px solid #ddd;background:#fff;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px;font-family:Sarabun,sans-serif}
+.pb:hover {border-color:#1560a8;background:#eef4ff}
+.pbic {width:30px;height:30px;border-radius:4px;flex-shrink:0}
+.pbm {background:#e8f0fb;border:1.5px solid #1560a8}
+.pbi {background:#fef3e2;border:1.5px solid #d97706}
+.pbt {font-size:12px;font-weight:700;color:#222;margin-bottom:1px}
+.pbs {font-size:9px;color:#888}
 
-/* ── GANTT+TABLE COMBINED ── */
-.gt-wrap{flex:1;overflow:auto;background:#fff}
-.gt-container{display:flex;flex-direction:column;min-width:900px}
+.hpg-r {flex:1;display:flex;flex-direction:column;padding:14px;gap:12px;background:#f9f9f9;overflow-y:auto;align-items:center; max-width: 100%;}
+.hcb {width:65%;min-width:300px;background:#fff;border:1px solid #ddd;border-radius:6px;padding:10px; max-width: 100%;}
+.hcb canvas {display:block;width:100%}
 
-/* Sticky header row */
-.gt-header{display:flex;position:sticky;top:0;z-index:100;background:#e8edf2;border-bottom:2px solid #bbb;font-size:11px;font-weight:700;color:#333}
-.gt-header .th{padding:6px 4px;border-right:1px solid #ccc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center}
+.prbox {margin-top:4px;border-top:1px solid #ddd;padding-top:10px;display:flex;flex-direction:column;gap:3px}
+.prlb {font-size:10px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+.prrow {display:flex;justify-content:space-between}
+.prn {font-size:11px;color:#555}
+.prm {font-size:11px;font-weight:700;color:#1560a8}
+.pri {font-size:11px;font-weight:700;color:#d97706}
+.prbg {height:5px;background:#e0e0e0;border-radius:3px;margin-top:2px}
+.prfm {height:5px;background:#1560a8;border-radius:3px;transition:width .4s}
+.prfi {height:5px;background:#d97706;border-radius:3px;transition:width .4s}
 
-/* Column widths */
-.c-no{width:36px;min-width:36px;text-align:center;justify-content:center}
-.c-item{width:68px;min-width:68px}
-.c-desc{width:180px;min-width:180px}
-.c-ps{width:82px;min-width:82px}
-.c-pe{width:82px;min-width:82px}
-.c-as{width:82px;min-width:82px}
-.c-ae{width:82px;min-width:82px}
-.c-pct{width:54px;min-width:54px;text-align:center;justify-content:center}
-.c-bg{width:80px;min-width:80px;text-align:right;justify-content:flex-end}
-.c-claim{width:80px;min-width:80px;text-align:right;justify-content:flex-end}
-.c-act{width:34px;min-width:34px;text-align:center;justify-content:center}
-.c-gantt{flex:1;min-width:300px;overflow:hidden;position:relative;border-left:2px solid #bbb;padding-left:2px}
+/* PLAN PAGE */
+.ptb {position:fixed;top:44px;left:0;right:0;z-index:100;display:flex;align-items:center;gap:7px;padding:6px 13px;background:#f0f2f5;border-bottom:1px solid #ddd;flex-wrap:wrap; width: 100%;}
+.ptit {font-size:14px;font-weight:700;color:#1560a8}
+.sp {flex:1}
+.rwc {display:flex;align-items:center;gap:5px;font-size:12px;color:#666}
+.rwc input {width:50px;padding:3px 5px;border:1px solid #ccc;border-radius:3px;font-size:12px;text-align:center;font-family:Sarabun,sans-serif}
 
-/* Data rows */
-.gt-row{display:flex;border-bottom:1px solid #eee;min-height:var(--rh)}
-.gt-row:hover .td{background:#f0f7ff!important}
-.gt-row.hdr-row .td{background:var(--blue-light)!important;font-weight:700;color:var(--blue)}
-.td{padding:2px 4px;border-right:1px solid #eee;font-size:var(--fsize);color:var(--text);display:flex;align-items:center;overflow:hidden}
-.td input,.td-input{width:100%;border:none;background:transparent;font-size:var(--fsize);font-family:Sarabun,sans-serif;color:inherit;padding:1px 2px;outline:none;min-width:0}
-.td input:focus,.td-input:focus{background:#fffef0;outline:2px solid var(--blue);outline-offset:-2px;border-radius:2px}
-body:not(.ed) .td input{pointer-events:none}
-body.ed .td input:not([readonly]){cursor:text}
-.td input[readonly]{color:var(--text3)}
-.hdr-row .td input{font-weight:700;color:var(--blue)}
+/* S-CURVE */
+.scs {display:flex;justify-content:center;padding:13px 0 9px;background:#fff;border-bottom:1px solid #ddd; width: 100%;}
+.scb {width:50%;min-width:360px;background:#fff;border:1px solid #ddd;border-radius:6px;padding:8px; max-width: 100%;}
+.scb canvas {display:block;width:100%}
 
-/* Gantt SVG cell */
-.gantt-svg-cell{width:100%;height:var(--rh);display:block}
-.hdr-row .c-gantt{background:var(--blue-light)}
+/* GANTT */
+.gs {background:#fff;border-bottom:1px solid #ddd;overflow-x:hidden; width: 100%; max-width: 100%;}
+.gs canvas {display:block; max-width: 100%;}
 
-/* Gantt header (months) */
-.gantt-months{position:sticky;top:0;z-index:99;background:#e8edf2;border-bottom:2px solid #bbb;height:32px;overflow:hidden}
-.gantt-months svg{display:block;width:100%;height:32px}
+/* TABLE */
+.ts {background:#fff; width: 100%; max-width: 100%; padding-bottom: 36px;}
+.tw {overflow-x:auto; width: 100%; max-width: 100%;}
 
-/* Footer totals */
-.gt-footer{display:flex;padding:5px 8px;background:#e8f0fb;border-top:2px solid var(--blue);font-size:12px;font-weight:700;position:sticky;bottom:0;z-index:50}
-.ft{padding:2px 4px;border-right:1px solid #ccc;display:flex;align-items:center;overflow:hidden;white-space:nowrap}
+table {
+  border-collapse: collapse;
+  font-size: 13px;
+  width: 100%;
+  min-width: 1000px;
+  table-layout: fixed;
+}
 
-/* Act% input special */
-.pct-input{text-align:center;font-weight:600;color:var(--blue)}
+thead th {
+  padding: 8px 10px;
+  background: #e8edf2;
+  border: 1px solid #bbb;
+  font-size: 12px;
+  font-weight: 700;
+  color: #333;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  text-align: left;
+}
 
-/* +/x buttons */
-.row-btns{display:flex;gap:2px;justify-content:center}
-.rbtn{width:14px;height:14px;border:none;border-radius:3px;cursor:pointer;font-size:10px;line-height:1;padding:0;display:flex;align-items:center;justify-content:center;font-weight:700}
-.rbtn-add{background:#2a8a2a;color:#fff}
-.rbtn-del{background:#c00;color:#fff}
+.col-no    { width: 45px;  text-align: center; }
+.col-item  { width: 100px; }
+.col-desc  { width: auto;  } 
+.col-date  { width: 135px; } 
+.col-bg    { width: 85px;  text-align: right; }
+.col-pct   { width: 65px;  text-align: center; }
+.col-claim { width: 105px; text-align: right; }
 
-/* ── BILLING PAGE ── */
-#bpg.on{display:flex;flex-direction:column;overflow-y:auto}
-.bil-cont{padding:20px;display:flex;flex-direction:column;gap:16px;align-items:center}
-.bil-header{width:100%;max-width:580px;display:flex;justify-content:space-between;align-items:center;font-size:12px}
-.b-card{width:100%;max-width:580px;background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06)}
-.b-head{padding:12px 18px;font-weight:700;font-size:14px;color:#fff;display:flex;justify-content:space-between;align-items:center}
-.b-head-m{background:var(--blue)}
-.b-head-i{background:var(--amber)}
-.b-body{padding:16px}
-.b-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:13px}
-.b-row:last-child{border:none}
-.b-lbl{color:var(--text2)}
-.b-val{font-weight:700;color:var(--text)}
-.b-hl{background:var(--green-light);padding:12px;border-radius:6px;border:1px solid #bbf7d0;margin-top:12px;display:flex;justify-content:space-between;align-items:center}
-.b-hl .b-lbl{color:#166534;font-weight:700}
-.b-hl .b-val{color:var(--green);font-size:16px}
+tbody tr:nth-child(even) {background:#f7f9fb}
+tbody tr:hover {background:#eef4ff}
 
-/* ── MODALS ── */
-.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;align-items:center;justify-content:center}
-.mo.on{display:flex}
-.md{background:#fff;border-radius:10px;padding:24px 28px;min-width:300px;box-shadow:0 8px 30px rgba(0,0,0,.2)}
-.md h2{font-size:14px;font-weight:700;margin-bottom:8px;color:var(--text)}
-.md p{font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.6}
-.md label{font-size:11px;color:var(--text2);display:block;margin-bottom:4px}
-.md input{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;margin-bottom:12px;font-family:Sarabun,sans-serif}
-.md input:focus{outline:2px solid var(--blue);border-color:var(--blue)}
-.ma{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}
-.ma button{padding:7px 16px;border-radius:6px;border:1px solid var(--border);background:#fff;font-size:12px;cursor:pointer;font-family:Sarabun,sans-serif}
-.ma button.primary{background:var(--blue);border-color:var(--blue);color:#fff}
-.ma button:hover{opacity:.85}
+tr.hdr td { background: #e8f0fb !important; border-top: 2px solid #1560a8 !important; border-bottom: 1px solid #1560a8 !important; }
+tr.hdr .ci { font-weight: 700; color: #1560a8; background: transparent !important; }
+tr.hdr .ci[readonly] { color: #1560a8; }
+tr.hdr:hover td { background: #dce7f8 !important; }
 
-/* Insert row modal */
-.ins-mo-inner{background:#fff;border-radius:10px;padding:20px 24px;width:260px;box-shadow:0 8px 30px rgba(0,0,0,.2)}
-.ins-choices{display:flex;gap:10px;margin-top:12px}
-.ins-choice{flex:1;padding:12px 8px;border-radius:8px;border:2px solid var(--border);cursor:pointer;text-align:center;font-size:12px;font-weight:700;transition:.15s}
-.ins-choice:hover{border-color:var(--blue);background:var(--blue-light)}
-.ins-choice.hdr-c{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
-.ins-choice.task-c{border-color:#888;color:#333}
+td {
+  border: 1px solid #ddd;
+  padding: 1px 4px;
+  height: 24px;
+  vertical-align: middle;
+}
 
-/* Toast */
-#toast{position:fixed;bottom:20px;right:20px;background:#1a1a2e;color:#fff;border-radius:8px;padding:9px 16px;font-size:12px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;box-shadow:0 4px 12px rgba(0,0,0,.2)}
-#toast.on{opacity:1}
-#toast.err{background:#dc2626}
+.ci {
+  width: 100%;
+  height: 22px;
+  border: none;
+  background: transparent;
+  font-size: 12px;
+  font-family: Sarabun, sans-serif;
+  color: #222;
+  padding: 0 6px;
+  border-radius: 2px;
+}
 
-/* ── MOBILE ── */
+.ci:focus {outline:2px solid #1560a8;outline-offset:-1px;background:#fff}
+.ci[readonly] {color:#888;cursor:default}
+.ci.r {text-align:right}
+
+body.ed .ci:not([readonly]) {
+  background:#fffef0;
+  cursor:text;
+  pointer-events:all;
+  border: 1px solid #e0e0e0;
+}
+body:not(.ed) .ci {pointer-events:none}
+
+.wtb {padding:5px 13px;background:#f4f6f8;border-top:1px solid #ddd;font-size:13px;color:#333;display:flex;gap:18px; width: 100%; font-weight: 700; flex-wrap: wrap; position:fixed; bottom:0; left:0; right:0; z-index:100;}
+thead { display: table-header-group; }
+tbody tr { page-break-inside: avoid; }
+.scs { page-break-after: avoid; }
+.gs { page-break-inside: avoid; page-break-after: avoid; }
+
+/* BILLING DASHBOARD */
+.bil-cont { padding: 20px; display: flex; flex-direction: column; gap: 20px; align-items: center; }
+.b-card { background: #fff; border: 1px solid #ddd; border-radius: 8px; width: 100%; max-width: 600px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden; }
+.b-head { background: #1560a8; color: #fff; padding: 12px 20px; font-weight: 700; font-size: 16px; display: flex; justify-content: space-between; }
+.b-head.inst { background: #d97706; }
+.b-body { padding: 20px; }
+.b-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; font-size: 14px; }
+.b-row:last-child { border-bottom: none; }
+.b-lbl { color: #555; }
+.b-val { font-weight: 700; color: #222; font-size: 15px;}
+.b-hl { background: #f0fdf4; padding: 15px; border-radius: 6px; border: 1px solid #bbf7d0; margin-top: 15px; }
+.b-hl .b-lbl { color: #166534; font-weight: 700; font-size: 15px; }
+.b-hl .b-val { color: #15803d; font-size: 18px; }
+
+/* PRINT MODE */
+.print-mode {
+  width: 1000px !important;
+  max-width: 1000px !important;
+  min-width: 1000px !important;
+  margin: 0 !important;
+  padding: 20px !important; 
+  background: #fff !important;
+  height: auto !important;
+  overflow: visible !important;
+  position: absolute !important; 
+  top: 0 !important;
+  left: 0 !important;
+  z-index: 9999 !important;
+}
+.print-mode .scs { padding: 0 0 20px 0 !important; border-bottom: none !important; display: block; }
+.print-mode .scb { width: 100% !important; min-width: 100% !important; border: none !important; padding: 0 !important; box-shadow: none !important; }
+.print-mode .gs { overflow: visible !important; width: 100% !important; min-width: 100% !important; border-bottom: none !important; margin-bottom: 20px !important; }
+.print-mode .ts { overflow: visible !important; width: 100% !important; min-width: 100% !important; }
+.print-mode .tw { overflow: visible !important; width: 100% !important; min-width: 100% !important; }
+.print-mode table { width: 100% !important; min-width: 100% !important; table-layout: fixed !important; border-collapse: collapse !important; }
+.print-mode .col-no    { width: 4% !important; text-align: center; }
+.print-mode .col-item  { width: 8% !important; }
+.print-mode .col-desc  { width: auto !important; } 
+.print-mode .col-date  { width: 11% !important; text-align: center; }
+.print-mode .col-bg    { width: 8% !important; text-align: right; }
+.print-mode .col-pct   { width: 6% !important; text-align: center; }
+.print-mode .col-claim { width: 10% !important; text-align: right; }
+.print-mode th { font-size: 11px !important; padding: 6px 4px !important; white-space: normal; background: #e8edf2 !important; }
+.print-mode td { padding: 4px !important; border: 1px solid #ddd !important; }
+.print-mode .ci { font-size: 11px !important; padding: 0 !important; background: transparent !important; border: none !important; color: #000 !important; width: 100% !important; height: auto !important; min-width: 0 !important; }
+.print-mode .wtb { display: none !important; } 
+
+/* MODAL */
+.mo {display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center}
+.mo.on {display:flex}
+.md {background:#fff;border-radius:8px;padding:22px 26px;min-width:320px;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+.md h2 {font-size:14px;margin-bottom:7px}
+.md p {font-size:12px;color:#666;margin-bottom:14px;line-height:1.6}
+.md label {font-size:11px;color:#666;display:block;margin-bottom:3px}
+.md input {width:100%;padding:6px 9px;border:1px solid #ccc;border-radius:4px;font-size:12px;margin-bottom:10px;font-family:Sarabun,sans-serif}
+.ma {display:flex;gap:7px;justify-content:flex-end;margin-top:7px}
+
+#toast {position:fixed;bottom:18px;right:18px;background:#fff;border:1px solid #ccc;border-radius:5px;padding:7px 14px;font-size:12px;color:#222;box-shadow:0 2px 10px rgba(0,0,0,.12);opacity:0;transition:opacity .3s;pointer-events:none;z-index:999}
+#toast.on {opacity:1}
+
 @media(max-width:768px){
-  #hpg.on{flex-direction:column}
-  .h-sidebar{width:100%;min-width:unset;border-right:none;border-bottom:1px solid var(--border)}
-  .gt-container{min-width:100%}
-  .c-desc{width:120px;min-width:120px}
-  .c-ps,.c-pe,.c-as,.c-ae{width:70px;min-width:70px}
-  .c-bg,.c-claim{display:none}
-  #bar h1{font-size:11px}
-  #uinfo{display:none}
-}
-@media(max-width:480px){
-  #bar h1{display:none}
+  #hpg.on {flex-direction:column!important;height:auto!important;overflow-y:auto; width: 100%;}
+  .hsb {width:100%!important;border-right:none;border-bottom:1px solid #ddd}
+  .pb {width:100%!important}
+  .hpg-r {padding:10px; width: 100%; max-width: 100%; overflow-x: hidden;}
+  .hcb {width:100%; max-width: 100%; min-width:unset; padding: 5px;}
+  .scs {padding: 10px 5px; width: 100%; max-width: 100%;}
+  .scb {width:100%; max-width: 100%; min-width:unset; padding: 5px;}
+  #bar h1 {font-size:10px}
+  .ts { width: 100%; max-width: 100%; overflow-x: hidden; }
+  .tw { width: 100%; max-width: 100%; overflow-x: hidden; }
+  table { min-width: 100% !important; width: 100% !important; max-width: 100% !important; table-layout: fixed; }
+  .col-no    { width: 4% !important; }
+  .col-item  { width: 8% !important; }
+  .col-desc  { width: 18% !important; }
+  .col-date  { width: 11% !important; }
+  .col-bg    { width: 9% !important; text-align: right; }
+  .col-pct   { width: 6% !important; text-align: center; }
+  .col-claim { width: 11% !important; text-align: right; }
+  th { font-size: 8px !important; padding: 4px 1px !important; word-wrap: break-word; letter-spacing: -0.2px; }
+  td { padding: 1px !important; height: 26px !important; }
+  .ci { font-size: 9px !important; padding: 0 !important; height: 24px !important; letter-spacing: -0.2px;}
+  input[type="date"]::-webkit-inner-spin-button,
+  input[type="date"]::-webkit-calendar-picker-indicator { display: none; -webkit-appearance: none; margin: 0; }
+  .wtb { font-size: 10px; flex-wrap: wrap; }
+  .rwc input { width: 35px; font-size: 10px; padding: 2px; }
+  .btnsm { padding: 2px 5px; font-size: 10px; }
+  .bil-cont { padding: 10px; }
 }
 
-/* Paste hint */
-.paste-hint{font-size:10px;color:var(--text3);padding:4px 8px;background:#fffef0;border:1px dashed #ccc;border-radius:4px;display:none}
-body.ed .paste-hint{display:inline-block}
+@media(max-width:480px){
+  #bar h1 {display:none}
+  #uinfo {display:none}
+}
 </style>
 </head>
 <body>
 
-<!-- TOP BAR -->
 <div id="bar">
   <h1>TSG PROJECT PLANNER</h1>
   <div class="tnav">
     <button class="tnb" id="nbM" onclick="goPlan('material')">📦 Material</button>
     <button class="tnb" id="nbI" onclick="goPlan('installation')">🔧 Installation</button>
-    <button class="tnb" id="nbB" style="display:none" onclick="goBilling()">💰 Billing</button>
+    <button class="tnb" id="nbB" style="display:none;" onclick="goBilling()">💰 Billing</button>
   </div>
-  <div class="bar-r">
+  <div class="r">
     <span id="uinfo"></span>
+    <button class="btn btnsm" id="pdfBtn" style="color:#fff;background:transparent;border-color:rgba(255,255,255,.5)" onclick="exportCurrentPDF()">📄 PDF</button>
     <div id="gBtn"></div>
-    <button class="bbtn" id="pinBtn" onclick="$('pinMo').classList.add('on')">🔑</button>
-    <button class="bbtn" onclick="exportAllPDF()">📄 PDF</button>
-    <button class="bbtn" id="soBtn" style="display:none" onclick="signOut()">Sign Out</button>
+    <button class="btn btnsm" id="pinBtn" style="color:#fff;background:transparent;border-color:rgba(255,255,255,.5)" onclick="$('pinMo').classList.add('on')">🔑</button>
+    <button class="btn btnsm" id="soBtn" style="display:none;color:#fff;background:transparent;border-color:rgba(255,255,255,.5)" onclick="signOut()">Sign Out</button>
   </div>
 </div>
 
-<div id="app">
-
-<!-- HOME -->
 <div class="pg" id="hpg">
-  <div class="h-sidebar">
-    <div class="h-label">Select Plan</div>
-    <button class="plan-btn" onclick="goPlan('material')">
-      <div class="plan-icon pm-icon">📦</div>
-      <div><div class="plan-title">Material Plan</div><div class="plan-sub">Procurement & delivery</div></div>
+  <div class="hsb">
+    <div class="hslb">Select Plan</div>
+    <button class="pb" onclick="goPlan('material')">
+      <div class="pbic pbm"></div>
+      <div><div class="pbt">Material Plan</div><div class="pbs">Procurement &amp; delivery</div></div>
     </button>
-    <button class="plan-btn" onclick="goPlan('installation')">
-      <div class="plan-icon pi-icon">🔧</div>
-      <div><div class="plan-title">Installation Plan</div><div class="plan-sub">Installation & commissioning</div></div>
+    <button class="pb" onclick="goPlan('installation')">
+      <div class="pbic pbi"></div>
+      <div><div class="pbt">Installation Plan</div><div class="pbs">Installation &amp; commissioning</div></div>
     </button>
-    <div class="prog-section">
-      <div class="h-label">Actual Progress</div>
-      <div class="prog-row"><span class="prog-label">Material</span><span class="prog-val" id="hmp" style="color:var(--blue)">0.00%</span></div>
-      <div class="prog-bar"><div class="prog-fill" id="hmb" style="width:0%;background:var(--blue)"></div></div>
-      <div class="prog-row"><span class="prog-label">Installation</span><span class="prog-val" id="hip" style="color:var(--amber)">0.00%</span></div>
-      <div class="prog-bar"><div class="prog-fill" id="hib" style="width:0%;background:var(--amber)"></div></div>
+    <div class="prbox">
+      <div class="prlb">Actual Progress</div>
+      <div class="prrow"><span class="prn">Material</span><span class="prm" id="hmp">0.00%</span></div>
+      <div class="prbg"><div class="prfm" id="hmb" style="width:0%"></div></div>
+      <div class="prrow" style="margin-top:7px"><span class="prn">Installation</span><span class="pri" id="hip">0.00%</span></div>
+      <div class="prbg"><div class="prfi" id="hib" style="width:0%"></div></div>
     </div>
   </div>
-  <div class="h-main">
-    <div class="h-chart">
-      <div class="h-chart-title">Material S-Curve</div>
-      <canvas id="svgMatSC" width="600" height="220" style="display:block;width:100%;height:220px"></canvas>
-    </div>
-    <div class="h-chart">
-      <div class="h-chart-title">Installation S-Curve</div>
-      <canvas id="svgInstSC" width="600" height="220" style="display:block;width:100%;height:220px"></canvas>
-    </div>
+  <div class="hpg-r">
+    <div class="hcb"><canvas id="cMat" height="200"></canvas></div>
+    <div class="hcb"><canvas id="cInst" height="200"></canvas></div>
   </div>
 </div>
 
-<!-- PLAN PAGE -->
-<div class="pg" id="ppg">
-  <div class="plan-toolbar">
-    <button class="tbtn" onclick="goHome()">← Home</button>
-    <button class="tbtn tbtn-d" id="rstBtn" style="display:none" onclick="resetRows()">✕ Reset</button>
-    <span class="plan-title-text" id="ptit"></span>
-    <span class="paste-hint" id="pasteHint">Click a cell then paste from Excel (Ctrl+V)</span>
-    <div class="sp"></div>
-    <button class="tbtn tbtn-p" id="savBtn" style="display:none" onclick="saveData()">💾 Save</button>
-  </div>
-  <!-- S-Curve -->
-  <div class="sc-wrap">
-    <div class="sc-inner">
-      <canvas id="svgSC" width="600" height="220" style="display:block;width:100%;height:220px"></canvas>
-    </div>
-  </div>
-  <!-- Gantt + Table combined -->
-  <div class="gt-wrap" id="gtWrap">
-    <div class="gt-container" id="gtContainer">
-      <!-- Header row built by JS -->
-      <div class="gt-header" id="gtHeader"></div>
-      <!-- Month row for gantt -->
-      <div class="gantt-months" id="ganttMonths" style="margin-left:0"></div>
-      <!-- Data rows built by JS -->
-      <div id="gtBody"></div>
-      <!-- Footer totals -->
-      <div class="gt-footer" id="gtFooter" style="display:none"></div>
-    </div>
-  </div>
-</div>
-
-<!-- BILLING PAGE -->
 <div class="pg" id="bpg">
   <div class="bil-cont">
-    <div class="bil-header">
-      <span id="bil-summary"></span>
-      <span id="bil-asof" style="color:var(--text3);font-size:11px"></span>
+
+    <!-- DATE + PROGRESS HEADER -->
+    <div id="bil-date" style="font-size:13px;color:#666;width:100%;max-width:600px;display:flex;justify-content:space-between;align-items:center;padding-bottom:4px;">
+      <span id="bil-summary" style="font-size:13px;"></span>
+      <span id="bil-asof" style="font-size:12px;color:#999;"></span>
     </div>
+
     <div class="b-card">
-      <div class="b-head b-head-m">
-        <span>📦 Material & Equipment (30/60/10)</span>
-        <span id="bil-m-pct" style="font-size:13px">0.00%</span>
+      <div class="b-head">
+        <span>📦 Material & Equipment (30 / 60 / 10)</span>
+        <span id="bil-m-pct">0.00% Progress</span>
       </div>
       <div class="b-body">
-        <div class="b-row"><span class="b-lbl">Total Contract Budget</span><span class="b-val" id="bil-m-tot" style="color:var(--blue)">0.00 THB</span></div>
-        <div class="b-row"><span class="b-lbl">Down Payment (30%)</span><span class="b-val" id="bil-m-down">0.00</span></div>
-        <div class="b-row"><span class="b-lbl">Progress Pool (60%)</span><span class="b-val" id="bil-m-pool">0.00</span></div>
-        <div class="b-row"><span class="b-lbl">After Cold Test (10%)</span><span class="b-val" id="bil-m-ret">0.00</span></div>
-        <div class="b-hl"><span class="b-lbl">Current Claimable (<span id="bil-m-formula">—</span>)</span><span class="b-val" id="bil-m-claim">0.00 THB</span></div>
-        <div class="b-row" id="bil-m-prev-row" style="display:none"><span class="b-lbl">Previous Payment Received</span><span class="b-val"><input id="bil-m-prev" type="number" min="0" step="1" value="0" onchange="updatePrevPay('material',this.value)" style="width:130px;text-align:right;border:1px solid #ccc;border-radius:4px;padding:3px 6px;font-size:13px;font-family:Sarabun,sans-serif"></span></div>
-        <div class="b-row" id="bil-m-next-row" style="display:none;background:#fff7e6;padding:10px;border-radius:6px;margin-top:4px"><span class="b-lbl" style="color:#92400e;font-weight:700">Next Claimable</span><span class="b-val" id="bil-m-next" style="color:#d97706;font-size:16px">0.00 THB</span></div>
+        <div class="b-row">
+          <span class="b-lbl">Total Contract Budget (Auto Sum):</span>
+          <span class="b-val" id="bil-m-tot" style="color:#1560a8;">0.00 THB</span>
+        </div>
+        <div class="b-row">
+          <span class="b-lbl">Down Payment (30%):</span>
+          <span class="b-val" id="bil-m-down">0.00</span>
+        </div>
+        <div class="b-row">
+          <span class="b-lbl">Total Progress Pool (60%):</span>
+          <span class="b-val" id="bil-m-pool">0.00</span>
+        </div>
+        <div class="b-row">
+          <span class="b-lbl">After Cold Test (10%):</span>
+          <span class="b-val" id="bil-m-ret">0.00</span>
+        </div>
+        <div class="b-row b-hl">
+          <span class="b-lbl">Current Claimable (<span id="bil-m-formula">0.00% × 0.00</span>):</span>
+          <span class="b-val" id="bil-m-claim">0.00 THB</span>
+        </div>
       </div>
     </div>
+
     <div class="b-card">
-      <div class="b-head b-head-i">
-        <span>🔧 Design & Installation (20/65/7.5/7.5)</span>
-        <span id="bil-i-pct" style="font-size:13px">0.00%</span>
+      <div class="b-head inst">
+        <span>🔧 Design & Installation (20 / 65 / 7.5 / 7.5)</span>
+        <span id="bil-i-pct">0.00% Progress</span>
       </div>
       <div class="b-body">
-        <div class="b-row"><span class="b-lbl">Total Contract Budget</span><span class="b-val" id="bil-i-tot" style="color:var(--amber)">0.00 THB</span></div>
-        <div class="b-row"><span class="b-lbl">Down Payment (20%)</span><span class="b-val" id="bil-i-down">0.00</span></div>
-        <div class="b-row"><span class="b-lbl">Progress Pool (65%)</span><span class="b-val" id="bil-i-pool">0.00</span></div>
-        <div class="b-row"><span class="b-lbl">Punch List (7.5%)</span><span class="b-val" id="bil-i-ret1">0.00</span></div>
-        <div class="b-row"><span class="b-lbl">After Commissioning (7.5%)</span><span class="b-val" id="bil-i-ret2">0.00</span></div>
-        <div class="b-hl"><span class="b-lbl">Current Claimable (<span id="bil-i-formula">—</span>)</span><span class="b-val" id="bil-i-claim">0.00 THB</span></div>
-        <div class="b-row" id="bil-i-prev-row" style="display:none"><span class="b-lbl">Previous Payment Received</span><span class="b-val"><input id="bil-i-prev" type="number" min="0" step="1" value="0" onchange="updatePrevPay('installation',this.value)" style="width:130px;text-align:right;border:1px solid #ccc;border-radius:4px;padding:3px 6px;font-size:13px;font-family:Sarabun,sans-serif"></span></div>
-        <div class="b-row" id="bil-i-next-row" style="display:none;background:#fff7e6;padding:10px;border-radius:6px;margin-top:4px"><span class="b-lbl" style="color:#92400e;font-weight:700">Next Claimable</span><span class="b-val" id="bil-i-next" style="color:#d97706;font-size:16px">0.00 THB</span></div>
+        <div class="b-row">
+          <span class="b-lbl">Total Contract Budget (Auto Sum):</span>
+          <span class="b-val" id="bil-i-tot" style="color:#d97706;">0.00 THB</span>
+        </div>
+        <div class="b-row">
+          <span class="b-lbl">Down Payment (20%):</span>
+          <span class="b-val" id="bil-i-down">0.00</span>
+        </div>
+        <div class="b-row">
+          <span class="b-lbl">Total Progress Pool (65%):</span>
+          <span class="b-val" id="bil-i-pool">0.00</span>
+        </div>
+        <div class="b-row">
+          <span class="b-lbl">Punch List (7.5%):</span>
+          <span class="b-val" id="bil-i-ret1">0.00</span>
+        </div>
+        <div class="b-row">
+          <span class="b-lbl">After Commissioning (7.5%):</span>
+          <span class="b-val" id="bil-i-ret2">0.00</span>
+        </div>
+        <div class="b-row b-hl">
+          <span class="b-lbl">Current Claimable (<span id="bil-i-formula">0.00% × 0.00</span>):</span>
+          <span class="b-val" id="bil-i-claim">0.00 THB</span>
+        </div>
       </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="pg" id="ppg">
+  <div class="ptb" id="planToolbar">
+    <button class="btn btnsm" onclick="goHome()">← Home</button>
+    <span class="ptit" id="ptit"></span>
+    
+    <div class="sp"></div>
+    <div class="rwc" id="rwc" style="display:none">
+      Rows:<input type="number" id="rwn" min="1" max="300" value="16">
+      <button class="btn btnsm" onclick="applyRows()">Apply</button>
+    </div>
+    <button class="btn btnsm btnd" id="rstBtn" style="display:none" onclick="resetRows()">✕ Reset Template</button>
+    <button class="btn btnsm btnp" id="savBtn" style="display:none" onclick="saveData()">💾 Save</button>
+  </div>
+  
+  <div class="scs"><div class="scb"><canvas id="cSC" height="260"></canvas></div></div>
+  <div class="gs" id="gsec"><canvas id="cGantt"></canvas></div>
+  
+  <div class="ts">
+    <div class="tw">
+      <table>
+        <thead><tr>
+          <th class="col-no">No.</th>
+          <th class="col-item">Item No.</th>
+          <th class="col-desc">Description</th>
+          <th class="col-date">Plan Start</th>
+          <th class="col-date">Plan Finish</th>
+          <th class="col-bg" id="th-bg" style="display:none;">Budget (THB)</th>
+          <th class="col-date">Act Start</th>
+          <th class="col-date">Act Finish</th>
+          <th class="col-pct">Act%</th>
+          <th class="col-claim" id="th-claim" style="display:none;">Claimable</th>
+        </tr></thead>
+        <tbody id="tb"></tbody>
+      </table>
+    </div>
+    <div class="wtb">
+        <span id="foot-bg" style="display:none;">Total Plan Budget: <span id="wts" style="color:#1560a8;">0.00 THB</span> &nbsp;|&nbsp; </span>
+        <span id="foot-claim" style="display:none;">Total Claimable: <span id="tot-claim" style="color:#2a8a2a;">0.00 THB</span> &nbsp;|&nbsp; </span>
+        Tasks in Progress: <span id="acn">0</span>
     </div>
   </div>
 </div>
 
-</div><!-- #app -->
-
-<!-- MODALS -->
 <div class="mo" id="patMo">
   <div class="md">
     <h2>GitHub Access Token</h2>
-    <p>Enter PAT to save data.</p>
+    <p>Enter your PAT to load or save data. Stored in session.</p>
     <label>Token</label>
     <input type="password" id="patIn" placeholder="ghp_...">
     <div class="ma">
-      <button onclick="$('patMo').classList.remove('on')">Cancel</button>
-      <button class="primary" onclick="confirmPAT()">Confirm</button>
+      <button class="btn" onclick="document.getElementById('patMo').classList.remove('on')">Cancel</button>
+      <button class="btn btnp" onclick="confirmPAT()">Confirm</button>
     </div>
   </div>
 </div>
-
-<div class="mo" id="pinMo">
-  <div class="md">
-    <h2>Admin Login</h2>
-    <label>PIN</label>
-    <input type="password" id="pinIn" placeholder="••••••" maxlength="6" inputmode="numeric">
-    <div class="ma">
-      <button onclick="$('pinMo').classList.remove('on')">Cancel</button>
-      <button class="primary" onclick="confirmPIN()">Login</button>
-    </div>
-  </div>
-</div>
-
 <div id="toast"></div>
 
 <script>
-// ── CONSTANTS ──
 const ADMIN_PIN='260150';
-const GCI='695932302309-p1rccufdkq9itb5paam78j1ll1ejb1uu.apps.googleusercontent.com';
-const EE='suthepp.top@gmail.com';
-const API='https://api.github.com/repos/suthepptop/tsg-planner/contents/data.json';
-const RAW='https://raw.githubusercontent.com/suthepptop/tsg-planner/main/data.json';
-
-let isEd=false, plan=null, sha=null, patAction='save';
-let D={material:{rows:[],snap:{},prevPay:0},installation:{rows:[],snap:{},prevPay:0}};
-const $=id=>document.getElementById(id);
-
-// ── HELPERS ──
-const pd=s=>{
-  if(!s)return null; s=s.trim();
-  const m=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
-  if(m){const d=new Date(+m[3],+m[2]-1,+m[1]);return isNaN(d)?null:d;}
-  return null;
-};
-const toISO=s=>{if(!s)return'';const m=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);return m?`${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`:''};
-const frISO=s=>{if(!s)return'';const[y,mo,d]=s.split('-');return`${d}/${mo}/${y}`};
-const nd=s=>{
-  if(!s)return''; s=s.trim();
-  if(/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}$/.test(s)){const sp=s.includes('/')?'/':'-';const[d,m,y]=s.split(sp);return`${d.padStart(2,'0')}/${m.padStart(2,'0')}/${y}`;}
-  if(/^\d{4}-\d{2}-\d{2}$/.test(s)){const[y,m,d]=s.split('-');return`${d}/${m}/${y}`;}
-  if(/^\d{5}$/.test(s)){const dt=new Date((+s-25569)*86400000);return`${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}`;}
-  return s;
-};
-const nn=v=>{v=String(v).trim().replace(/,/g,'').replace('%','');return Math.round((parseFloat(v)||0)*100)/100};
-const dayDiff=(a,b)=>Math.round((b-a)/86400000);
-const fmtN=(n,dec=2)=>n.toLocaleString('en-US',{minimumFractionDigits:dec,maximumFractionDigits:dec});
-const fmtInt=n=>{if(!n)return'';return parseInt(n).toLocaleString('en-US')};
-
-const toast=(msg,err=false)=>{
-  const e=$('toast'); e.textContent=msg;
-  e.className=err?'on err':'on';
-  clearTimeout(e._t); e._t=setTimeout(()=>e.classList.remove('on'),2800);
-};
-
-// ── DATE RANGE ──
-function getRange(rows){
-  let mn=null,mx=null;
-  rows.forEach(r=>{
-    const s=pd(r.ps),e=pd(r.pe);
-    if(s&&(!mn||s<mn))mn=s; if(e&&(!mx||e>mx))mx=e;
-  });
-  if(!mn)mn=new Date('2026-02-16'); if(!mx)mx=new Date('2026-07-15');
-  return{start:mn,end:mx,days:dayDiff(mn,mx)+1};
-}
-
-// ── SNAPSHOT ──
-function recordSnap(){
-  if(!plan)return;
-  const d=new Date();
-  const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  D[plan].snap[k]=calcP(D[plan].rows);
-}
-
-function calcP(rows){
-  const tw=rows.reduce((s,r)=>s+(+r.bg||0),0);
-  if(!tw)return'0.00';
-  return(rows.reduce((s,r)=>s+(+r.bg||0)*(+r.pct||0)/100,0)/tw*100).toFixed(2);
-}
-
-// ── TEMPLATE DATA ──
-function initD(){
-  const matTmpl=[
-    {no:'',itemNo:'',desc:'5. ตู้ไฟฟ้า+PLC',ps:'',pe:'',bg:0,as:'',ae:'',pct:0},
-    {no:1,itemNo:'5.1.1',desc:'Enclosure MDB-1',ps:'01/04/2026',pe:'31/05/2026',bg:39400,as:'',ae:'',pct:0},
-    {no:2,itemNo:'5.1.2',desc:'Main MCCB 630AT',ps:'01/04/2026',pe:'31/05/2026',bg:49000,as:'',ae:'',pct:0},
-    {no:3,itemNo:'5.1.3',desc:'Digital Multimeter',ps:'01/04/2026',pe:'31/05/2026',bg:12200,as:'',ae:'',pct:0},
-    {no:4,itemNo:'5.1.4',desc:'CT 630/5A',ps:'01/04/2026',pe:'31/05/2026',bg:5900,as:'',ae:'',pct:0},
-    {no:5,itemNo:'5.1.5',desc:'Pilot Lamp etc',ps:'01/04/2026',pe:'31/05/2026',bg:7500,as:'',ae:'',pct:0},
-    {no:6,itemNo:'5.1.6',desc:'MCCB 200AT',ps:'01/04/2026',pe:'31/05/2026',bg:16900,as:'',ae:'',pct:0},
-    {no:7,itemNo:'5.1.7',desc:'MCCB 125AT',ps:'01/04/2026',pe:'31/05/2026',bg:39100,as:'',ae:'',pct:0},
-    {no:8,itemNo:'5.1.8',desc:'MCCB 30AT',ps:'01/04/2026',pe:'31/05/2026',bg:5500,as:'',ae:'',pct:0},
-    {no:9,itemNo:'5.1.9',desc:'Main Busbar',ps:'01/04/2026',pe:'31/05/2026',bg:22100,as:'',ae:'',pct:0},
-    {no:10,itemNo:'5.1.10',desc:'สายไฟ Control MDB',ps:'01/04/2026',pe:'31/05/2026',bg:10400,as:'',ae:'',pct:0},
-    {no:11,itemNo:'5.2.1',desc:'Enclosure MCC',ps:'01/04/2026',pe:'31/05/2026',bg:39400,as:'',ae:'',pct:0},
-    {no:12,itemNo:'5.2.2',desc:'Main MCCB 200AT',ps:'01/04/2026',pe:'31/05/2026',bg:17400,as:'',ae:'',pct:0},
-    {no:13,itemNo:'5.2.3',desc:'DM + CT + Fuse',ps:'01/04/2026',pe:'31/05/2026',bg:14600,as:'',ae:'',pct:0},
-    {no:14,itemNo:'5.2.4',desc:'Pilot Lamp Start-Stop',ps:'01/04/2026',pe:'31/05/2026',bg:7500,as:'',ae:'',pct:0},
-    {no:15,itemNo:'5.2.5',desc:'Y/D 30kW',ps:'01/04/2026',pe:'31/05/2026',bg:72500,as:'',ae:'',pct:0},
-    {no:16,itemNo:'5.2.6',desc:'Y/D 7.5kW',ps:'01/04/2026',pe:'31/05/2026',bg:37700,as:'',ae:'',pct:0},
-    {no:17,itemNo:'5.2.7',desc:'DOL 5.5kW',ps:'01/04/2026',pe:'31/05/2026',bg:19100,as:'',ae:'',pct:0},
-    {no:18,itemNo:'5.2.8',desc:'Spare 32AT',ps:'01/04/2026',pe:'31/05/2026',bg:7800,as:'',ae:'',pct:0},
-    {no:19,itemNo:'5.2.9',desc:'Main Busbar 630A',ps:'01/04/2026',pe:'31/05/2026',bg:17400,as:'',ae:'',pct:0},
-    {no:20,itemNo:'5.2.10',desc:'สายไฟ Control MCC',ps:'01/04/2026',pe:'31/05/2026',bg:10400,as:'',ae:'',pct:0},
-    {no:21,itemNo:'5.2.11',desc:'ตู้ลูกย่อย LC1',ps:'01/04/2026',pe:'31/05/2026',bg:51300,as:'',ae:'',pct:0},
-    {no:22,itemNo:'5.3.1',desc:'ตู้ PLC + Controller',ps:'01/04/2026',pe:'10/06/2026',bg:102600,as:'',ae:'',pct:0},
-    {no:23,itemNo:'5.3.2',desc:'UPS 40 kVA',ps:'01/04/2026',pe:'10/06/2026',bg:173500,as:'',ae:'',pct:0},
-    {no:24,itemNo:'5.3.3',desc:'Battery',ps:'01/04/2026',pe:'10/06/2026',bg:138900,as:'',ae:'',pct:0},
-    {no:25,itemNo:'5.4.1',desc:'Control Desk',ps:'01/04/2026',pe:'10/06/2026',bg:102600,as:'',ae:'',pct:0},
-    {no:26,itemNo:'5.5.1',desc:'Control Marshalling',ps:'01/04/2026',pe:'31/05/2026',bg:85400,as:'',ae:'',pct:0},
-    {no:27,itemNo:'5.6',desc:'I/O Remote Box',ps:'01/04/2026',pe:'31/05/2026',bg:90400,as:'',ae:'',pct:0},
-    {no:'',itemNo:'',desc:'6. Cable tray & conduit',ps:'',pe:'',bg:0,as:'',ae:'',pct:0},
-    {no:28,itemNo:'6.2.1',desc:'Conduit (Zone 1)',ps:'06/04/2026',pe:'25/05/2026',bg:115900,as:'',ae:'',pct:0},
-    {no:29,itemNo:'6.2.2',desc:'Conduit (Zone 2)',ps:'06/04/2026',pe:'25/05/2026',bg:12400,as:'',ae:'',pct:0},
-    {no:30,itemNo:'6.2.3',desc:'Conduit (Zone 3)',ps:'06/04/2026',pe:'25/05/2026',bg:12400,as:'',ae:'',pct:0},
-    {no:31,itemNo:'6.2.4',desc:'Conduit (Zone 4)',ps:'06/04/2026',pe:'25/05/2026',bg:43500,as:'',ae:'',pct:0},
-    {no:32,itemNo:'6.3',desc:'Accessories',ps:'06/04/2026',pe:'25/05/2026',bg:69000,as:'',ae:'',pct:0},
-    {no:33,itemNo:'6.4.1',desc:'Junction Box (STM 1)',ps:'06/04/2026',pe:'25/05/2026',bg:8100,as:'',ae:'',pct:0},
-    {no:34,itemNo:'6.4.2',desc:'Junction Box (STM 2&3)',ps:'06/04/2026',pe:'25/05/2026',bg:8100,as:'',ae:'',pct:0},
-    {no:35,itemNo:'6.4.3',desc:'Junction Box (STM 4)',ps:'06/04/2026',pe:'25/05/2026',bg:8100,as:'',ae:'',pct:0},
-    {no:36,itemNo:'6.4.4',desc:'Junction Box (โรงสี 1)',ps:'06/04/2026',pe:'25/05/2026',bg:8100,as:'',ae:'',pct:0},
-    {no:37,itemNo:'6.4.5',desc:'Junction Box (โรงสี 2)',ps:'06/04/2026',pe:'25/05/2026',bg:8100,as:'',ae:'',pct:0},
-    {no:38,itemNo:'6.4.6',desc:'Junction Box (โรงสี 3)',ps:'06/04/2026',pe:'25/05/2026',bg:8100,as:'',ae:'',pct:0},
-    {no:'',itemNo:'',desc:'7. ระบบกราวด์',ps:'',pe:'',bg:0,as:'',ae:'',pct:0},
-    {no:39,itemNo:'7.4',desc:'Ground test box',ps:'01/04/2026',pe:'07/05/2026',bg:72500,as:'',ae:'',pct:0},
-    {no:40,itemNo:'7.5',desc:'Accessories',ps:'23/03/2026',pe:'30/04/2026',bg:68800,as:'',ae:'',pct:0},
-    {no:'',itemNo:'',desc:'8. อุปกรณ์ Instrument',ps:'',pe:'',bg:0,as:'',ae:'',pct:0},
-    {no:41,itemNo:'8.5',desc:'Accessories',ps:'27/04/2026',pe:'31/05/2026',bg:17300,as:'',ae:'',pct:0},
-    {no:'',itemNo:'',desc:'9. ระบบแสงสว่าง',ps:'',pe:'',bg:0,as:'',ae:'',pct:0},
-    {no:42,itemNo:'9.1',desc:'ตู้ load center',ps:'01/04/2026',pe:'31/05/2026',bg:41200,as:'',ae:'',pct:0},
-    {no:43,itemNo:'9.2.1',desc:'Conduit & fitting',ps:'01/04/2026',pe:'31/05/2026',bg:40400,as:'',ae:'',pct:0},
-    {no:44,itemNo:'9.3.1',desc:'สายไฟ Steam Trans',ps:'01/04/2026',pe:'31/05/2026',bg:29100,as:'',ae:'',pct:0},
-    {no:45,itemNo:'9.3.2',desc:'สายไฟ Accum 2',ps:'01/04/2026',pe:'31/05/2026',bg:5100,as:'',ae:'',pct:0},
-    {no:46,itemNo:'9.4.1',desc:'โคมไฟ STM High Bay',ps:'01/04/2026',pe:'31/05/2026',bg:27600,as:'',ae:'',pct:0},
-    {no:47,itemNo:'9.4.2',desc:'โคมไฟ STM 2x36W',ps:'01/04/2026',pe:'31/05/2026',bg:24800,as:'',ae:'',pct:0},
-    {no:48,itemNo:'9.4.3',desc:'โคมไฟ Accum2 High Bay',ps:'01/04/2026',pe:'31/05/2026',bg:11000,as:'',ae:'',pct:0},
-    {no:49,itemNo:'9.5',desc:'Accessories',ps:'01/04/2026',pe:'31/05/2026',bg:28200,as:'',ae:'',pct:0},
-    {no:'',itemNo:'',desc:'10. กล้องวงจรปิด (CCTV)',ps:'',pe:'',bg:0,as:'',ae:'',pct:0},
-    {no:50,itemNo:'10.1.1',desc:'กล้อง STM',ps:'23/03/2026',pe:'25/05/2026',bg:29100,as:'',ae:'',pct:0},
-    {no:51,itemNo:'10.1.2',desc:'กล้อง Plant 1',ps:'23/03/2026',pe:'25/05/2026',bg:7300,as:'',ae:'',pct:0},
-    {no:52,itemNo:'10.1.3',desc:'กล้อง โรงสี 1 2 3',ps:'23/03/2026',pe:'25/05/2026',bg:21900,as:'',ae:'',pct:0},
-    {no:53,itemNo:'10.1.4',desc:'กล้อง Accum 2',ps:'23/03/2026',pe:'25/05/2026',bg:7300,as:'',ae:'',pct:0},
-    {no:54,itemNo:'10.2.1',desc:'NVR',ps:'23/03/2026',pe:'25/05/2026',bg:14400,as:'',ae:'',pct:0},
-    {no:55,itemNo:'10.2.2',desc:'HDD',ps:'23/03/2026',pe:'25/05/2026',bg:11500,as:'',ae:'',pct:0},
-    {no:56,itemNo:'10.3.1',desc:'Media Converter',ps:'23/03/2026',pe:'25/05/2026',bg:43800,as:'',ae:'',pct:0},
-    {no:57,itemNo:'10.4.1',desc:'LAN Accum2-โรงสี3',ps:'23/03/2026',pe:'25/05/2026',bg:13200,as:'',ae:'',pct:0},
-    {no:58,itemNo:'10.4.2',desc:'LAN Control-STM',ps:'23/03/2026',pe:'25/05/2026',bg:9300,as:'',ae:'',pct:0},
-    {no:59,itemNo:'10.4.3',desc:'Fiber โรงสี1-Control',ps:'23/03/2026',pe:'25/05/2026',bg:26200,as:'',ae:'',pct:0},
-    {no:60,itemNo:'10.4.4',desc:'Fiber โรงสี2-Control',ps:'23/03/2026',pe:'25/05/2026',bg:26200,as:'',ae:'',pct:0},
-    {no:61,itemNo:'10.4.5',desc:'Fiber โรงสี2-โรงสี3',ps:'23/03/2026',pe:'25/05/2026',bg:18700,as:'',ae:'',pct:0},
-    {no:'',itemNo:'',desc:'12. Pipe Rack',ps:'',pe:'',bg:0,as:'',ae:'',pct:0},
-    {no:62,itemNo:'12.2',desc:'Support for Cable Tray',ps:'01/04/2026',pe:'31/05/2026',bg:56800,as:'',ae:'',pct:0}
-  ];
-  const instTmpl=[
-    {no:'',itemNo:'',desc:'16. งานออกแบบ+เขียนแบบ',ps:'',pe:'',bg:0,as:'',ae:'',pct:0},
-    {no:1,itemNo:'16.1',desc:'Electrical Single Line',ps:'16/02/2026',pe:'25/04/2026',bg:28800,as:'',ae:'',pct:0},
-    {no:2,itemNo:'16.2',desc:'Cable Schedule & Route',ps:'02/03/2026',pe:'30/04/2026',bg:34500,as:'',ae:'',pct:0},
-    {no:3,itemNo:'16.3',desc:'Cable arrangement diagram',ps:'02/03/2026',pe:'30/04/2026',bg:28800,as:'',ae:'',pct:0},
-    {no:4,itemNo:'16.4',desc:'Grounding System Design',ps:'16/02/2026',pe:'25/04/2026',bg:34500,as:'',ae:'',pct:0},
-    {no:5,itemNo:'16.5',desc:'Lightning Arrester Design',ps:'16/02/2026',pe:'20/04/2026',bg:28800,as:'',ae:'',pct:0},
-    {no:6,itemNo:'16.6',desc:'Hook-up Drawing',ps:'23/03/2026',pe:'20/05/2026',bg:28800,as:'',ae:'',pct:0},
-    {no:7,itemNo:'16.7',desc:'Panel GA Drawing',ps:'02/03/2026',pe:'20/04/2026',bg:34500,as:'',ae:'',pct:0},
-    {no:8,itemNo:'16.8',desc:'Panel Wiring Diagram',ps:'02/03/2026',pe:'30/04/2026',bg:34500,as:'',ae:'',pct:0},
-    {no:9,itemNo:'16.9',desc:'I/O Assignment List',ps:'02/03/2026',pe:'20/04/2026',bg:34500,as:'',ae:'',pct:0},
-    {no:10,itemNo:'16.10',desc:'Lighting Design',ps:'09/03/2026',pe:'10/05/2026',bg:28800,as:'',ae:'',pct:0},
-    {no:11,itemNo:'16.11',desc:'CCTV Layout',ps:'09/03/2026',pe:'10/05/2026',bg:28800,as:'',ae:'',pct:0},
-    {no:'',itemNo:'',desc:'17. งาน Programming',ps:'',pe:'',bg:0,as:'',ae:'',pct:0},
-    {no:12,itemNo:'17.1',desc:'PLC Programming',ps:'01/04/2026',pe:'31/05/2026',bg:230000,as:'',ae:'',pct:0},
-    {no:13,itemNo:'17.2',desc:'Control Logic',ps:'01/04/2026',pe:'31/05/2026',bg:57500,as:'',ae:'',pct:0},
-    {no:14,itemNo:'17.3',desc:'Alarm & Data Logging',ps:'01/04/2026',pe:'31/05/2026',bg:57500,as:'',ae:'',pct:0},
-    {no:15,itemNo:'17.4',desc:'HMI Programming',ps:'01/04/2026',pe:'31/05/2026',bg:115000,as:'',ae:'',pct:0},
-    {no:16,itemNo:'17.5',desc:'Screen Design',ps:'01/04/2026',pe:'31/05/2026',bg:57500,as:'',ae:'',pct:0},
-    {no:17,itemNo:'17.6',desc:'User Management',ps:'01/04/2026',pe:'31/05/2026',bg:57500,as:'',ae:'',pct:0},
-    {no:'',itemNo:'',desc:'18. FAT (Factory Test)',ps:'',pe:'',bg:0,as:'',ae:'',pct:0},
-    {no:18,itemNo:'18.1',desc:'Panel Testing',ps:'01/05/2026',pe:'31/05/2026',bg:5800,as:'',ae:'',pct:0},
-    {no:19,itemNo:'18.2',desc:'PLC Simulation',ps:'01/05/2026',pe:'31/05/2026',bg:5800,as:'',ae:'',pct:0},
-    {no:20,itemNo:'18.3',desc:'HMI Testing',ps:'01/05/2026',pe:'31/05/2026',bg:5800,as:'',ae:'',pct:0},
-    {no:21,itemNo:'18.4',desc:'Interlock Testing',ps:'01/05/2026',pe:'31/05/2026',bg:11500,as:'',ae:'',pct:0},
-    {no:22,itemNo:'18.5',desc:'Communication Test',ps:'01/05/2026',pe:'31/05/2026',bg:5800,as:'',ae:'',pct:0},
-    {no:23,itemNo:'18.6',desc:'Customer Witness',ps:'01/05/2026',pe:'31/05/2026',bg:5800,as:'',ae:'',pct:0},
-    {no:'',itemNo:'',desc:'19. งานติดตั้ง',ps:'',pe:'',bg:0,as:'',ae:'',pct:0},
-    {no:24,itemNo:'19.1',desc:'Ground installation',ps:'01/04/2026',pe:'30/04/2026',bg:262900,as:'',ae:'',pct:0},
-    {no:25,itemNo:'19.2',desc:'Panel Installation',ps:'01/05/2026',pe:'31/05/2026',bg:105200,as:'',ae:'',pct:0},
-    {no:26,itemNo:'19.3',desc:'Cable Tray Installation',ps:'06/04/2026',pe:'25/05/2026',bg:404900,as:'',ae:'',pct:0},
-    {no:27,itemNo:'19.4',desc:'Conduit Installation',ps:'06/04/2026',pe:'25/05/2026',bg:262900,as:'',ae:'',pct:0},
-    {no:28,itemNo:'19.5',desc:'Cable Pulling & connection',ps:'10/06/2026',pe:'30/06/2026',bg:157800,as:'',ae:'',pct:0},
-    {no:29,itemNo:'19.6',desc:'Accessories',ps:'01/06/2026',pe:'30/06/2026',bg:36800,as:'',ae:'',pct:0},
-    {no:'',itemNo:'',desc:'20. งานติดตั้ง Field Instrument',ps:'',pe:'',bg:0,as:'',ae:'',pct:0},
-    {no:30,itemNo:'20.1.1',desc:'Pressure Transmitter+Impulse Line',ps:'25/05/2026',pe:'30/06/2026',bg:32200,as:'',ae:'',pct:0},
-    {no:31,itemNo:'20.1.2',desc:'Pressure Transmitter+Syphon',ps:'25/05/2026',pe:'30/06/2026',bg:29900,as:'',ae:'',pct:0},
-    {no:32,itemNo:'20.1.3',desc:'Temp Transmitter',ps:'25/05/2026',pe:'30/06/2026',bg:36800,as:'',ae:'',pct:0},
-    {no:33,itemNo:'20.1.4',desc:'Flow Transmitter+Impulse Line (DP)',ps:'25/05/2026',pe:'30/06/2026',bg:20700,as:'',ae:'',pct:0},
-    {no:34,itemNo:'20.1.5',desc:'Level Transmitter+Impulse Line (DP)',ps:'25/05/2026',pe:'30/06/2026',bg:20700,as:'',ae:'',pct:0},
-    {no:35,itemNo:'20.1.6',desc:'Level Trans. Direct Mounting',ps:'25/05/2026',pe:'30/06/2026',bg:9200,as:'',ae:'',pct:0},
-    {no:36,itemNo:'20.1.7',desc:'Pressure Gauge',ps:'25/05/2026',pe:'30/06/2026',bg:78200,as:'',ae:'',pct:0},
-    {no:37,itemNo:'20.1.8',desc:'Temp Gauge',ps:'25/05/2026',pe:'30/06/2026',bg:29900,as:'',ae:'',pct:0},
-    {no:38,itemNo:'20.1.9',desc:'Level Gauge',ps:'25/05/2026',pe:'30/06/2026',bg:13800,as:'',ae:'',pct:0},
-    {no:'',itemNo:'',desc:'21. งานติดตั้งแสงสว่าง',ps:'',pe:'',bg:0,as:'',ae:'',pct:0},
-    {no:39,itemNo:'21.1',desc:'ติดตั้งตู้ load center, โคมไฟ และลากสาย',ps:'01/06/2026',pe:'30/06/2026',bg:86300,as:'',ae:'',pct:0},
-    {no:'',itemNo:'',desc:'22. งานติดตั้ง CCTV',ps:'',pe:'',bg:0,as:'',ae:'',pct:0},
-    {no:40,itemNo:'22.1',desc:'กล้อง CCTV และ ลากสาย',ps:'01/06/2026',pe:'30/06/2026',bg:115000,as:'',ae:'',pct:0},
-    {no:'',itemNo:'',desc:'23. งานติดตั้งอุปกรณ์โรงงาน',ps:'',pe:'',bg:0,as:'',ae:'',pct:0},
-    {no:41,itemNo:'23.1',desc:'Steam Transformer Install',ps:'01/06/2026',pe:'30/06/2026',bg:0,as:'',ae:'',pct:0},
-    {no:42,itemNo:'23.2',desc:'Accumulator#1 Install',ps:'01/06/2026',pe:'30/06/2026',bg:0,as:'',ae:'',pct:0},
-    {no:43,itemNo:'23.3',desc:'Accumulator#2 Install',ps:'01/06/2026',pe:'30/06/2026',bg:0,as:'',ae:'',pct:0},
-    {no:44,itemNo:'23.4',desc:'Soft, Condensate, Flash, Return Tank',ps:'01/06/2026',pe:'30/06/2026',bg:0,as:'',ae:'',pct:0},
-    {no:45,itemNo:'23.5',desc:'Pump Installation',ps:'01/06/2026',pe:'30/06/2026',bg:0,as:'',ae:'',pct:0},
-    {no:46,itemNo:'23.6',desc:'Control Valve Install',ps:'01/06/2026',pe:'30/06/2026',bg:0,as:'',ae:'',pct:0},
-    {no:47,itemNo:'23.7',desc:'Instrument air piping',ps:'01/06/2026',pe:'30/06/2026',bg:0,as:'',ae:'',pct:0},
-    {no:48,itemNo:'23.8',desc:'Chemical Dosing Install',ps:'01/06/2026',pe:'30/06/2026',bg:0,as:'',ae:'',pct:0},
-    {no:49,itemNo:'23.9',desc:'Heat exchanger H/E2, H/E3',ps:'01/06/2026',pe:'30/06/2026',bg:0,as:'',ae:'',pct:0},
-    {no:'',itemNo:'',desc:'24. Commissioning & SAT',ps:'',pe:'',bg:0,as:'',ae:'',pct:0},
-    {no:50,itemNo:'24.1',desc:'Pre-Commissioning (Cold test)',ps:'01/07/2026',pe:'15/07/2026',bg:46000,as:'',ae:'',pct:0},
-    {no:51,itemNo:'24.2',desc:'Commissioning (Hot test)',ps:'01/07/2026',pe:'15/07/2026',bg:57500,as:'',ae:'',pct:0},
-    {no:'',itemNo:'',desc:'25. Training',ps:'',pe:'',bg:0,as:'',ae:'',pct:0},
-    {no:52,itemNo:'25.1',desc:'System Training',ps:'10/07/2026',pe:'15/07/2026',bg:0,as:'',ae:'',pct:0},
-    {no:'',itemNo:'',desc:'26. เอกสาร',ps:'',pe:'',bg:0,as:'',ae:'',pct:0},
-    {no:53,itemNo:'26.1',desc:'As-Built Drawing (Ele+Ins)',ps:'16/02/2026',pe:'15/07/2026',bg:17300,as:'',ae:'',pct:0},
-    {no:54,itemNo:'26.2',desc:'PLC/HMI Document',ps:'01/04/2026',pe:'15/07/2026',bg:11500,as:'',ae:'',pct:0},
-    {no:55,itemNo:'26.3',desc:'Operation Manual',ps:'01/07/2026',pe:'15/07/2026',bg:0,as:'',ae:'',pct:0},
-    {no:56,itemNo:'26.4',desc:'Training Material',ps:'01/07/2026',pe:'15/07/2026',bg:0,as:'',ae:'',pct:0},
-    {no:'',itemNo:'',desc:'27. Expenses',ps:'',pe:'',bg:0,as:'',ae:'',pct:0},
-    {no:57,itemNo:'27.1',desc:'ค่าเดินทาง+ที่พัก',ps:'16/02/2026',pe:'15/07/2026',bg:138000,as:'',ae:'',pct:0},
-    {no:58,itemNo:'27.2',desc:'Office container',ps:'16/02/2026',pe:'15/07/2026',bg:34500,as:'',ae:'',pct:0},
-    {no:59,itemNo:'27.3',desc:'Transportation',ps:'16/02/2026',pe:'15/07/2026',bg:57100,as:'',ae:'',pct:0},
-    {no:60,itemNo:'27.4',desc:'ค่าใช้จ่ายหน้างาน',ps:'16/02/2026',pe:'15/07/2026',bg:74100,as:'',ae:'',pct:0}
-  ];
-  if(!D.material.rows||!D.material.rows.length)D.material.rows=matTmpl;
-  if(!D.material.snap)D.material.snap={};
-  if(!D.installation.rows||!D.installation.rows.length)D.installation.rows=instTmpl;
-  if(!D.installation.snap)D.installation.snap={};
-}
-
-// ── DATA LOAD/SAVE ──
-async function loadData(){
-  try{
-    const r=await fetch(RAW+'?t='+Date.now());
-    if(!r.ok){initD();renderAll();return;}
-    const d=await r.json();
-    const migrate=(arr,base)=>arr.forEach(r=>{if(r.wt!==undefined&&r.bg===undefined){r.bg=Math.round((r.wt/100)*base);delete r.wt;}});
-    if(d.material){D.material.rows=d.material.rows||[];migrate(D.material.rows,2150000);D.material.snap=d.material.snap||{};D.material.prevPay=d.material.prevPay||0;}
-    if(d.installation){D.installation.rows=d.installation.rows||[];migrate(D.installation.rows,3100000);D.installation.snap=d.installation.snap||{};D.installation.prevPay=d.installation.prevPay||0;}
-    toast('✓ Data loaded');
-  }catch(e){initD();}
-  renderAll();
-}
-
-async function saveData(){
-  let pat=sessionStorage.getItem('ghPAT');
-  if(!pat){patAction='save';$('patMo').classList.add('on');return;}
-  if(!sha){
-    try{const c=await fetch(API,{headers:{Authorization:`token ${pat}`}});if(c.ok){const j=await c.json();sha=j.sha;}}catch(e){}
-  }
-  const json=JSON.stringify(D,null,2);
-  const bytes=new TextEncoder().encode(json);
-  let bin='';bytes.forEach(b=>bin+=String.fromCharCode(b));
-  const body={message:'Update TSG Plan data',content:btoa(bin)};
-  if(sha)body.sha=sha;
-  try{
-    const r=await fetch(API,{method:'PUT',headers:{Authorization:`token ${pat}`,'Content-Type':'application/json'},body:JSON.stringify(body)});
-    if(!r.ok){const e=await r.json();toast('✗ '+e.message,true);return;}
-    const j=await r.json();sha=j.content.sha;toast('✓ Saved');
-  }catch(e){toast('✗ Error',true);}
-}
-
-function confirmPAT(){
-  const v=$('patIn').value.trim();if(!v)return;
-  sessionStorage.setItem('ghPAT',v);$('patMo').classList.remove('on');
-  if(patAction==='save')saveData();else loadData();
-}
-
-// ── AUTH ──
 function confirmPIN(){
   if($('pinIn').value.trim()===ADMIN_PIN){
     isEd=true;
@@ -612,282 +442,719 @@ function confirmPIN(){
     sessionStorage.setItem('email','Admin');
     $('uinfo').textContent='Admin';
     $('pinMo').classList.remove('on');
-    $('pinIn').value='';
     $('pinBtn').style.display='none';
-    $('gBtn').style.display='none';
     $('soBtn').style.display='inline-block';
     document.body.classList.add('ed');
-    showEdUI();setupPaste();
-    if(plan)renderPlan();
+    showEdUI(); setupPaste();
+    if(plan)renderTable();
     toast('✓ Admin');
-  }else{toast('✗ Wrong PIN',true);$('pinIn').value='';}
+  } else { toast('✗ Wrong PIN',true); $('pinIn').value=''; }
+}
+const GCI='695932302309-p1rccufdkq9itb5paam78j1ll1ejb1uu.apps.googleusercontent.com';
+const EE='suthepp.top@gmail.com';
+const API='https://api.github.com/repos/suthepptop/tsg-planner/contents/data.json';
+const RAW='https://raw.githubusercontent.com/suthepptop/tsg-planner/main/data.json';
+let isEd=false,plan=null,sha=null,patAction='save';
+let D={material:{rows:[], snap:{}},installation:{rows:[], snap:{}}};
+const $=id=>document.getElementById(id);
+const FN='Sarabun,sans-serif';
+
+const pd=s=>{
+  if(!s)return null;s=s.trim();
+  const m=s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+  if(m){const d=new Date(+m[3],+m[2]-1,+m[1]);return isNaN(d.getTime())?null:d;}
+  return null;
+};
+const toI=s=>{if(!s)return'';const m=s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);return m?`${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`:'';};
+const frI=s=>{if(!s)return'';const[y,mo,d]=s.split('-');return`${d}/${mo}/${y}`;};
+const nd=s=>{
+  if(!s)return'';s=s.trim();
+  if(/^\d{1,2}[\/-]\d{1,2}[\/-]\d{4}$/.test(s)){const sp=s.includes('/')?'/':'-';const[d,m,y]=s.split(sp);return`${d.padStart(2,'0')}/${m.padStart(2,'0')}/${y}`;}
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)){const[y,m,d]=s.split('-');return`${d}/${m}/${y}`;}
+  if(/^\d{5}$/.test(s)){const dt=new Date((+s-25569)*86400000);return`${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}`;}
+  return s;
+};
+const nn=v=>{v=String(v).trim().replace(/,/g, '').replace('%','');let n=parseFloat(v)||0;return Math.round(n*100)/100;};
+const dd=(a,b)=>Math.round((b-a)/86400000);
+const fd=s=>{const d=pd(s);return d?`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`:'';};
+const toast=(msg,err=false)=>{const e=$('toast');e.textContent=msg;e.style.borderColor=err?'#c00':'#ccc';e.classList.add('on');setTimeout(()=>e.classList.remove('on'),2800);};
+
+function getRange(rows){
+  let mn=null,mx=null;
+  rows.forEach(r=>{
+      if(!r.ps && !r.pe && (!r.bg || r.bg == 0)) return;
+      const s=pd(r.ps),e=pd(r.pe);
+      if(s&&(!mn||s<mn))mn=s;if(e&&(!mx||e>mx))mx=e;
+  });
+  if(!mn)mn=new Date('2026-02-16');if(!mx)mx=new Date('2026-07-15');
+  return{start:mn,end:mx,days:dd(mn,mx)+1};
+}
+
+function recordSnap() {
+  if(!plan) return;
+  if(!D[plan].snap) D[plan].snap = {};
+  const d = new Date();
+  const tStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  D[plan].snap[tStr] = calcP(D[plan].rows);
+}
+
+function exportExcel() {
+  if(!plan) return;
+  const rows = D[plan].rows;
+  const rate = plan === 'material' ? 0.60 : 0.65;
+  let csv = isEd ? 
+    "\ufeffNo.,Item No.,Description,Plan Start,Plan Finish,Budget (THB),Act Start,Act Finish,Act%,Claimable (THB)\n" : 
+    "\ufeffNo.,Item No.,Description,Plan Start,Plan Finish,Act Start,Act Finish,Act%\n";
+  rows.forEach(r => {
+    const desc = (r.desc || '').replace(/"/g, '""');
+    if (isEd) {
+        const claim = (!r.bg || r.bg==0) ? 0 : ((r.bg||0) * (r.pct||0)/100 * rate);
+        csv += `${r.no || ''},"${r.itemNo || ''}","${desc}",${r.ps || ''},${r.pe || ''},${r.bg || 0},${r.as || ''},${r.ae || ''},${Number(r.pct||0).toFixed(2)},${claim}\n`;
+    } else {
+        csv += `${r.no || ''},"${r.itemNo || ''}","${desc}",${r.ps || ''},${r.pe || ''},${r.as || ''},${r.ae || ''},${Number(r.pct||0).toFixed(2)}\n`;
+    }
+  });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `TSG_${plan}_plan.csv`;
+  link.click();
+  toast('✓ Excel (CSV) Exported');
+}
+
+function exportCurrentPDF(){
+  const lb=sessionStorage.getItem('lastPage');
+  const lp=sessionStorage.getItem('lastPlan');
+  if(lb==='billing') exportBillingPDF();
+  else if(lp) exportPDF();
+  else exportHomePDF();
+}
+
+// Core: build hidden iframe at fixed width, capture with html2canvas, save with jsPDF
+function captureAndSave(htmlContent, filename){
+  toast('Generating PDF...');
+  const iframe = document.createElement('iframe');
+  iframe.style.cssText = 'position:fixed;top:0;left:0;width:794px;height:2000px;border:none;visibility:hidden;z-index:9999;';
+  document.body.appendChild(iframe);
+  const idoc = iframe.contentDocument || iframe.contentWindow.document;
+  idoc.open(); idoc.write(htmlContent); idoc.close();
+
+  // Wait for all images to load before measuring
+  const imgs = Array.from(idoc.querySelectorAll('img'));
+  const imgPromises = imgs.map(img => new Promise(res => {
+    if(img.complete) res();
+    else { img.onload = res; img.onerror = res; }
+  }));
+
+  Promise.all(imgPromises).then(()=>{
+    const totalH = idoc.body.scrollHeight;
+    iframe.style.height = totalH + 'px';
+    const {jsPDF} = window.jspdf;
+    const pdf = new jsPDF({unit:'pt', format:'a4', orientation:'portrait'});
+    const pW = pdf.internal.pageSize.getWidth();
+    const pH = pdf.internal.pageSize.getHeight();
+    const margin = 28;
+    const contentW = pW - margin*2;
+
+    // Get thead height and row positions BEFORE html2canvas
+    const thead = idoc.querySelector('thead');
+    const trows = Array.from(idoc.querySelectorAll('tbody tr, tfoot tr'));
+    const theadH = thead ? thead.offsetHeight : 0;
+    const rowBottoms = trows.map(r => r.offsetTop + r.offsetHeight); // px in doc
+
+    window.html2canvas(idoc.body,{
+      scale:2, useCORS:true, allowTaint:true,
+      backgroundColor:'#ffffff', logging:false,
+      width:794, windowWidth:794, height:totalH
+    }).then(canvas=>{
+      document.body.removeChild(iframe);
+      const ratio = contentW / canvas.width; // pt per canvas-px
+      const imgTotalPt = canvas.height * ratio + 2; // +2pt buffer for last border
+      const pageContentH = pH - margin*2;
+
+      // thead height in pt (scale:2 so *2)
+      const theadPt = theadH * 2 * ratio;
+
+      // row bottom positions in pt
+      const rowEndsPt = rowBottoms.map(y => y * 2 * ratio);
+
+      // Extract thead strip from canvas
+      let theadImg = null;
+      if(thead && theadH > 0){
+        const tc = document.createElement('canvas');
+        tc.width = canvas.width;
+        tc.height = Math.ceil(theadH * 2);
+        tc.getContext('2d').drawImage(canvas, 0, thead.offsetTop*2, canvas.width, theadH*2, 0, 0, canvas.width, theadH*2);
+        theadImg = tc.toDataURL('image/jpeg', 0.95);
+      }
+
+      let yPt = 0, page = 0;
+      // Find where table starts in pt
+      const tableEl = idoc.querySelector('table');
+      const tableStartPt = tableEl ? tableEl.offsetTop * 2 * ratio : imgTotalPt;
+
+      while(yPt < imgTotalPt){
+        if(page > 0) pdf.addPage();
+        const extraH = (page > 0 && theadImg) ? theadPt : 0;
+        const avail = pageContentH - extraH;
+        let cutPt = yPt + avail;
+
+        if(cutPt < imgTotalPt){
+          if(cutPt > tableStartPt && rowEndsPt.length > 0){
+            // We're in the table — snap to row boundary
+            const fit = rowEndsPt.filter(y => y > yPt && y <= cutPt);
+            if(fit.length > 0){
+              cutPt = fit[fit.length-1];
+            } else {
+              const next = rowEndsPt.find(y => y > yPt);
+              if(next) cutPt = next;
+            }
+          }
+          // else in image/gantt area — just cut at page boundary, no snapping needed
+        } else {
+          cutPt = imgTotalPt;
+        }
+
+        let drawY = margin;
+
+        // Repeat thead on pages 2+
+        if(page > 0 && theadImg){
+          pdf.addImage(theadImg, 'JPEG', margin, drawY, contentW, theadPt);
+          drawY += theadPt;
+        }
+
+        const slicePt = cutPt - yPt;
+        const srcY = Math.round(yPt / ratio);
+        const srcH = Math.round(slicePt / ratio);
+        const tmp = document.createElement('canvas');
+        tmp.width = canvas.width;
+        tmp.height = srcH;
+        tmp.getContext('2d').drawImage(canvas, 0, srcY, canvas.width, srcH, 0, 0, canvas.width, srcH);
+        pdf.addImage(tmp.toDataURL('image/jpeg',0.92), 'JPEG', margin, drawY, contentW, slicePt);
+
+        yPt = cutPt;
+        page++;
+      }
+      pdf.save(filename);
+      toast('✓ Downloaded');
+    }).catch(e=>{ document.body.removeChild(iframe); console.error(e); toast('✗ Failed',true); });
+  });
+}
+
+function pdfStyle(){
+  return `<style>*{box-sizing:border-box;margin:0;padding:0;font-family:Sarabun,sans-serif}body{background:#fff;padding:12px;font-size:11px}img{max-width:100%;display:block}table{width:100%;border-collapse:collapse;table-layout:fixed}th{background:#e8edf2;border:1px solid #bbb;padding:4px 3px;font-size:9px;text-align:left;word-break:break-word}td{border:1px solid #ddd;padding:3px;font-size:9px;vertical-align:middle;word-break:break-word}tr:nth-child(even) td{background:#f7f9fb}</style>`;
+}
+
+function exportHomePDF(){
+  renderHome();
+  setTimeout(()=>{
+    const mat=document.getElementById('cMat').toDataURL('image/png');
+    const inst=document.getElementById('cInst').toDataURL('image/png');
+    const mp=document.getElementById('hmp').textContent;
+    const ip=document.getElementById('hip').textContent;
+    const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">${pdfStyle()}</head><body>
+<div style="font-size:14px;font-weight:700;color:#1560a8;margin-bottom:10px">TSG Project Planner — Overview — ${new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</div>
+<img src="${mat}" style="margin-bottom:10px;border:1px solid #ddd">
+<img src="${inst}" style="margin-bottom:12px;border:1px solid #ddd">
+<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;font-size:12px"><span>Material Progress</span><span style="color:#1560a8;font-weight:700">${mp}</span></div>
+<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:12px"><span>Installation Progress</span><span style="color:#d97706;font-weight:700">${ip}</span></div>
+<div class="mo" id="pinMo">
+  <div class="md">
+    <h2>Admin PIN</h2>
+    <input type="password" id="pinIn" placeholder="Enter PIN" maxlength="6" inputmode="numeric" style="width:100%;padding:6px 9px;border:1px solid #ccc;border-radius:4px;font-size:14px;margin-bottom:10px;font-family:Sarabun,sans-serif">
+    <div class="ma">
+      <button class="btn" onclick="$('pinMo').classList.remove('on')">Cancel</button>
+      <button class="btn btnp" onclick="confirmPIN()">Login</button>
+    </div>
+  </div>
+</div>
+</body></html>`;
+    captureAndSave(html,'TSG_home.pdf');
+  },300);
+}
+
+function exportBillingPDF(){
+  const g=id=>document.getElementById(id).textContent;
+  const card=(t,bg,pct,body)=>`<div style="border:1px solid #ddd;border-radius:5px;margin-bottom:12px;overflow:hidden"><div style="background:${bg};color:#fff;padding:8px 14px;font-weight:700;font-size:12px;display:flex;justify-content:space-between"><span>${t}</span><span>${pct}</span></div><div style="padding:12px">${body}</div></div>`;
+  const row=(l,v,c='#222')=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;font-size:12px"><span style="color:#555">${l}</span><span style="font-weight:700;color:${c}">${v}</span></div>`;
+  const hl=(l,v)=>`<div style="background:#f0fdf4;padding:8px;border-radius:4px;border:1px solid #bbf7d0;margin-top:8px;display:flex;justify-content:space-between"><span style="color:#166534;font-weight:700;font-size:12px">${l}</span><span style="color:#15803d;font-weight:700;font-size:13px">${v}</span></div>`;
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">${pdfStyle()}</head><body>
+<div style="font-size:11px;color:#666;display:flex;justify-content:space-between;margin-bottom:12px"><span>${document.getElementById('bil-summary').innerHTML}</span><span>${g('bil-asof')}</span></div>
+${card('📦 Material & Equipment (30/60/10)','#1560a8',g('bil-m-pct'),row('Total Contract Budget',g('bil-m-tot'),'#1560a8')+row('Down Payment (30%)',g('bil-m-down'))+row('Progress Pool (60%)',g('bil-m-pool'))+row('After Cold Test (10%)',g('bil-m-ret'))+hl('Current Claimable ('+g('bil-m-formula')+')',g('bil-m-claim')))}
+${card('🔧 Design & Installation (20/65/7.5/7.5)','#d97706',g('bil-i-pct'),row('Total Contract Budget',g('bil-i-tot'),'#d97706')+row('Down Payment (20%)',g('bil-i-down'))+row('Progress Pool (65%)',g('bil-i-pool'))+row('Punch List (7.5%)',g('bil-i-ret1'))+row('After Commissioning (7.5%)',g('bil-i-ret2'))+hl('Current Claimable ('+g('bil-i-formula')+')',g('bil-i-claim')))}
+<div class="mo" id="pinMo">
+  <div class="md">
+    <h2>Admin PIN</h2>
+    <input type="password" id="pinIn" placeholder="Enter PIN" maxlength="6" inputmode="numeric" style="width:100%;padding:6px 9px;border:1px solid #ccc;border-radius:4px;font-size:14px;margin-bottom:10px;font-family:Sarabun,sans-serif">
+    <div class="ma">
+      <button class="btn" onclick="$('pinMo').classList.remove('on')">Cancel</button>
+      <button class="btn btnp" onclick="confirmPIN()">Login</button>
+    </div>
+  </div>
+</div>
+</body></html>`;
+  captureAndSave(html,'TSG_billing.pdf');
+}
+
+function exportPDF(){
+  if(!plan) return;
+  renderSC(); renderGantt();
+  setTimeout(()=>{
+    const rows=D[plan].rows;
+    const rate=plan==='material'?0.60:0.65;
+    const scCanvas=document.getElementById('cSC');
+    const ganttCanvas=document.getElementById('cGantt');
+
+    const {jsPDF}=window.jspdf;
+    const pdf=new jsPDF({unit:'pt',format:'a4',orientation:'portrait'});
+    const pW=pdf.internal.pageSize.getWidth();
+    const pH=pdf.internal.pageSize.getHeight();
+    const margin=28;
+    const contentW=pW-margin*2;
+
+    // PAGE 1+: S-Curve (fit on first page top)
+    const scRatio=contentW/scCanvas.width;
+    const scH=scCanvas.height*scRatio;
+    pdf.addImage(scCanvas.toDataURL('image/jpeg',0.92),'JPEG',margin,margin,contentW,scH);
+
+    // GANTT: slice directly from canvas, continuing after S-curve
+    const ganttRatio=contentW/ganttCanvas.width;
+    let ganttY=0;
+    let currentPageY=margin+scH+4; // continue right after S-curve
+
+    while(ganttY<ganttCanvas.height){
+      const availPt=pH-currentPageY-margin;
+      const availPx=availPt/ganttRatio;
+      const sliceH=Math.min(availPx, ganttCanvas.height-ganttY);
+      if(sliceH<=0){ pdf.addPage(); currentPageY=margin; continue; }
+      const tmp=document.createElement('canvas');
+      tmp.width=ganttCanvas.width;
+      tmp.height=Math.ceil(sliceH);
+      tmp.getContext('2d').drawImage(ganttCanvas,0,ganttY,ganttCanvas.width,sliceH,0,0,ganttCanvas.width,sliceH);
+      const slicePt=sliceH*ganttRatio;
+      pdf.addImage(tmp.toDataURL('image/jpeg',0.92),'JPEG',margin,currentPageY,contentW,slicePt);
+      ganttY+=sliceH;
+      currentPageY+=slicePt+4;
+      // If remaining gantt doesn't fit on current page, start new page
+      if(ganttY<ganttCanvas.height && currentPageY+20>pH-margin){
+        pdf.addPage(); currentPageY=margin;
+      }
+    }
+
+    // TABLE: build in iframe, capture, slice into pages
+    const cA=`<colgroup><col style="width:4%"><col style="width:7%"><col style="width:22%"><col style="width:9%"><col style="width:9%"><col style="width:8%"><col style="width:9%"><col style="width:9%"><col style="width:6%"><col style="width:8%"></colgroup>`;
+    const cV=`<colgroup><col style="width:5%"><col style="width:8%"><col style="width:29%"><col style="width:12%"><col style="width:12%"><col style="width:12%"><col style="width:12%"><col style="width:8%"></colgroup>`;
+    const hA=`<tr><th>No.</th><th>Item</th><th>Description</th><th>Pl.Start</th><th>Pl.Finish</th><th>Budget</th><th>Ac.Start</th><th>Ac.Finish</th><th>Act%</th><th>Claim</th></tr>`;
+    const hV=`<tr><th>No.</th><th>Item</th><th>Description</th><th>Pl.Start</th><th>Pl.Finish</th><th>Ac.Start</th><th>Ac.Finish</th><th>Act%</th></tr>`;
+    let tbody='',totBg=0,totClaim=0;
+    rows.forEach(r=>{
+      const isHdr=(!r.bg||r.bg==0)&&!r.ps&&!r.pe;
+      const claim=isHdr?0:(r.bg||0)*(r.pct||0)/100*rate;
+      totBg+=(+r.bg||0); totClaim+=claim;
+      const bg=isHdr?'background:#e8f0fb;font-weight:700;color:#1560a8;':'';
+      const aS=r.as||r.ps||''; const aE=r.ae||r.pe||'';
+      tbody+=isEd
+        ?`<tr style="${bg}"><td>${r.no||''}</td><td>${r.itemNo||''}</td><td>${r.desc||''}</td><td>${r.ps||''}</td><td>${r.pe||''}</td><td style="text-align:right">${isHdr?'':parseInt(r.bg||0).toLocaleString()}</td><td>${aS}</td><td>${aE}</td><td style="text-align:center">${isHdr?'':Number(r.pct||0).toFixed(2)+'%'}</td><td style="text-align:right;color:#2a8a2a">${isHdr?'':parseInt(claim).toLocaleString()}</td></tr>`
+        :`<tr style="${bg}"><td>${r.no||''}</td><td>${r.itemNo||''}</td><td>${r.desc||''}</td><td>${r.ps||''}</td><td>${r.pe||''}</td><td>${aS}</td><td>${aE}</td><td style="text-align:center">${isHdr?'':Number(r.pct||0).toFixed(2)+'%'}</td></tr>`;
+    });
+    const tot=isEd?`<tr style="background:#e8f0fb;font-weight:700"><td colspan="5" style="text-align:right">Total</td><td style="text-align:right;color:#1560a8">${totBg.toLocaleString('en-US',{minimumFractionDigits:2})}</td><td colspan="3"></td><td style="text-align:right;color:#2a8a2a">${totClaim.toLocaleString('en-US',{minimumFractionDigits:2})}</td></tr>`:'';
+
+    const tableHTML=`<!DOCTYPE html><html><head><meta charset="UTF-8">${pdfStyle()}</head><body>
+<table>${isEd?cA:cV}<thead>${isEd?hA:hV}</thead><tbody>${tbody}${tot}</tbody></table>
+</body></html>`;
+
+    const iframe=document.createElement('iframe');
+    iframe.style.cssText='position:fixed;top:0;left:0;width:794px;height:2000px;border:none;visibility:hidden;z-index:9999;';
+    document.body.appendChild(iframe);
+    const idoc=iframe.contentDocument||iframe.contentWindow.document;
+    idoc.open(); idoc.write(tableHTML); idoc.close();
+
+    setTimeout(()=>{
+      const totalH=idoc.body.scrollHeight;
+      iframe.style.height=totalH+'px';
+      const thead=idoc.querySelector('thead');
+      const theadH=thead?thead.offsetHeight:0;
+      const trows=Array.from(idoc.querySelectorAll('tbody tr'));
+      const rowBottoms=trows.map(r=>r.offsetTop+r.offsetHeight);
+
+      window.html2canvas(idoc.body,{
+        scale:2,useCORS:true,allowTaint:true,
+        backgroundColor:'#ffffff',logging:false,
+        width:794,windowWidth:794,height:totalH
+      }).then(tCanvas=>{
+        document.body.removeChild(iframe);
+        const tRatio=contentW/tCanvas.width;
+        const tTotalPt=tCanvas.height*tRatio+4;
+        const pageH2=pH-margin*2;
+
+        // thead image for repeat
+        let theadImg=null,theadPt=0;
+        if(thead&&theadH>0){
+          theadPt=theadH*2*tRatio;
+          const tc=document.createElement('canvas');
+          tc.width=tCanvas.width; tc.height=Math.ceil(theadH*2);
+          tc.getContext('2d').drawImage(tCanvas,0,thead.offsetTop*2,tCanvas.width,theadH*2,0,0,tCanvas.width,theadH*2);
+          theadImg=tc.toDataURL('image/jpeg',0.95);
+        }
+        const rowEndsPt=rowBottoms.map(y=>y*2*tRatio);
+
+        let yPt=0,pg=0;
+        // Continue on same page after gantt, only add page if not enough space
+        let firstTableY = currentPageY+4;
+        if(firstTableY + 40 > pH - margin){ pdf.addPage(); firstTableY = margin; }
+        while(yPt<tTotalPt){
+          if(pg>0) pdf.addPage();
+          const isFirstSlice = pg===0;
+          const extraH=(pg>0&&theadImg)?theadPt:0;
+          const startY2 = isFirstSlice ? firstTableY : margin;
+          const avail = isFirstSlice ? (pH - firstTableY - margin) : (pageH2 - extraH);
+          let cutPt=yPt+avail;
+          if(cutPt<tTotalPt){
+            const fit=rowEndsPt.filter(y=>y>yPt&&y<=cutPt);
+            cutPt=fit.length>0?fit[fit.length-1]:(rowEndsPt.find(y=>y>yPt)||cutPt);
+          } else cutPt=tTotalPt;
+          let drawY=startY2;
+          if(pg>0&&theadImg){ pdf.addImage(theadImg,'JPEG',margin,drawY,contentW,theadPt); drawY+=theadPt; }
+          const slicePt=cutPt-yPt;
+          const tmp2=document.createElement('canvas');
+          tmp2.width=tCanvas.width; tmp2.height=Math.ceil(slicePt/tRatio);
+          tmp2.getContext('2d').drawImage(tCanvas,0,Math.round(yPt/tRatio),tCanvas.width,tmp2.height,0,0,tCanvas.width,tmp2.height);
+          pdf.addImage(tmp2.toDataURL('image/jpeg',0.92),'JPEG',margin,drawY,contentW,slicePt);
+          yPt=cutPt; pg++;
+        }
+        pdf.save(`TSG_${plan}_plan.pdf`);
+        toast('✓ Downloaded');
+      }).catch(e=>{document.body.removeChild(iframe);toast('✗ Failed',true);});
+    },500);
+  },400);
+}
+
+function restoreSession() {
+  const storedEd = sessionStorage.getItem('isEd');
+  const storedEmail = sessionStorage.getItem('email');
+  if (storedEd === 'true') {
+    isEd = true;
+    $('uinfo').textContent = storedEmail;
+    $('gBtn').style.display = 'none';
+    $('pinBtn').style.display = 'none';
+    $('soBtn').style.display = 'inline-block';
+    document.body.classList.add('ed');
+    showEdUI();
+    setupPaste();
+  }
+}
+
+window.onload=()=>{
+  restoreSession(); 
+  const lp = sessionStorage.getItem('lastPlan');
+  if(lp) {
+    plan = lp;
+    showPg('ppg');
+    $('ptit').textContent=lp==='material'?'📦 Material Plan':'🔧 Installation Plan';
+    $(lp==='material'?'nbM':'nbI').classList.add('on');
+  } else {
+    showPg('hpg');
+  }
+  google.accounts.id.initialize({client_id:GCI,callback:onLogin,auto_select:true});
+  google.accounts.id.renderButton($('gBtn'),{theme:'filled_blue',size:'small',text:'signin_with',shape:'rectangular'});
+  loadData();
+};
+
+function onLogin(resp){
+  const p=JSON.parse(atob(resp.credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+  isEd=p.email===EE;
+  sessionStorage.setItem('isEd', isEd);
+  sessionStorage.setItem('email', p.email);
+  $('uinfo').textContent=p.email;
+  $('gBtn').style.display='none';
+  $('soBtn').style.display='inline-block';
+  if(isEd){
+      document.body.classList.add('ed');
+      showEdUI();
+      setupPaste();
+  } else {
+      signOut(); 
+  }
+  if(plan)renderTable();
+  toast(isEd?'✓ Editor':'✓ View only');
 }
 
 function showEdUI(){
   $('savBtn').style.display='inline-block';
   $('rstBtn').style.display='inline-block';
+  $('rwc').style.display='flex';
   $('nbB').style.display='inline-block';
+  $('th-bg').style.display='table-cell';
+  $('th-claim').style.display='table-cell';
+  $('foot-bg').style.display='inline';
+  $('foot-claim').style.display='inline';
 }
 
 function signOut(){
   google.accounts.id.disableAutoSelect();
   isEd=false;
-  sessionStorage.removeItem('isEd');sessionStorage.removeItem('email');
+  sessionStorage.removeItem('isEd');
+  sessionStorage.removeItem('email');
   document.body.classList.remove('ed');
   $('uinfo').textContent='';
   $('gBtn').style.display='block';
-  $('pinBtn').style.display='inline-block';
   ['soBtn','savBtn','rstBtn','nbB'].forEach(id=>$(id).style.display='none');
-  if(plan)renderPlan();
+  $('pinBtn').style.display='inline-block';
+  $('rwc').style.display='none';
+  $('th-bg').style.display='none';
+  $('th-claim').style.display='none';
+  $('foot-bg').style.display='none';
+  $('foot-claim').style.display='none';
+  if(plan)renderTable();
 }
 
-function onLogin(resp){
-  const p=JSON.parse(atob(resp.credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
-  isEd=p.email===EE;
-  sessionStorage.setItem('isEd',isEd);
-  sessionStorage.setItem('email',p.email);
-  $('uinfo').textContent=p.email;
-  $('gBtn').style.display='none';
-  $('pinBtn').style.display='none';
-  $('soBtn').style.display='inline-block';
-  if(isEd){document.body.classList.add('ed');showEdUI();setupPaste();}
-  else signOut();
-  if(plan)renderPlan();
-  toast(isEd?'✓ Editor':'✓ View only');
+function initD(){
+  const matTmpl = [
+      {no:'', itemNo:'', desc:'5. ตู้ไฟฟ้า+PLC', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:1, itemNo:'5.1.1', desc:'Enclosure MDB-1', ps:'01/04/2026', pe:'31/05/2026', bg:39400, as:'', ae:'', pct:0},
+      {no:2, itemNo:'5.1.2', desc:'Main MCCB 630AT', ps:'01/04/2026', pe:'31/05/2026', bg:49000, as:'', ae:'', pct:0},
+      {no:3, itemNo:'5.1.3', desc:'Digital Multimeter', ps:'01/04/2026', pe:'31/05/2026', bg:12200, as:'', ae:'', pct:0},
+      {no:4, itemNo:'5.1.4', desc:'CT 630/5A', ps:'01/04/2026', pe:'31/05/2026', bg:5900, as:'', ae:'', pct:0},
+      {no:5, itemNo:'5.1.5', desc:'Pilot Lamp etc', ps:'01/04/2026', pe:'31/05/2026', bg:7500, as:'', ae:'', pct:0},
+      {no:6, itemNo:'5.1.6', desc:'MCCB 200AT', ps:'01/04/2026', pe:'31/05/2026', bg:16900, as:'', ae:'', pct:0},
+      {no:7, itemNo:'5.1.7', desc:'MCCB 125AT', ps:'01/04/2026', pe:'31/05/2026', bg:39100, as:'', ae:'', pct:0},
+      {no:8, itemNo:'5.1.8', desc:'MCCB 30AT', ps:'01/04/2026', pe:'31/05/2026', bg:5500, as:'', ae:'', pct:0},
+      {no:9, itemNo:'5.1.9', desc:'Main Busbar', ps:'01/04/2026', pe:'31/05/2026', bg:22100, as:'', ae:'', pct:0},
+      {no:10, itemNo:'5.1.10', desc:'สายไฟ Control MDB', ps:'01/04/2026', pe:'31/05/2026', bg:10400, as:'', ae:'', pct:0},
+      {no:11, itemNo:'5.2.1', desc:'Enclosure MCC', ps:'01/04/2026', pe:'31/05/2026', bg:39400, as:'', ae:'', pct:0},
+      {no:12, itemNo:'5.2.2', desc:'Main MCCB 200AT', ps:'01/04/2026', pe:'31/05/2026', bg:17400, as:'', ae:'', pct:0},
+      {no:13, itemNo:'5.2.3', desc:'DM + CT + Fuse', ps:'01/04/2026', pe:'31/05/2026', bg:14600, as:'', ae:'', pct:0},
+      {no:14, itemNo:'5.2.4', desc:'Pilot Lamp Start-Stop', ps:'01/04/2026', pe:'31/05/2026', bg:7500, as:'', ae:'', pct:0},
+      {no:15, itemNo:'5.2.5', desc:'Y/D 30kW', ps:'01/04/2026', pe:'31/05/2026', bg:72500, as:'', ae:'', pct:0},
+      {no:16, itemNo:'5.2.6', desc:'Y/D 7.5kW', ps:'01/04/2026', pe:'31/05/2026', bg:37700, as:'', ae:'', pct:0},
+      {no:17, itemNo:'5.2.7', desc:'DOL 5.5kW', ps:'01/04/2026', pe:'31/05/2026', bg:19100, as:'', ae:'', pct:0},
+      {no:18, itemNo:'5.2.8', desc:'Spare 32AT', ps:'01/04/2026', pe:'31/05/2026', bg:7800, as:'', ae:'', pct:0},
+      {no:19, itemNo:'5.2.9', desc:'Main Busbar 630A', ps:'01/04/2026', pe:'31/05/2026', bg:17400, as:'', ae:'', pct:0},
+      {no:20, itemNo:'5.2.10', desc:'สายไฟ Control MCC', ps:'01/04/2026', pe:'31/05/2026', bg:10400, as:'', ae:'', pct:0},
+      {no:21, itemNo:'5.2.11', desc:'ตู้ลูกย่อย LC1', ps:'01/04/2026', pe:'31/05/2026', bg:51300, as:'', ae:'', pct:0},
+      {no:22, itemNo:'5.3.1', desc:'ตู้ PLC + Controller', ps:'01/04/2026', pe:'10/06/2026', bg:102600, as:'', ae:'', pct:0},
+      {no:23, itemNo:'5.3.2', desc:'UPS 40 kVA', ps:'01/04/2026', pe:'10/06/2026', bg:173500, as:'', ae:'', pct:0},
+      {no:24, itemNo:'5.3.3', desc:'Battery', ps:'01/04/2026', pe:'10/06/2026', bg:138900, as:'', ae:'', pct:0},
+      {no:25, itemNo:'5.4.1', desc:'Control Desk', ps:'01/04/2026', pe:'10/06/2026', bg:102600, as:'', ae:'', pct:0},
+      {no:26, itemNo:'5.5.1', desc:'Control Marshalling', ps:'01/04/2026', pe:'31/05/2026', bg:85400, as:'', ae:'', pct:0},
+      {no:27, itemNo:'5.6', desc:'I/O Remote Box', ps:'01/04/2026', pe:'31/05/2026', bg:90400, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'6. Cable tray & conduit', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:28, itemNo:'6.2.1', desc:'Conduit (Zone 1)', ps:'06/04/2026', pe:'25/05/2026', bg:115900, as:'', ae:'', pct:0},
+      {no:29, itemNo:'6.2.2', desc:'Conduit (Zone 2)', ps:'06/04/2026', pe:'25/05/2026', bg:12400, as:'', ae:'', pct:0},
+      {no:30, itemNo:'6.2.3', desc:'Conduit (Zone 3)', ps:'06/04/2026', pe:'25/05/2026', bg:12400, as:'', ae:'', pct:0},
+      {no:31, itemNo:'6.2.4', desc:'Conduit (Zone 4)', ps:'06/04/2026', pe:'25/05/2026', bg:43500, as:'', ae:'', pct:0},
+      {no:32, itemNo:'6.3', desc:'Accessories', ps:'06/04/2026', pe:'25/05/2026', bg:69000, as:'', ae:'', pct:0},
+      {no:33, itemNo:'6.4.1', desc:'Junction Box (STM 1)', ps:'06/04/2026', pe:'25/05/2026', bg:8100, as:'', ae:'', pct:0},
+      {no:34, itemNo:'6.4.2', desc:'Junction Box (STM 2&3)', ps:'06/04/2026', pe:'25/05/2026', bg:8100, as:'', ae:'', pct:0},
+      {no:35, itemNo:'6.4.3', desc:'Junction Box (STM 4)', ps:'06/04/2026', pe:'25/05/2026', bg:8100, as:'', ae:'', pct:0},
+      {no:36, itemNo:'6.4.4', desc:'Junction Box (โรงสี 1)', ps:'06/04/2026', pe:'25/05/2026', bg:8100, as:'', ae:'', pct:0},
+      {no:37, itemNo:'6.4.5', desc:'Junction Box (โรงสี 2)', ps:'06/04/2026', pe:'25/05/2026', bg:8100, as:'', ae:'', pct:0},
+      {no:38, itemNo:'6.4.6', desc:'Junction Box (โรงสี 3)', ps:'06/04/2026', pe:'25/05/2026', bg:8100, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'7. ระบบกราวด์', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:39, itemNo:'7.4', desc:'Ground test box', ps:'01/04/2026', pe:'07/05/2026', bg:72500, as:'', ae:'', pct:0},
+      {no:40, itemNo:'7.5', desc:'Accessories', ps:'23/03/2026', pe:'30/04/2026', bg:68800, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'8. อุปกรณ์ Instrument', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:41, itemNo:'8.5', desc:'Accessories', ps:'27/04/2026', pe:'31/05/2026', bg:17300, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'9. ระบบแสงสว่าง', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:42, itemNo:'9.1', desc:'ตู้ load center', ps:'01/04/2026', pe:'31/05/2026', bg:41200, as:'', ae:'', pct:0},
+      {no:43, itemNo:'9.2.1', desc:'Conduit & fitting', ps:'01/04/2026', pe:'31/05/2026', bg:40400, as:'', ae:'', pct:0},
+      {no:44, itemNo:'9.3.1', desc:'สายไฟ Steam Trans', ps:'01/04/2026', pe:'31/05/2026', bg:29100, as:'', ae:'', pct:0},
+      {no:45, itemNo:'9.3.2', desc:'สายไฟ Accum 2', ps:'01/04/2026', pe:'31/05/2026', bg:5100, as:'', ae:'', pct:0},
+      {no:46, itemNo:'9.4.1', desc:'โคมไฟ STM High Bay', ps:'01/04/2026', pe:'31/05/2026', bg:27600, as:'', ae:'', pct:0},
+      {no:47, itemNo:'9.4.2', desc:'โคมไฟ STM 2x36W', ps:'01/04/2026', pe:'31/05/2026', bg:24800, as:'', ae:'', pct:0},
+      {no:48, itemNo:'9.4.3', desc:'โคมไฟ Accum2 High Bay', ps:'01/04/2026', pe:'31/05/2026', bg:11000, as:'', ae:'', pct:0},
+      {no:49, itemNo:'9.5', desc:'Accessories', ps:'01/04/2026', pe:'31/05/2026', bg:28200, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'10. กล้องวงจรปิด (CCTV)', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:50, itemNo:'10.1.1', desc:'กล้อง STM', ps:'23/03/2026', pe:'25/05/2026', bg:29100, as:'', ae:'', pct:0},
+      {no:51, itemNo:'10.1.2', desc:'กล้อง Plant 1', ps:'23/03/2026', pe:'25/05/2026', bg:7300, as:'', ae:'', pct:0},
+      {no:52, itemNo:'10.1.3', desc:'กล้อง โรงสี 1 2 3', ps:'23/03/2026', pe:'25/05/2026', bg:21900, as:'', ae:'', pct:0},
+      {no:53, itemNo:'10.1.4', desc:'กล้อง Accum 2', ps:'23/03/2026', pe:'25/05/2026', bg:7300, as:'', ae:'', pct:0},
+      {no:54, itemNo:'10.2.1', desc:'NVR', ps:'23/03/2026', pe:'25/05/2026', bg:14400, as:'', ae:'', pct:0},
+      {no:55, itemNo:'10.2.2', desc:'HDD', ps:'23/03/2026', pe:'25/05/2026', bg:11500, as:'', ae:'', pct:0},
+      {no:56, itemNo:'10.3.1', desc:'Media Converter', ps:'23/03/2026', pe:'25/05/2026', bg:43800, as:'', ae:'', pct:0},
+      {no:57, itemNo:'10.4.1', desc:'LAN Accum2-โรงสี3', ps:'23/03/2026', pe:'25/05/2026', bg:13200, as:'', ae:'', pct:0},
+      {no:58, itemNo:'10.4.2', desc:'LAN Control-STM', ps:'23/03/2026', pe:'25/05/2026', bg:9300, as:'', ae:'', pct:0},
+      {no:59, itemNo:'10.4.3', desc:'Fiber โรงสี1-Control', ps:'23/03/2026', pe:'25/05/2026', bg:26200, as:'', ae:'', pct:0},
+      {no:60, itemNo:'10.4.4', desc:'Fiber โรงสี2-Control', ps:'23/03/2026', pe:'25/05/2026', bg:26200, as:'', ae:'', pct:0},
+      {no:61, itemNo:'10.4.5', desc:'Fiber โรงสี2-โรงสี3', ps:'23/03/2026', pe:'25/05/2026', bg:18700, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'12. Pipe Rack', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:62, itemNo:'12.2', desc:'Support for Cable Tray', ps:'01/04/2026', pe:'31/05/2026', bg:56800, as:'', ae:'', pct:0}
+  ];
+
+  const instTmpl = [
+      {no:'', itemNo:'', desc:'16. งานออกแบบ+เขียนแบบ', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:1, itemNo:'16.1', desc:'Electrical Single Line', ps:'16/02/2026', pe:'25/04/2026', bg:28800, as:'', ae:'', pct:0},
+      {no:2, itemNo:'16.2', desc:'Cable Schedule & Route', ps:'02/03/2026', pe:'30/04/2026', bg:34500, as:'', ae:'', pct:0},
+      {no:3, itemNo:'16.3', desc:'Cable arrangement diagram', ps:'02/03/2026', pe:'30/04/2026', bg:28800, as:'', ae:'', pct:0},
+      {no:4, itemNo:'16.4', desc:'Grounding System Design', ps:'16/02/2026', pe:'25/04/2026', bg:34500, as:'', ae:'', pct:0},
+      {no:5, itemNo:'16.5', desc:'Lightning Arrester Design', ps:'16/02/2026', pe:'20/04/2026', bg:28800, as:'', ae:'', pct:0},
+      {no:6, itemNo:'16.6', desc:'Hook-up Drawing', ps:'23/03/2026', pe:'20/05/2026', bg:28800, as:'', ae:'', pct:0},
+      {no:7, itemNo:'16.7', desc:'Panel GA Drawing', ps:'02/03/2026', pe:'20/04/2026', bg:34500, as:'', ae:'', pct:0},
+      {no:8, itemNo:'16.8', desc:'Panel Wiring Diagram', ps:'02/03/2026', pe:'30/04/2026', bg:34500, as:'', ae:'', pct:0},
+      {no:9, itemNo:'16.9', desc:'I/O Assignment List', ps:'02/03/2026', pe:'20/04/2026', bg:34500, as:'', ae:'', pct:0},
+      {no:10, itemNo:'16.10', desc:'Lighting Design', ps:'09/03/2026', pe:'10/05/2026', bg:28800, as:'', ae:'', pct:0},
+      {no:11, itemNo:'16.11', desc:'CCTV Layout', ps:'09/03/2026', pe:'10/05/2026', bg:28800, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'17. งาน Programming', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:12, itemNo:'17.1', desc:'PLC Programming', ps:'01/04/2026', pe:'31/05/2026', bg:230000, as:'', ae:'', pct:0},
+      {no:13, itemNo:'17.2', desc:'Control Logic', ps:'01/04/2026', pe:'31/05/2026', bg:57500, as:'', ae:'', pct:0},
+      {no:14, itemNo:'17.3', desc:'Alarm & Data Logging', ps:'01/04/2026', pe:'31/05/2026', bg:57500, as:'', ae:'', pct:0},
+      {no:15, itemNo:'17.4', desc:'HMI Programming', ps:'01/04/2026', pe:'31/05/2026', bg:115000, as:'', ae:'', pct:0},
+      {no:16, itemNo:'17.5', desc:'Screen Design', ps:'01/04/2026', pe:'31/05/2026', bg:57500, as:'', ae:'', pct:0},
+      {no:17, itemNo:'17.6', desc:'User Management', ps:'01/04/2026', pe:'31/05/2026', bg:57500, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'18. FAT (Factory Test)', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:18, itemNo:'18.1', desc:'Panel Testing', ps:'01/05/2026', pe:'31/05/2026', bg:5800, as:'', ae:'', pct:0},
+      {no:19, itemNo:'18.2', desc:'PLC Simulation', ps:'01/05/2026', pe:'31/05/2026', bg:5800, as:'', ae:'', pct:0},
+      {no:20, itemNo:'18.3', desc:'HMI Testing', ps:'01/05/2026', pe:'31/05/2026', bg:5800, as:'', ae:'', pct:0},
+      {no:21, itemNo:'18.4', desc:'Interlock Testing', ps:'01/05/2026', pe:'31/05/2026', bg:11500, as:'', ae:'', pct:0},
+      {no:22, itemNo:'18.5', desc:'Communication Test', ps:'01/05/2026', pe:'31/05/2026', bg:5800, as:'', ae:'', pct:0},
+      {no:23, itemNo:'18.6', desc:'Customer Witness', ps:'01/05/2026', pe:'31/05/2026', bg:5800, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'19. งานติดตั้ง', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:24, itemNo:'19.1', desc:'Ground installation', ps:'01/04/2026', pe:'30/04/2026', bg:262900, as:'', ae:'', pct:0},
+      {no:25, itemNo:'19.2', desc:'Panel Installation', ps:'01/05/2026', pe:'31/05/2026', bg:105200, as:'', ae:'', pct:0},
+      {no:26, itemNo:'19.3', desc:'Cable Tray Installation', ps:'06/04/2026', pe:'25/05/2026', bg:404900, as:'', ae:'', pct:0},
+      {no:27, itemNo:'19.4', desc:'Conduit Installation', ps:'06/04/2026', pe:'25/05/2026', bg:262900, as:'', ae:'', pct:0},
+      {no:28, itemNo:'19.5', desc:'Cable Pulling & connection', ps:'10/06/2026', pe:'30/06/2026', bg:157800, as:'', ae:'', pct:0},
+      {no:29, itemNo:'19.6', desc:'Accessories', ps:'01/06/2026', pe:'30/06/2026', bg:36800, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'20. งานติดตั้ง Field Instrument', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:30, itemNo:'20.1.1', desc:'Pressure Transmitter+Impulse Line', ps:'25/05/2026', pe:'30/06/2026', bg:32200, as:'', ae:'', pct:0},
+      {no:31, itemNo:'20.1.2', desc:'Pressure Transmitter+Syphon', ps:'25/05/2026', pe:'30/06/2026', bg:29900, as:'', ae:'', pct:0},
+      {no:32, itemNo:'20.1.3', desc:'Temp Transmitter', ps:'25/05/2026', pe:'30/06/2026', bg:36800, as:'', ae:'', pct:0},
+      {no:33, itemNo:'20.1.4', desc:'Flow Transmitter+Impulse Line (DP)', ps:'25/05/2026', pe:'30/06/2026', bg:20700, as:'', ae:'', pct:0},
+      {no:34, itemNo:'20.1.5', desc:'Level Transmitter+Impulse Line (DP)', ps:'25/05/2026', pe:'30/06/2026', bg:20700, as:'', ae:'', pct:0},
+      {no:35, itemNo:'20.1.6', desc:'Level Trans. Direct Mounting', ps:'25/05/2026', pe:'30/06/2026', bg:9200, as:'', ae:'', pct:0},
+      {no:36, itemNo:'20.1.7', desc:'Pressure Gauge', ps:'25/05/2026', pe:'30/06/2026', bg:78200, as:'', ae:'', pct:0},
+      {no:37, itemNo:'20.1.8', desc:'Temp Gauge', ps:'25/05/2026', pe:'30/06/2026', bg:29900, as:'', ae:'', pct:0},
+      {no:38, itemNo:'20.1.9', desc:'Level Gauge', ps:'25/05/2026', pe:'30/06/2026', bg:13800, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'21. งานติดตั้งแสงสว่าง', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:39, itemNo:'21.1', desc:'ติดตั้งตู้ load center, โคมไฟ และลากสาย', ps:'01/06/2026', pe:'30/06/2026', bg:86300, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'22. งานติดตั้ง CCTV', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:40, itemNo:'22.1', desc:'กล้อง CCTV และ ลากสาย', ps:'01/06/2026', pe:'30/06/2026', bg:115000, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'23. งานติดตั้งอุปกรณ์โรงงาน', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:41, itemNo:'23.1', desc:'Steam Transformer Install', ps:'01/06/2026', pe:'30/06/2026', bg:0, as:'', ae:'', pct:0},
+      {no:42, itemNo:'23.2', desc:'Accumulator#1 Install', ps:'01/06/2026', pe:'30/06/2026', bg:0, as:'', ae:'', pct:0},
+      {no:43, itemNo:'23.3', desc:'Accumulator#2 Install', ps:'01/06/2026', pe:'30/06/2026', bg:0, as:'', ae:'', pct:0},
+      {no:44, itemNo:'23.4', desc:'Soft, Condensate, Flash, Return Tank', ps:'01/06/2026', pe:'30/06/2026', bg:0, as:'', ae:'', pct:0},
+      {no:45, itemNo:'23.5', desc:'Pump Installation', ps:'01/06/2026', pe:'30/06/2026', bg:0, as:'', ae:'', pct:0},
+      {no:46, itemNo:'23.6', desc:'Control Valve Install', ps:'01/06/2026', pe:'30/06/2026', bg:0, as:'', ae:'', pct:0},
+      {no:47, itemNo:'23.7', desc:'Instrument air piping', ps:'01/06/2026', pe:'30/06/2026', bg:0, as:'', ae:'', pct:0},
+      {no:48, itemNo:'23.8', desc:'Chemical Dosing Install', ps:'01/06/2026', pe:'30/06/2026', bg:0, as:'', ae:'', pct:0},
+      {no:49, itemNo:'23.9', desc:'Heat exchanger H/E2, H/E3', ps:'01/06/2026', pe:'30/06/2026', bg:0, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'24. Commissioning & SAT', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:50, itemNo:'24.1', desc:'Pre-Commissioning (Cold test)', ps:'01/07/2026', pe:'15/07/2026', bg:46000, as:'', ae:'', pct:0},
+      {no:51, itemNo:'24.2', desc:'Commissioning (Hot test)', ps:'01/07/2026', pe:'15/07/2026', bg:57500, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'25. Training', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:52, itemNo:'25.1', desc:'System Training', ps:'10/07/2026', pe:'15/07/2026', bg:0, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'26. เอกสาร', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:53, itemNo:'26.1', desc:'As-Built Drawing (Ele+Ins)', ps:'16/02/2026', pe:'15/07/2026', bg:17300, as:'', ae:'', pct:0},
+      {no:54, itemNo:'26.2', desc:'PLC/HMI Document', ps:'01/04/2026', pe:'15/07/2026', bg:11500, as:'', ae:'', pct:0},
+      {no:55, itemNo:'26.3', desc:'Operation Manual', ps:'01/07/2026', pe:'15/07/2026', bg:0, as:'', ae:'', pct:0},
+      {no:56, itemNo:'26.4', desc:'Training Material', ps:'01/07/2026', pe:'15/07/2026', bg:0, as:'', ae:'', pct:0},
+      {no:'', itemNo:'', desc:'27. Expenses', ps:'', pe:'', bg:0, as:'', ae:'', pct:0},
+      {no:57, itemNo:'27.1', desc:'ค่าเดินทาง+ที่พัก', ps:'16/02/2026', pe:'15/07/2026', bg:138000, as:'', ae:'', pct:0},
+      {no:58, itemNo:'27.2', desc:'Office container', ps:'16/02/2026', pe:'15/07/2026', bg:34500, as:'', ae:'', pct:0},
+      {no:59, itemNo:'27.3', desc:'Transportation', ps:'16/02/2026', pe:'15/07/2026', bg:57100, as:'', ae:'', pct:0},
+      {no:60, itemNo:'27.4', desc:'ค่าใช้จ่ายหน้างาน', ps:'16/02/2026', pe:'15/07/2026', bg:74100, as:'', ae:'', pct:0}
+  ];
+
+  if(!D.material) D.material = {rows:[], snap:{}};
+  if(!D.material.rows || !D.material.rows.length) D.material.rows = matTmpl;
+  if(!D.material.snap) D.material.snap={};
+  if(!D.installation) D.installation = {rows:[], snap:{}};
+  if(!D.installation.rows || !D.installation.rows.length) D.installation.rows = instTmpl;
+  if(!D.installation.snap) D.installation.snap={};
 }
 
-
-// ── PDF EXPORT ──
-function exportAllPDF(){
-  try{
-  const jsPDFLib=window.jspdf&&window.jspdf.jsPDF;
-  if(!jsPDFLib){toast('PDF not ready, try again',true);return;}
-  toast('Generating PDF...');
-  // Draw S-curves at window width
-  drawSC($('svgMatSC'),D.material.rows,D.material.snap,'#1560a8','#15803d','Material S-Curve');
-  drawSC($('svgInstSC'),D.installation.rows,D.installation.snap,'#d97706','#15803d','Installation S-Curve');
-  if(plan) drawSC($('svgSC'),D[plan].rows,D[plan].snap,plan==='material'?'#1560a8':'#d97706','#15803d',plan==='material'?'Material S-Curve':'Installation S-Curve');
-  const jsPDF=jsPDFLib;
-  const pdf=new jsPDF({unit:'pt',format:'a4',orientation:'portrait'});
-  const pW=pdf.internal.pageSize.getWidth();
-  const pH=pdf.internal.pageSize.getHeight();
-  const margin=28;
-  const contentW=pW-margin*2;
-  const rate_m=0.60,rate_i=0.65;
-
-  // Helper: capture SVG as image data
-  function cvToImg(cv){return cv.toDataURL('image/jpeg',0.92);}
-function svgToImg(svgEl,w,h){
-    const clone=svgEl.cloneNode(true);
-    clone.setAttribute('width',w);clone.setAttribute('height',h);
-    const xml=new XMLSerializer().serializeToString(clone);
-    const b64=btoa(unescape(encodeURIComponent(xml)));
-    return 'data:image/svg+xml;base64,'+b64;
-  }
-
-  // Helper: add text line
-  function addText(text,x,y,size,bold,color){
-    pdf.setFontSize(size||10);
-    pdf.setFont('helvetica',bold?'bold':'normal');
-    if(color)pdf.setTextColor(...color);else pdf.setTextColor(30,30,46);
-    pdf.text(text,x,y);
-    pdf.setTextColor(30,30,46);
-  }
-
-  // Helper: add horizontal line
-  function hline(y,color){pdf.setDrawColor(...(color||[200,200,200]));pdf.line(margin,y,pW-margin,y);}
-
-  // ── PAGE 1: HOME (S-curves) ──
-  addText('TSG PROJECT PLANNER',margin,margin+10,14,true,[21,96,168]);
-  addText('Overview Report — As of '+new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}),margin,margin+24,10,false,[100,100,100]);
-  hline(margin+30,[200,200,200]);
-
-  // Redraw S-curves at known width
-  const scW=pW-margin*2;
-  const scH=150;
-  [$('svgMatSC'),$('svgInstSC')].forEach((svg,si)=>{
-    drawSC(svg,si===0?D.material.rows:D.installation.rows,si===0?D.material.snap:D.installation.snap,si===0?'#1560a8':'#d97706','#15803d',si===0?'Material S-Curve':'Installation S-Curve');
-  });
-
-  // Add Mat S-curve
-  const matImg=$('svgMatSC').toDataURL('image/jpeg',0.92);
-  pdf.addImage(matImg,'JPEG',margin,margin+36,contentW,scH);
-  const mProg=calcP(D.material.rows);
-  addText(`Material Progress: ${mProg}%`,margin,margin+36+scH+12,10,true,[21,96,168]);
-
-  // Add Inst S-curve
-  const instImg=$('svgInstSC').toDataURL('image/jpeg',0.92);
-  pdf.addImage(instImg,'JPEG',margin,margin+36+scH+20,contentW,scH);
-  const iProg=calcP(D.installation.rows);
-  addText(`Installation Progress: ${iProg}%`,margin,margin+36+scH*2+32,10,true,[217,119,6]);
-
-  // ── PAGE 2+: MATERIAL PLAN TABLE ──
-  pdf.addPage();
-  addText('📦 Material Plan',margin,margin+12,13,true,[21,96,168]);
-  hline(margin+18);
-
-  function addTable(rows,rate,startY){
-    const colW=isEd?[28,52,140,64,64,64,64,40,64,60]:[28,52,160,70,70,70,70,44];
-    const headers=isEd?['No','Item','Description','Pl.Start','Pl.Finish','Ac.Start','Ac.Finish','Act%','Budget','Claim']:['No','Item','Description','Pl.Start','Pl.Finish','Ac.Start','Ac.Finish','Act%'];
-    const rowH=16;
-    let y=startY;
-
-    function drawHeaders(yy){
-      pdf.setFillColor(232,237,242);
-      pdf.rect(margin,yy,contentW,rowH,'F');
-      let x=margin;
-      headers.forEach((h,i)=>{
-        pdf.setFontSize(8);pdf.setFont('helvetica','bold');pdf.setTextColor(51,51,51);
-        pdf.text(h,x+2,yy+10);x+=colW[i];
-      });
-      pdf.setDrawColor(187,187,187);pdf.rect(margin,yy,contentW,rowH,'S');
-      return yy+rowH;
-    }
-
-    y=drawHeaders(y);
-    let totBg=0,totClaim=0;
-
-    rows.forEach((r,ri)=>{
-      if(y+rowH>pH-margin){pdf.addPage();y=margin;y=drawHeaders(y);}
-      const isHdr=(!r.bg||r.bg==0)&&!r.ps&&!r.pe;
-      if(isHdr){
-        pdf.setFillColor(232,240,251);
-        pdf.rect(margin,y,contentW,rowH,'F');
-      } else if(ri%2===0){
-        pdf.setFillColor(247,249,251);
-        pdf.rect(margin,y,contentW,rowH,'F');
-      }
-      const claim=isHdr?0:(r.bg||0)*(r.pct||0)/100*rate;
-      totBg+=(+r.bg||0);totClaim+=claim;
-      const vals=isEd
-        ?[r.no||'',r.itemNo||'',r.desc||'',r.ps||'',r.pe||'',r.as||r.ps||'',r.ae||r.pe||'',isHdr?'':(r.pct||0).toFixed(1)+'%',isHdr?'':parseInt(r.bg||0).toLocaleString(),isHdr?'':parseInt(claim).toLocaleString()]
-        :[r.no||'',r.itemNo||'',r.desc||'',r.ps||'',r.pe||'',r.as||r.ps||'',r.ae||r.pe||'',isHdr?'':(r.pct||0).toFixed(1)+'%'];
-      let x=margin;
-      vals.forEach((v,vi)=>{
-        pdf.setFontSize(7.5);
-        pdf.setFont('helvetica',isHdr?'bold':'normal');
-        pdf.setTextColor(isHdr?21:30,isHdr?96:30,isHdr?168:46);
-        const maxW=colW[vi]-4;
-        const txt=pdf.splitTextToSize(String(v),maxW)[0]||'';
-        pdf.text(txt,x+2,y+10);
-        x+=colW[vi];
-      });
-      pdf.setDrawColor(230,230,230);pdf.rect(margin,y,contentW,rowH,'S');
-      y+=rowH;
-    });
-
-    // Total row
-    if(isEd&&y+rowH<pH-margin){
-      pdf.setFillColor(232,240,251);
-      pdf.rect(margin,y,contentW,rowH,'F');
-      pdf.setFontSize(8);pdf.setFont('helvetica','bold');
-      let x=margin;
-      const totVals=['','','Total','','','','','',totBg.toLocaleString('en-US',{minimumFractionDigits:2}),totClaim.toLocaleString('en-US',{minimumFractionDigits:2})];
-      totVals.forEach((v,vi)=>{
-        pdf.setTextColor(vi===8?21:vi===9?21:30,vi===8?96:vi===9?128:30,vi===8?168:vi===9?61:46);
-        pdf.text(String(v),x+2,y+10);x+=colW[vi];
-      });
-      pdf.setDrawColor(21,96,168);pdf.rect(margin,y,contentW,rowH,'S');
-    }
-    return y+rowH+4;
-  }
-
-  addTable(D.material.rows,rate_m,margin+24);
-
-  // ── INSTALLATION PLAN TABLE ──
-  pdf.addPage();
-  addText('🔧 Installation Plan',margin,margin+12,13,true,[217,119,6]);
-  hline(margin+18);
-  addTable(D.installation.rows,rate_i,margin+24);
-
-  // ── BILLING PAGE ──
-  if(isEd){
-    pdf.addPage();
-    addText('💰 Billing Summary',margin,margin+12,13,true,[21,96,168]);
-    hline(margin+18);
-    const mTot=D.material.rows.reduce((s,r)=>s+(+r.bg||0),0);
-    const iTot=D.installation.rows.reduce((s,r)=>s+(+r.bg||0),0);
-    const mClaim=D.material.rows.reduce((a,r)=>a+((+r.bg||0)*(+r.pct||0)/100*rate_m),0);
-    const iClaim=D.installation.rows.reduce((a,r)=>a+((+r.bg||0)*(+r.pct||0)/100*rate_i),0);
-    const mPrev=D.material.prevPay||0,iPrev=D.installation.prevPay||0;
-    const mNext=Math.max(0,mClaim-mPrev),iNext=Math.max(0,iClaim-iPrev);
-    let y=margin+28;
-    const brow=(label,val,bold,color)=>{
-      addText(label,margin+4,y+10,10,false,[80,80,80]);
-      pdf.setFontSize(10);pdf.setFont('helvetica',bold?'bold':'normal');
-      if(color)pdf.setTextColor(...color);else pdf.setTextColor(30,30,46);
-      pdf.text(val,pW-margin-4,y+10,{align:'right'});
-      pdf.setDrawColor(240,240,240);pdf.line(margin,y+rowH,pW-margin,y+rowH);
-      y+=18;
+async function loadData() {
+  try {
+    const r = await fetch(RAW + '?t=' + Date.now());
+    if (!r.ok) { initD(); renderAll(); return; }
+    const d = await r.json();
+    const migrate = (arr, totalBase) => {
+        arr.forEach(r => {
+            if (r.wt !== undefined && r.bg === undefined) {
+                r.bg = Math.round((r.wt / 100) * totalBase);
+                delete r.wt;
+            }
+        });
     };
-    addText('📦 Material & Equipment (30/60/10)',margin,y,11,true,[21,96,168]);
-    y+=16;
-    brow('Total Contract Budget',fmtN(mTot)+' THB',true,[21,96,168]);
-    brow('Down Payment (30%)',fmtN(mTot*0.30));
-    brow('Progress Pool (60%)',fmtN(mTot*0.60));
-    brow('After Cold Test (10%)',fmtN(mTot*0.10));
-    brow(`Current Claimable (${calcP(D.material.rows)}% × ${fmtN(mTot*0.60)})`,fmtN(mClaim)+' THB',true,[21,128,61]);
-    brow('Previous Payment Received',fmtN(mPrev),false,[150,80,0]);
-    pdf.setFillColor(255,247,230);pdf.rect(margin,y,contentW,18,'F');
-    addText('Next Claimable (Material)',margin+4,y+12,11,true,[146,64,14]);
-    pdf.setFontSize(12);pdf.setFont('helvetica','bold');pdf.setTextColor(217,119,6);
-    pdf.text(fmtN(mNext)+' THB',pW-margin-4,y+12,{align:'right'});
-    y+=28;
-    addText('🔧 Design & Installation (20/65/7.5/7.5)',margin,y,11,true,[217,119,6]);
-    y+=16;
-    brow('Total Contract Budget',fmtN(iTot)+' THB',true,[217,119,6]);
-    brow('Down Payment (20%)',fmtN(iTot*0.20));
-    brow('Progress Pool (65%)',fmtN(iTot*0.65));
-    brow('Punch List (7.5%)',fmtN(iTot*0.075));
-    brow('After Commissioning (7.5%)',fmtN(iTot*0.075));
-    brow(`Current Claimable (${calcP(D.installation.rows)}% × ${fmtN(iTot*0.65)})`,fmtN(iClaim)+' THB',true,[21,128,61]);
-    brow('Previous Payment Received',fmtN(iPrev),false,[150,80,0]);
-    pdf.setFillColor(255,247,230);pdf.rect(margin,y,contentW,18,'F');
-    addText('Next Claimable (Installation)',margin+4,y+12,11,true,[146,64,14]);
-    pdf.setFontSize(12);pdf.setFont('helvetica','bold');pdf.setTextColor(217,119,6);
-    pdf.text(fmtN(iNext)+' THB',pW-margin-4,y+12,{align:'right'});
+    if (d.material) { 
+        D.material.rows = d.material.rows || []; 
+        migrate(D.material.rows, 2150000);
+        D.material.snap = d.material.snap || {}; 
+    }
+    if (d.installation) { 
+        D.installation.rows = d.installation.rows || []; 
+        migrate(D.installation.rows, 3100000); 
+        D.installation.snap = d.installation.snap || {}; 
+    }
+    toast('✓ Data loaded');
+  } catch(e) { 
+    initD(); 
   }
-
-  pdf.save('TSG_Project_Report.pdf');
-  toast('✓ PDF Downloaded');
-  }catch(e){console.error(e);toast('✗ PDF Error: '+e.message,true);}
+  renderAll();
 }
 
-function restoreSession(){
-  if(sessionStorage.getItem('isEd')==='true'){
-    isEd=true;
-    $('uinfo').textContent=sessionStorage.getItem('email')||'Admin';
-    $('gBtn').style.display='none';
-    $('pinBtn').style.display='none';
-    $('soBtn').style.display='inline-block';
-    document.body.classList.add('ed');
-    showEdUI();setupPaste();
+async function saveData() {
+  let pat = sessionStorage.getItem('ghPAT');
+  if (!pat) { 
+      patAction = 'save';
+      $('patMo').classList.add('on'); 
+      return; 
   }
+  if (!sha) {
+    try {
+      const check = await fetch(API, { headers: { Authorization: `token ${pat}` } });
+      if (check.ok) { const j = await check.json(); sha = j.sha; }
+    } catch(e) { console.warn("Could not pre-fetch SHA"); }
+  }
+  const json = JSON.stringify(D, null, 2);
+  const bytes = new TextEncoder().encode(json);
+  let bin = ''; bytes.forEach(b => bin += String.fromCharCode(b));
+  const content = btoa(bin);
+  const body = { message: `Update TSG Plan data`, content };
+  if (sha) body.sha = sha;
+  try {
+    const r = await fetch(API, {
+      method: 'PUT',
+      headers: { Authorization: `token ${pat}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!r.ok) { const e = await r.json(); toast('✗ ' + e.message, true); return; }
+    const j = await r.json(); 
+    sha = j.content.sha; 
+    toast('✓ Saved');
+  } catch(e) { toast('✗ Error', true); }
 }
 
-// ── NAVIGATION ──
+function confirmPAT(){
+    const v=$('patIn').value.trim();
+    if(!v) return;
+    sessionStorage.setItem('ghPAT',v);
+    $('patMo').classList.remove('on');
+    if (patAction === 'save') { saveData(); } else { loadData(); }
+}
+
 function showPg(id){document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));$(id).classList.add('on');}
-
 function goPlan(p){
   plan=p;
   sessionStorage.setItem('lastPlan',p);
   sessionStorage.removeItem('lastPage');
   $('ptit').textContent=p==='material'?'📦 Material Plan':'🔧 Installation Plan';
+  $('rwn').value=D[p].rows.length;
   document.querySelectorAll('.tnb').forEach(b=>b.classList.remove('on'));
   $(p==='material'?'nbM':'nbI').classList.add('on');
+  if(isEd)showEdUI();
   showPg('ppg');
-  renderPlan();
-  setTimeout(renderSC_plan,300);
+  renderTable();
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{renderGantt();renderSC();}));
 }
-
 function goHome(){
   plan=null;
   sessionStorage.removeItem('lastPlan');
   document.querySelectorAll('.tnb').forEach(b=>b.classList.remove('on'));
   showPg('hpg');
-  requestAnimationFrame(renderHome);
+  requestAnimationFrame(()=>requestAnimationFrame(renderHome));
 }
-
 function goBilling(){
   plan=null;
   sessionStorage.setItem('lastPage','billing');
@@ -898,506 +1165,182 @@ function goBilling(){
   updateBilling();
 }
 
+function formatTHB(num) { return num.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}); }
+
+function updateBilling() {
+  const mTot = D.material.rows.reduce((s,r)=>s+(+r.bg||0),0);
+  const iTot = D.installation.rows.reduce((s,r)=>s+(+r.bg||0),0);
+  const mPct = calcP(D.material.rows);
+  const iPct = calcP(D.installation.rows);
+
+  // DATE + PROGRESS HEADER
+  const now = new Date();
+  $('bil-asof').textContent = 'As of: ' + now.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
+  $('bil-summary').innerHTML = '📦 Mat: <b style="color:#1560a8">' + mPct + '%</b> &nbsp;|&nbsp; 🔧 Inst: <b style="color:#d97706">' + iPct + '%</b>';
+
+  $('bil-m-pct').textContent = mPct + '% Progress';
+  $('bil-i-pct').textContent = iPct + '% Progress';
+
+  const mClaim = D.material.rows.reduce((a,r)=>a+((+r.bg||0) * (+r.pct||0)/100 * 0.60), 0);
+  const iClaim = D.installation.rows.reduce((a,r)=>a+((+r.bg||0) * (+r.pct||0)/100 * 0.65), 0);
+
+  $('bil-m-tot').textContent = formatTHB(mTot) + ' THB';
+  $('bil-m-down').textContent = formatTHB(mTot * 0.30);
+  $('bil-m-pool').textContent = formatTHB(mTot * 0.60);
+  $('bil-m-ret').textContent  = formatTHB(mTot * 0.10);
+  $('bil-m-claim').textContent = formatTHB(mClaim) + ' THB';
+  $('bil-m-formula').textContent = mPct + '% × ' + formatTHB(mTot * 0.60);
+
+  $('bil-i-tot').textContent = formatTHB(iTot) + ' THB';
+  $('bil-i-down').textContent = formatTHB(iTot * 0.20);
+  $('bil-i-pool').textContent = formatTHB(iTot * 0.65);
+  $('bil-i-ret1').textContent = formatTHB(iTot * 0.075);
+  $('bil-i-ret2').textContent = formatTHB(iTot * 0.075);
+  $('bil-i-claim').textContent = formatTHB(iClaim) + ' THB';
+  $('bil-i-formula').textContent = iPct + '% × ' + formatTHB(iTot * 0.65);
+}
+
+function applyRows(){
+  if(!isEd)return;
+  const n=parseInt($('rwn').value)||16;
+  const rows=D[plan].rows;
+  while(rows.length<n)rows.push({no:'',itemNo:'',desc:'',ps:'',pe:'',bg:0,as:'',ae:'',pct:0});
+  if(rows.length>n)rows.splice(n);
+  renderTable(); recordSnap(); renderGantt(); renderSC();
+}
 function resetRows(){
-  if(!isEd||!confirm('Reset to Default Template? ALL DATA WILL BE LOST.'))return;
-  D[plan].rows=[];initD();
-  renderPlan();toast('✓ Template loaded');
-}
-
-function renderAll(){
+  if(!isEd||!confirm('Reset to Default Template? ALL CURRENT DATA WILL BE LOST.'))return;
+  D[plan].rows = [];
   initD();
-  const lb=sessionStorage.getItem('lastPage');
-  const lp=sessionStorage.getItem('lastPlan');
-  if(lb==='billing')requestAnimationFrame(goBilling);
-  else if(lp)requestAnimationFrame(()=>goPlan(lp));
-  else{
-    showPg('hpg');
-    renderHome();
-    setTimeout(renderHome, 300);
-  }
+  $('rwn').value=D[plan].rows.length;
+  renderTable(); recordSnap(); renderGantt(); renderSC(); toast('✓ Template Loaded');
 }
 
-// ── SVG HELPERS ──
-const SVG_NS='http://www.w3.org/2000/svg';
-function svgEl(tag,attrs={}){
-  const e=document.createElementNS(SVG_NS,tag);
-  Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));
-  return e;
-}
-function svgText(t,x,y,attrs={}){
-  const e=svgEl('text',{x,y,...attrs});e.textContent=t;return e;
+function formatInt(num) {
+  if (!num) return "";
+  return parseInt(num).toLocaleString('en-US');
 }
 
-// ── S-CURVE SVG ──
-function buildSCData(rows,snapData){
-  const {start:ps,days:td}=getRange(rows);
-  const tw=rows.reduce((s,r)=>s+(+r.bg||0),0);
-  const pl=new Array(td).fill(0);
-  const ac=new Array(td).fill(0);
-  const today=new Date();
-  const todD=Math.min(td-1,Math.max(0,dayDiff(ps,today)));
-  if(tw>0){
-    rows.forEach(r=>{
-      const w=(+r.bg||0)/tw;if(!w)return;
-      const s=pd(r.ps),e=pd(r.pe);if(!s||!e)return;
-      const sd=Math.max(0,dayDiff(ps,s)),ed=Math.min(td-1,dayDiff(ps,e));
-      const sp=ed-sd+1;if(sp<=0)return;
-      for(let d=sd;d<=ed;d++)pl[d]+=w/sp;
-    });
-    for(let d=1;d<td;d++)pl[d]+=pl[d-1];
-  }
-  const snaps=JSON.parse(JSON.stringify(snapData||{}));
-  const tStr=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
-  snaps[tStr]=tw>0?calcP(rows):'0.00';
-  const snapDates=Object.keys(snaps).sort((a,b)=>new Date(a)-new Date(b));
-  if(snapDates.length>0){
-    let pts=snapDates.map(ds=>({day:dayDiff(ps,new Date(ds)),val:snaps[ds]/100})).sort((a,b)=>a.day-b.day);
-    pts=pts.filter((v,i,a)=>i===0||v.day!==a[i-1].day);
-    if(pts.length>0){
-      let pi=0;
-      for(let d=0;d<=todD;d++){
-        if(d<=pts[0].day){ac[d]=pts[0].day<=0?pts[0].val:(d/pts[0].day)*pts[0].val;}
-        else if(pi<pts.length-1&&d>pts[pi+1].day){pi--;d--;}
-        else if(pi<pts.length-1){const p1=pts[pi],p2=pts[pi+1];ac[d]=p1.val+(d-p1.day)/(p2.day-p1.day)*(p2.val-p1.val);}
-        else ac[d]=pts[pts.length-1].val;
-      }
-    }
-  }
-  return{pl,ac,td,ps};
-}
-
-function drawSC(cvElem,rows,snapData,planColor,actColor,title){
-  const cv=cvElem;
-  if(!cv)return;
-  // Use window width - most reliable approach
-  const W=Math.max(window.innerWidth-40,300);
-  const H=220;
-  cv.width=W; cv.height=H;
-  cv.style.width='100%'; cv.style.height=H+'px';
-  const ctx=cv.getContext('2d');
-  ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,H);
-  const PL=44,PR=20,PT=36,PB=28;
-  const pw=W-PL-PR, ph=H-PT-PB;
-  const {pl,ac,td,ps:pst_}=buildSCData(rows,snapData);
-  const {start:pst,end:pen}=getRange(rows);
-  const today=new Date();
-  const todD=Math.min(td-1,Math.max(0,dayDiff(pst,today)));
-  const tw=rows.reduce((s,r)=>s+(+r.bg||0),0);
-  const prog=tw>0?calcP(rows):'0.00';
-  const FN="13px Sarabun,sans-serif";
-
-  // Title
-  ctx.fillStyle='#1a1a2e'; ctx.font='bold 12px Sarabun,sans-serif';
-  ctx.textAlign='left'; ctx.fillText(title+' (Progress = '+prog+'%)',PL,18);
-  ctx.fillStyle='#888'; ctx.font='10px Sarabun,sans-serif';
-  ctx.textAlign='right'; ctx.fillText('As of: '+today.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}),W-4,14);
-
-  // Legend
-  ctx.strokeStyle=planColor; ctx.lineWidth=2; ctx.setLineDash([]);
-  ctx.beginPath(); ctx.moveTo(PL,26); ctx.lineTo(PL+16,26); ctx.stroke();
-  ctx.fillStyle='#555'; ctx.font='10px Sarabun,sans-serif'; ctx.textAlign='left';
-  ctx.fillText('Plan',PL+20,30);
-  ctx.strokeStyle=actColor; ctx.setLineDash([6,3]);
-  ctx.beginPath(); ctx.moveTo(PL+52,26); ctx.lineTo(PL+68,26); ctx.stroke();
-  ctx.setLineDash([]); ctx.fillText('Actual',PL+72,30);
-
-  // Grid
-  [0,20,40,60,80,100].forEach(p=>{
-    const gy=PT+ph-(p/100)*ph;
-    ctx.strokeStyle=p===0||p===100?'#bbb':'#eee'; ctx.lineWidth=p===0||p===100?1:0.5;
-    ctx.setLineDash(p===0||p===100?[]:[3,3]);
-    ctx.beginPath(); ctx.moveTo(PL,gy); ctx.lineTo(PL+pw,gy); ctx.stroke();
-    ctx.setLineDash([]); ctx.fillStyle='#888'; ctx.font='10px Sarabun,sans-serif';
-    ctx.textAlign='right'; ctx.fillText(p+'%',PL-3,gy+3.5);
-  });
-
-  // Month lines + labels
-  let mc=new Date(pst.getFullYear(),pst.getMonth(),1);
-  while(mc<=pen){
-    const gx=PL+(dayDiff(pst,mc)/td)*pw;
-    if(gx>PL){
-      ctx.strokeStyle='#eee'; ctx.lineWidth=0.5; ctx.setLineDash([2,3]);
-      ctx.beginPath(); ctx.moveTo(gx,PT); ctx.lineTo(gx,PT+ph); ctx.stroke(); ctx.setLineDash([]);
-    }
-    ctx.fillStyle='#888'; ctx.font='10px Sarabun,sans-serif'; ctx.textAlign='center';
-    ctx.fillText(mc.toLocaleString('default',{month:'short'}),gx,PT+ph+14);
-    mc=new Date(mc.getFullYear(),mc.getMonth()+1,1);
-  }
-
-  // Axes
-  ctx.strokeStyle='#888'; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(PL,PT); ctx.lineTo(PL,PT+ph); ctx.lineTo(PL+pw,PT+ph); ctx.stroke();
-
-  // Plan area
-  const step=Math.max(1,Math.floor(td/300));
-  const pts=[], apts=[];
-  for(let d=0;d<td;d+=step){
-    pts.push([PL+(d/td)*pw, PT+ph-pl[d]*ph]);
-    if(d<=todD) apts.push([PL+(d/td)*pw, PT+ph-ac[d]*ph]);
-  }
-  if(pts.length){
-    ctx.beginPath(); ctx.moveTo(pts[0][0],PT+ph);
-    pts.forEach(([x,y])=>ctx.lineTo(x,y));
-    ctx.lineTo(pts[pts.length-1][0],PT+ph); ctx.closePath();
-    ctx.fillStyle=planColor+'22'; ctx.fill();
-    ctx.beginPath(); ctx.moveTo(pts[0][0],pts[0][1]);
-    pts.forEach(([x,y])=>ctx.lineTo(x,y));
-    ctx.strokeStyle=planColor; ctx.lineWidth=2; ctx.setLineDash([]); ctx.stroke();
-    ctx.fillStyle=planColor; ctx.font='bold 10px Sarabun,sans-serif'; ctx.textAlign='left';
-    const lp=pts[pts.length-1]; ctx.fillText((pl[Math.min(td-1,(pts.length-1)*step)]*100).toFixed(2)+'%',lp[0]+3,lp[1]+3);
-  }
-  if(apts.length){
-    ctx.beginPath(); ctx.moveTo(apts[0][0],apts[0][1]);
-    apts.forEach(([x,y])=>ctx.lineTo(x,y));
-    ctx.strokeStyle=actColor; ctx.lineWidth=2; ctx.setLineDash([6,3]); ctx.stroke(); ctx.setLineDash([]);
-    ctx.fillStyle=actColor; ctx.font='bold 10px Sarabun,sans-serif'; ctx.textAlign='left';
-    const la=apts[apts.length-1]; ctx.fillText((ac[todD]*100).toFixed(2)+'%',la[0]+3,la[1]+3);
-  }
-
-  // Today line
-  if(today>=pst&&today<=pen){
-    const tx=PL+(dayDiff(pst,today)/td)*pw;
-    ctx.strokeStyle='#dc2626'; ctx.lineWidth=1; ctx.setLineDash([3,3]);
-    ctx.beginPath(); ctx.moveTo(tx,PT); ctx.lineTo(tx,PT+ph); ctx.stroke(); ctx.setLineDash([]);
-  }
-}
-
-function svgEl_(tag,attrs){
-  const e=document.createElementNS(SVG_NS,tag);
-  Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));
-  return e;
-}
-
-// ── GANTT SVG (inline per row) ──
-let _ganttRange=null;
-function getGanttRange(){
-  if(!plan)return null;
-  return getRange(D[plan].rows);
-}
-
-function buildGanttSVG(r,isHdr,W){
-  const range=_ganttRange;
-  if(!range||W<10)return'';
-  const {start:ps,days:td}=range;
-  const H=32;
-  const x=d=>Math.max(0,Math.min(W,(dayDiff(ps,d)/td)*W));
-
-  let content='';
-
-  if(isHdr){
-    content=`<rect width="${W}" height="${H}" fill="#dce8f8"/>`;
-  } else {
-    const s=pd(r.ps),e=pd(r.pe);
-    if(s&&e){
-      const bx=x(s),ex=x(e),bw=Math.max(ex-bx,2);
-      // Plan bar
-      content+=`<rect x="${bx}" y="6" width="${bw}" height="10" rx="2" fill="#1560a8"/>`;
-      // Duration text
-      if(bw>30){
-        content+=`<text x="${bx+bw/2}" y="14" font-size="9" fill="#fff" text-anchor="middle" font-family="Sarabun,sans-serif">${dayDiff(s,e)+1}d</text>`;
-      }
-      // Start/end date labels
-      const sd=`${String(s.getDate()).padStart(2,'0')}/${String(s.getMonth()+1).padStart(2,'0')}`;
-      const ed2=`${String(e.getDate()).padStart(2,'0')}/${String(e.getMonth()+1).padStart(2,'0')}`;
-      content+=`<text x="${Math.max(bx-2,0)}" y="22" font-size="8" fill="#555" text-anchor="end" font-family="Sarabun,sans-serif">${sd}</text>`;
-      content+=`<text x="${Math.min(bx+bw+2,W)}" y="22" font-size="8" fill="#555" font-family="Sarabun,sans-serif">${ed2}</text>`;
-
-      // Actual bar
-      const as=pd(r.as||r.ps),ae=pd(r.ae||r.pe);
-      if(as&&ae){
-        const ax=x(as),aex=x(ae),aw=Math.max(aex-ax,2);
-        content+=`<rect x="${ax}" y="18" width="${aw}" height="7" rx="2" fill="#f59e0b" opacity="0.9"/>`;
-        const pct=+r.pct||0;
-        if(pct>0){
-          const px2=ax+(pct/100)*aw;
-          content+=`<line x1="${ax}" y1="21.5" x2="${px2}" y2="21.5" stroke="#1a1a2e" stroke-width="2.5" stroke-linecap="round"/>`;
-          content+=`<text x="${Math.max(ax-2,0)}" y="17" font-size="8" fill="#1a1a2e" text-anchor="end" font-family="Sarabun,sans-serif">${pct.toFixed(1)}%</text>`;
-        }
-      }
-    }
-  }
-
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${content}</svg>`;
-}
-
-function buildMonthsSVG(W){
-  const range=_ganttRange;
-  if(!range||W<10)return'';
-  const {start:ps,end:pe,days:td}=range;
-  const H=32;
-  let content=`<rect width="${W}" height="${H}" fill="#e8edf2"/>`;
-  let mc=new Date(ps.getFullYear(),ps.getMonth(),1);
-  let mi=0;
-  while(mc<=pe){
-    const x1=Math.max(0,(dayDiff(ps,mc)/td)*W);
-    const next=new Date(mc.getFullYear(),mc.getMonth()+1,1);
-    const x2=Math.min(W,(dayDiff(ps,next)/td)*W);
-    content+=`<rect x="${x1}" y="0" width="${x2-x1}" height="${H}" fill="${mi%2?'#1050a0':'#1560a8'}"/>`;
-    const label=mc.toLocaleString('default',{month:'short'})+"'"+String(mc.getFullYear()).slice(2);
-    content+=`<text x="${(x1+x2)/2}" y="19" font-size="11" fill="#fff" text-anchor="middle" font-family="Sarabun,sans-serif" font-weight="700">${label}</text>`;
-    mc=next; mi++;
-  }
-  // Today line
-  const today=new Date();
-  if(today>=ps&&today<=pe){
-    const tx=(dayDiff(ps,today)/td)*W;
-    content+=`<line x1="${tx}" y1="0" x2="${tx}" y2="${H}" stroke="#dc2626" stroke-width="2" stroke-dasharray="4,2"/>`;
-    content+=`<text x="${tx}" y="11" font-size="9" fill="#fff" text-anchor="middle" font-family="Sarabun,sans-serif" font-weight="700">TODAY</text>`;
-  }
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${content}</svg>`;
-}
-
-// ── RENDER PLAN (TABLE + GANTT COMBINED) ──
-function renderPlan(){
+function renderTable(){
   if(!plan)return;
-  _ganttRange=getGanttRange();
-  renderHeader();
-  renderRows();
-  renderFooter();
-  renderSC_plan();
-  setTimeout(renderSC_plan, 300); // redraw after layout settles
-}
-
-function getTableW(){
-  // Fixed table width (left side)
-  let w=36+68+180+82+82+82+82+54; // no+item+desc+ps+pe+as+ae+pct
-  if(isEd)w+=80+80+34; // bg+claim+act
-  return w;
-}
-
-function getGanttW(){
-  const cont=$('gtWrap');
-  if(!cont)return 400;
-  return Math.max(cont.offsetWidth-getTableW()-8,200);
-}
-
-function renderHeader(){
-  const hdr=$('gtHeader');
-  hdr.innerHTML='';
-  const cols=[
-    {cls:'c-no',label:'No.'},
-    {cls:'c-item',label:'Item'},
-    {cls:'c-desc',label:'Description'},
-    {cls:'c-ps',label:'Plan Start'},
-    {cls:'c-pe',label:'Plan Finish'},
-    {cls:'c-as',label:'Act Start'},
-    {cls:'c-ae',label:'Act Finish'},
-    {cls:'c-pct',label:'Act%'},
-  ];
-  if(isEd){
-    cols.push({cls:'c-bg',label:'Budget'});
-    cols.push({cls:'c-claim',label:'Claimable'});
-    cols.push({cls:'c-act',label:''});
-  }
-  cols.forEach(c=>{
-    const th=document.createElement('div');
-    th.className=`th ${c.cls}`;
-    th.textContent=c.label;
-    hdr.appendChild(th);
-  });
-  // Gantt header
-  const gth=document.createElement('div');
-  gth.className='th c-gantt';
-  gth.style.cssText='padding:0;overflow:hidden;';
-  const gW=getGanttW();
-  gth.innerHTML=buildMonthsSVG(gW);
-  hdr.appendChild(gth);
-}
-
-function renderRows(){
-  const body=$('gtBody');
-  body.innerHTML='';
-  const rows=D[plan].rows;
-  const rate=plan==='material'?0.60:0.65;
-  const ro=!isEd;
-  const gW=getGanttW();
-
+  const rows=D[plan].rows,ro=!isEd;
+  const tb=$('tb');tb.innerHTML='';
+  const rate = plan === 'material' ? 0.60 : 0.65;
   rows.forEach((r,i)=>{
-    const isHdr=(!r.bg||r.bg==0)&&!r.ps&&!r.pe;
-    const row=document.createElement('div');
-    row.className='gt-row'+(isHdr?' hdr-row':'');
-
-    const mkTd=(cls,inner)=>{
-      const d=document.createElement('div');
-      d.className=`td ${cls}`;
-      d.innerHTML=inner;
-      return d;
-    };
-
-    const inp=(val,cls2,roFlag,onChange,type='text',extra='')=>{
-      const ro2=roFlag?'readonly':'';
-      return `<input class="td-input${cls2?' '+cls2:''}" value="${val}" ${ro2} type="${type}" ${extra} onchange="${onChange}">`;
-    };
-
-    row.appendChild(mkTd('c-no',inp(r.no||'','',ro||isHdr,`upField(${i},'no',this.value)`)));
-    row.appendChild(mkTd('c-item',inp(r.itemNo||'','',ro||isHdr,`upField(${i},'itemNo',this.value)`)));
-    row.appendChild(mkTd('c-desc',inp(r.desc||'','',ro||isHdr,`upField(${i},'desc',this.value)`)));
-    row.appendChild(mkTd('c-ps',inp(toISO(r.ps),'',ro||isHdr,`upDate(${i},'ps',this.value)`,'date')));
-    row.appendChild(mkTd('c-pe',inp(toISO(r.pe),'',ro||isHdr,`upDate(${i},'pe',this.value)`,'date')));
-    row.appendChild(mkTd('c-as',inp(toISO(r.as||r.ps),'',ro||isHdr,`upDate(${i},'as',this.value)`,'date')));
-    row.appendChild(mkTd('c-ae',inp(toISO(r.ae||r.pe),'',ro||isHdr,`upDate(${i},'ae',this.value)`,'date')));
-    row.appendChild(mkTd('c-pct',inp(isHdr?'':Number(r.pct||0).toFixed(2),'pct-input',ro||isHdr,`upField(${i},'pct',nn(this.value))`)));
-
-    if(isEd){
-      const claimVal=isHdr?'':parseInt((r.bg||0)*(r.pct||0)/100*rate).toLocaleString('en-US');
-      row.appendChild(mkTd('c-bg',inp(isHdr?'':fmtInt(r.bg),'',isHdr,`upField(${i},'bg',nn(this.value))`)));
-      row.appendChild(mkTd('c-claim',`<input class="td-input" value="${claimVal}" readonly style="color:#15803d;font-weight:700;text-align:right">`));
-      const actd=document.createElement('div');
-      actd.className='td c-act';
-      actd.innerHTML=`<div class="row-btns"><button class="rbtn rbtn-add" onclick="insertRow(${i})">+</button><button class="rbtn rbtn-del" onclick="deleteRow(${i})">✕</button></div>`;
-      row.appendChild(actd);
-    }
-
-    // Gantt cell
-    const gd=document.createElement('div');
-    gd.className='td c-gantt';
-    gd.style.cssText='padding:0;overflow:hidden;';
-    gd.innerHTML=buildGanttSVG(r,isHdr,gW);
-    row.appendChild(gd);
-
-    body.appendChild(row);
+    const isHdr = (!r.bg || r.bg == 0) && !r.ps && !r.pe;
+    const dateType = isHdr ? 'text' : 'date';
+    const tr=document.createElement('tr');
+    if(isHdr) tr.className = 'hdr';
+    const bgTd = isEd ? `<td><input class="ci r" value="${isHdr ? '' : formatInt(r.bg)}" ${ro||isHdr?'readonly':''} onchange="up(${i},'bg',nn(this.value))"></td>` : '';
+    const claimVal = isHdr ? '' : formatInt((r.bg||0) * (r.pct||0)/100 * rate);
+    const claimTd = isEd ? `<td><input class="ci r" value="${claimVal}" readonly style="color:#2a8a2a; font-weight:700;"></td>` : '';
+    const actTd = isEd ? `<td style="white-space:nowrap;padding:1px 2px;border:1px solid #ddd;width:32px;text-align:center">
+      <button onclick="insertRow(${i})" style="background:#2a8a2a;color:#fff;border:none;border-radius:3px;width:14px;height:14px;cursor:pointer;font-size:10px;line-height:1;padding:0">+</button>
+      <button onclick="deleteRow(${i})" style="background:#c00;color:#fff;border:none;border-radius:3px;width:14px;height:14px;cursor:pointer;font-size:10px;line-height:1;padding:0">✕</button>
+    </td>` : '';
+    tr.innerHTML=`
+      <td><input class="ci r" value="${r.no}" ${ro?'readonly':''} onchange="up(${i},'no',this.value)"></td>
+      <td><input class="ci" value="${r.itemNo||''}" ${ro?'readonly':''} onchange="up(${i},'itemNo',this.value)"></td>
+      <td><input class="ci" value="${r.desc||''}" ${ro?'readonly':''} onchange="up(${i},'desc',this.value)"></td>
+      <td><input class="ci" type="${dateType}" value="${toI(r.ps)}" ${ro||isHdr?'readonly':''} onchange="upd(${i},'ps',frI(this.value))"></td>
+      <td><input class="ci" type="${dateType}" value="${toI(r.pe)}" ${ro||isHdr?'readonly':''} onchange="upd(${i},'pe',frI(this.value))"></td>
+      ${bgTd}
+      <td><input class="ci" type="${dateType}" value="${toI(r.as||r.ps)}" ${ro||isHdr?'readonly':''} onchange="up(${i},'as',frI(this.value))"></td>
+      <td><input class="ci" type="${dateType}" value="${toI(r.ae||r.pe)}" ${ro||isHdr?'readonly':''} onchange="up(${i},'ae',frI(this.value))"></td>
+      <td><input class="ci r" value="${isHdr ? '' : Number(r.pct||0).toFixed(2)}" ${ro||isHdr?'readonly':''} onchange="up(${i},'pct',nn(this.value))"></td>
+      ${claimTd}${actTd}`;
+    tb.appendChild(tr);
   });
-}
 
-function renderFooter(){
-  const ft=$('gtFooter');
-  if(!isEd){ft.style.display='none';return;}
-  const rows=D[plan].rows;
-  const rate=plan==='material'?0.60:0.65;
-  const totBg=rows.reduce((a,r)=>a+(+r.bg||0),0);
-  const totClaim=rows.reduce((a,r)=>a+((+r.bg||0)*(+r.pct||0)/100*rate),0);
-  ft.style.display='flex';
-  ft.innerHTML=`
-    <div class="ft c-no"></div>
-    <div class="ft c-item"></div>
-    <div class="ft c-desc" style="justify-content:flex-end;color:#333">Total</div>
-    <div class="ft c-ps"></div><div class="ft c-pe"></div>
-    <div class="ft c-as"></div><div class="ft c-ae"></div>
-    <div class="ft c-pct"></div>
-    <div class="ft c-bg" style="justify-content:flex-end;color:#1560a8">${fmtN(totBg,0)}</div>
-    <div class="ft c-claim" style="justify-content:flex-end;color:#15803d">${fmtN(totClaim,0)}</div>
-    <div class="ft c-act"></div>
-    <div class="ft c-gantt" style="color:#888;font-size:11px">Tasks in progress: ${rows.filter(r=>r.pct>0&&r.bg>0).length}</div>`;
-}
-
-function renderSC_plan(){
-  const cv=$('svgSC');
-  if(!cv||!plan)return;
-  const draw=()=>{
-    const color=plan==='material'?'#1560a8':'#d97706';
-    drawSC(cv,D[plan].rows,D[plan].snap,color,'#15803d',plan==='material'?'Material S-Curve':'Installation S-Curve');
-  };
-  draw();
-  setTimeout(draw,150);
-}
-
-function renderHome(){
-  const mp=calcP(D.material.rows),ip=calcP(D.installation.rows);
-  $('hmp').textContent=mp+'%';$('hip').textContent=ip+'%';
-  $('hmb').style.width=mp+'%';$('hib').style.width=ip+'%';
-  const drawHome=()=>{
-    drawSC($('svgMatSC'),D.material.rows,D.material.snap,'#1560a8','#15803d','Material S-Curve');
-    drawSC($('svgInstSC'),D.installation.rows,D.installation.snap,'#d97706','#15803d','Installation S-Curve');
-  };
-  // Draw immediately and again after delays to catch layout
-  drawHome();
-  setTimeout(drawHome,150);
-  setTimeout(drawHome,500);
-}
-
-// ── FIELD UPDATES ──
-function upField(i,k,v){
-  D[plan].rows[i][k]=v;
-  recordSnap();
-  refreshRow(i);
-  renderSC_plan();
-}
-
-function upDate(i,k,v){
-  const dv=frISO(v);
-  D[plan].rows[i][k]=dv;
-  // Auto-copy plan to actual
-  const r=D[plan].rows[i];
-  if(k==='ps'&&!r.as)r.as=dv;
-  if(k==='pe'&&!r.ae)r.ae=dv;
-  recordSnap();
-  refreshRow(i);
-  renderSC_plan();
-}
-
-function refreshRow(i){
-  // Re-render just the gantt cell and claim cell of row i
-  const body=$('gtBody');
-  const rows=body.querySelectorAll('.gt-row');
-  if(!rows[i])return;
-  const row=rows[i];
-  const gW=getGanttW();
-  const r=D[plan].rows[i];
-  const isHdr=(!r.bg||r.bg==0)&&!r.ps&&!r.pe;
-  // Update gantt cell
-  const gd=row.querySelector('.c-gantt');
-  if(gd)gd.innerHTML=buildGanttSVG(r,isHdr,gW);
-  // Update claim cell
+  // Total row (admin only)
   if(isEd){
-    const rate=plan==='material'?0.60:0.65;
-    const claimCell=row.querySelectorAll('.td')[isEd?9:7];
-    if(claimCell){
-      const inp=claimCell.querySelector('input');
-      if(inp)inp.value=isHdr?'':parseInt((r.bg||0)*(r.pct||0)/100*rate).toLocaleString('en-US');
-    }
+    const totBg = rows.reduce((a,r)=>a+(+r.bg||0),0);
+    const totClaim = rows.reduce((a,r)=>a+((+r.bg||0)*(+r.pct||0)/100*rate),0);
+    const tfoot = document.createElement('tr');
+    tfoot.style.cssText='background:#e8f0fb;border-top:2px solid #1560a8;font-weight:700;';
+    const colCount = 7; // no, itemNo, desc, ps, pe, as, ae, pct = 8 + bg + claim
+    tfoot.innerHTML=`
+      <td colspan="5" style="text-align:right;padding:4px 8px;border:1px solid #bbb;color:#333;font-size:12px;">Total</td>
+      <td style="text-align:right;padding:4px 6px;border:1px solid #bbb;color:#1560a8;font-size:12px;">${formatTHB(totBg)}</td>
+      <td colspan="3" style="border:1px solid #bbb;"></td>
+      <td style="text-align:right;padding:4px 6px;border:1px solid #bbb;color:#2a8a2a;font-size:12px;">${formatTHB(totClaim)}</td>`;
+    tb.appendChild(tfoot);
   }
-  renderFooter();
+  updWt();
 }
-
-// ── INSERT/DELETE ROWS ──
 function insertRow(i){
   if(!isEd)return;
-  const mo=document.createElement('div');
-  mo.className='mo on';
-  mo.style.zIndex='600';
-  mo.innerHTML=`<div class="ins-mo-inner">
-    <div style="font-size:14px;font-weight:700;color:#1a1a2e;margin-bottom:4px">Add Row Below</div>
-    <div style="font-size:12px;color:#888;margin-bottom:2px">Select row type:</div>
-    <div class="ins-choices">
-      <div class="ins-choice hdr-c" onclick="doInsert(${i},'hdr');this.closest('.mo').remove()">📋<br><span style='font-size:11px'>Header</span></div>
-      <div class="ins-choice task-c" onclick="doInsert(${i},'task');this.closest('.mo').remove()">📝<br><span style='font-size:11px'>Task</span></div>
+  const mo = document.createElement('div');
+  mo.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:flex;align-items:center;justify-content:center;';
+  mo.innerHTML=`<div style="background:#fff;border-radius:8px;padding:22px 26px;min-width:260px;box-shadow:0 4px 20px rgba(0,0,0,.2);font-family:Sarabun,sans-serif">
+    <div style="font-size:14px;font-weight:700;margin-bottom:14px">เพิ่มแถวแบบไหน?</div>
+    <div style="display:flex;gap:10px">
+      <button onclick="doInsert(${i},'hdr');this.closest('.ins-mo').remove()" style="flex:1;padding:10px;background:#e8f0fb;border:2px solid #1560a8;border-radius:6px;color:#1560a8;font-weight:700;font-size:13px;cursor:pointer;font-family:Sarabun,sans-serif">📋 Header</button>
+      <button onclick="doInsert(${i},'task');this.closest('.ins-mo').remove()" style="flex:1;padding:10px;background:#fff;border:2px solid #888;border-radius:6px;color:#333;font-weight:700;font-size:13px;cursor:pointer;font-family:Sarabun,sans-serif">📝 Task</button>
     </div>
-    <div style="text-align:right;margin-top:10px"><button onclick="this.closest('.mo').remove()" style="font-size:12px;background:none;border:none;color:#888;cursor:pointer;font-family:Sarabun,sans-serif">Cancel</button></div>
+    <div style="margin-top:10px;text-align:right"><button onclick="this.closest('.ins-mo').remove()" style="font-size:12px;background:none;border:none;color:#888;cursor:pointer;font-family:Sarabun,sans-serif">Cancel</button></div>
   </div>`;
-  mo.addEventListener('click',e=>{if(e.target===mo)mo.remove();});
+  mo.className='ins-mo';
   document.body.appendChild(mo);
+  mo.addEventListener('click',e=>{ if(e.target===mo) mo.remove(); });
 }
-
-function doInsert(i,type){
-  const nr=type==='hdr'
-    ?{no:'',itemNo:'',desc:'New Section',ps:'',pe:'',bg:0,as:'',ae:'',pct:0}
-    :{no:'',itemNo:'',desc:'',ps:'',pe:'',bg:0,as:'',ae:'',pct:0};
-  D[plan].rows.splice(i+1,0,nr);
-  renderPlan();
+function doInsert(i, type){
+  if(!isEd)return;
+  const newRow = type==='hdr'
+    ? {no:'',itemNo:'',desc:'New Section',ps:'',pe:'',bg:0,as:'',ae:'',pct:0}
+    : {no:'',itemNo:'',desc:'',ps:'',pe:'',bg:0,as:'',ae:'',pct:0};
+  D[plan].rows.splice(i+1,0,newRow);
+  $('rwn').value=D[plan].rows.length;
+  renderTable(); renderGantt(); renderSC();
 }
-
 function deleteRow(i){
-  if(!isEd||!confirm('Delete this row?'))return;
+  if(!isEd)return;
+  if(!confirm('Delete this row?'))return;
   D[plan].rows.splice(i,1);
-  renderPlan();
-  recordSnap();
+  $('rwn').value=D[plan].rows.length;
+  renderTable(); recordSnap(); renderGantt(); renderSC();
+}
+function up(i,k,v){
+  D[plan].rows[i][k]=v;
+  updWt();
+  recordSnap(); 
+  renderGantt();
+  renderSC();
+  if(k==='bg' || k==='ps' || k==='pe' || k==='pct') renderTable();
+}
+function upd(i,k,v){
+  D[plan].rows[i][k]=v;
+  const r=D[plan].rows[i];
+  if(k==='ps'&&!r.as)r.as=v;if(k==='pe'&&!r.ae)r.ae=v;
+  updWt();
+  recordSnap(); 
+  renderGantt();
+  renderSC();
+  renderTable();
+}
+function updWt(){
+  if(!plan)return;
+  const rows=D[plan].rows;
+  const rate = plan === 'material' ? 0.60 : 0.65;
+  const totBg = rows.reduce((a,r)=>a+(+r.bg||0),0);
+  const totClaim = rows.reduce((a,r)=>a+((+r.bg||0) * (+r.pct||0)/100 * rate),0);
+  $('wts').textContent = formatTHB(totBg) + ' THB';
+  $('tot-claim').textContent = formatTHB(totClaim) + ' THB';
+  $('acn').textContent = rows.filter(r=>r.pct>0 && r.bg>0).length;
 }
 
-// ── PASTE FROM EXCEL ──
 function setupPaste(){
   if(window._pf)document.removeEventListener('paste',window._pf);
   window._pf=e=>{
     if(!isEd||!plan)return;
-    const body=$('gtBody');if(!body)return;
-    const inputs=Array.from(body.querySelectorAll('input'));
+    const tb=$('tb');if(!tb)return;
+    const inputs=Array.from(tb.querySelectorAll('input'));
     const si=inputs.indexOf(document.activeElement);if(si<0)return;
     e.preventDefault();
     const txt=(e.clipboardData||window.clipboardData).getData('text');if(!txt)return;
     const pr=txt.trim().split(/\r?\n/).map(r=>r.split('\t'));
-    // Columns order in paste: no, itemNo, desc, ps, pe, bg, as, ae, pct
-    const colsPerRow=isEd?9:8; // inputs per row
-    const sr=Math.floor(si/colsPerRow),sc=si%colsPerRow;
     const cols=['no','itemNo','desc','ps','pe','bg','as','ae','pct'];
+    const sr=Math.floor(si/9),sc=si%9;
     const rows=D[plan].rows;
     while(rows.length<sr+pr.length)rows.push({no:'',itemNo:'',desc:'',ps:'',pe:'',bg:0,as:'',ae:'',pct:0});
     pr.forEach((row,ri)=>{
@@ -1405,100 +1348,307 @@ function setupPaste(){
       row.forEach((val,ci)=>{
         const ci2=sc+ci;if(ci2>=cols.length)return;
         const k=cols[ci2];let v=val.trim();
-        if(['ps','pe','as','ae'].includes(k))v=nd(v);
-        else if(['bg','pct'].includes(k))v=nn(v);
+        if('ps pe as ae'.split(' ').includes(k))v=nd(v);
+        else if('bg pct'.split(' ').includes(k))v=nn(v);
         rows[ri2][k]=v;
         if(k==='ps'&&!rows[ri2].as)rows[ri2].as=v;
         if(k==='pe'&&!rows[ri2].ae)rows[ri2].ae=v;
       });
     });
-    renderPlan();recordSnap();
+    $('rwn').value=rows.length;
+    renderTable(); recordSnap(); renderGantt(); renderSC();
     toast('✓ Pasted '+pr.length+' rows');
   };
   document.addEventListener('paste',window._pf);
 }
 
-// ── BILLING ──
-function updateBilling(){
-  const mTot=D.material.rows.reduce((s,r)=>s+(+r.bg||0),0);
-  const iTot=D.installation.rows.reduce((s,r)=>s+(+r.bg||0),0);
-  const mPct=calcP(D.material.rows),iPct=calcP(D.installation.rows);
-  const mClaim=D.material.rows.reduce((a,r)=>a+((+r.bg||0)*(+r.pct||0)/100*0.60),0);
-  const iClaim=D.installation.rows.reduce((a,r)=>a+((+r.bg||0)*(+r.pct||0)/100*0.65),0);
-  const mPrev=D.material.prevPay||0;
-  const iPrev=D.installation.prevPay||0;
-  const mNext=Math.max(0,mClaim-mPrev);
-  const iNext=Math.max(0,iClaim-iPrev);
-  const now=new Date();
-  $('bil-asof').textContent='As of: '+now.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
-  $('bil-summary').innerHTML=`📦 Mat: <b style="color:#1560a8">${mPct}%</b> &nbsp;|&nbsp; 🔧 Inst: <b style="color:#d97706">${iPct}%</b>`;
-  $('bil-m-pct').textContent=mPct+'%';
-  $('bil-i-pct').textContent=iPct+'%';
-  $('bil-m-tot').textContent=fmtN(mTot)+' THB';
-  $('bil-m-down').textContent=fmtN(mTot*0.30);
-  $('bil-m-pool').textContent=fmtN(mTot*0.60);
-  $('bil-m-ret').textContent=fmtN(mTot*0.10);
-  $('bil-m-claim').textContent=fmtN(mClaim)+' THB';
-  $('bil-m-formula').textContent=`${mPct}% × ${fmtN(mTot*0.60)}`;
-  $('bil-i-tot').textContent=fmtN(iTot)+' THB';
-  $('bil-i-down').textContent=fmtN(iTot*0.20);
-  $('bil-i-pool').textContent=fmtN(iTot*0.65);
-  $('bil-i-ret1').textContent=fmtN(iTot*0.075);
-  $('bil-i-ret2').textContent=fmtN(iTot*0.075);
-  $('bil-i-claim').textContent=fmtN(iClaim)+' THB';
-  $('bil-i-formula').textContent=`${iPct}% × ${fmtN(iTot*0.65)}`;
-  // Prev payment fields (admin only)
-  const showPrev=isEd;
-  ['bil-m-prev-row','bil-m-next-row','bil-i-prev-row','bil-i-next-row'].forEach(id=>{
-    const el=$(id); if(el) el.style.display=showPrev?'flex':'none';
+function renderGantt(){
+  const cv=$('cGantt'),sec=$('gsec');
+  if(!cv||!plan)return;
+  const rows=D[plan].rows;
+  const{start:ps,end:pe,days:td}=getRange(rows);
+  const today=new Date();
+  const isMob = window.innerWidth <= 768;
+  const W = isMob ? window.innerWidth : Math.max(sec.getBoundingClientRect().width || sec.offsetWidth, 600);
+  const LW = Math.floor(W * (isMob ? 0.30 : 0.35)); 
+  const HH = isMob ? 30 : 44;
+  const LH = isMob ? 22 : 32;
+  const baseRH = isMob ? 28 : 42;
+  const tmpCtx = cv.getContext('2d');
+  const maxW = LW - 10;
+  const getLines = (ctx, text, maxWidth) => {
+      if(!text) return [''];
+      const lines = []; let curr = '';
+      for(let i=0; i<text.length; i++) {
+          const c = text[i];
+          if (ctx.measureText(curr + c).width <= maxWidth) { curr += c; } 
+          else {
+              const ls = curr.lastIndexOf(' ');
+              if(ls > 0 && curr.length - ls < 15) { lines.push(curr.substring(0, ls)); curr = curr.substring(ls + 1) + c; } 
+              else { lines.push(curr); curr = c; }
+          }
+      }
+      if(curr) lines.push(curr);
+      return lines;
+  };
+  const rowData = rows.map((r, i) => {
+      const lbl = (r.itemNo ? r.itemNo + ' ' : '') + (r.desc || '');
+      const isDesc = !!r.desc;
+      const isHdr = (!r.bg || r.bg == 0) && !r.ps && !r.pe;
+      tmpCtx.font = (isDesc ? (isMob?'13px ':'17px ') : (isMob?'italic 12px ':'italic 15px ')) + FN;
+      if (isHdr) tmpCtx.font = 'bold ' + tmpCtx.font; 
+      const lines = getLines(tmpCtx, lbl || ('row '+r.no), maxW);
+      const rh = Math.max(baseRH, lines.length * (isMob?16:22) + 12);
+      return { r, lines, rh, isDesc, isHdr };
   });
-  if(isEd){
-    const mp=$('bil-m-prev'); if(mp) mp.value=mPrev;
-    const ip=$('bil-i-prev'); if(ip) ip.value=iPrev;
-    $('bil-m-next').textContent=fmtN(mNext)+' THB';
-    $('bil-i-next').textContent=fmtN(iNext)+' THB';
+  const totalRH = rowData.reduce((sum, rd) => sum + rd.rh, 0);
+  const H = HH + totalRH + LH;
+  cv.width=W;cv.height=H;cv.style.width=W+'px';cv.style.height=H+'px';
+  const ctx=cv.getContext('2d');
+  const BW=W-LW;
+  const gx=d=>LW+(d/td)*BW;
+  const dx=d=>gx(dd(ps,d));
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
+  const ms=[];let mc=new Date(ps.getFullYear(),ps.getMonth(),1);
+  while(mc<=pe){ms.push(new Date(mc));mc=new Date(mc.getFullYear(),mc.getMonth()+1,1);}
+  ms.forEach((m,i)=>{
+    const x1=Math.max(LW,dx(m)),x2=Math.min(W,dx(new Date(m.getFullYear(),m.getMonth()+1,1)));
+    ctx.fillStyle=i%2?'#1050a0':'#1560a8';ctx.fillRect(x1,0,x2-x1,HH);
+    ctx.fillStyle='#fff';ctx.font='bold '+(isMob?'13px ':'17px ')+FN;ctx.textAlign='center';
+    ctx.fillText(m.toLocaleString('default',{month:'short'})+"'"+String(m.getFullYear()).slice(2),(x1+x2)/2,HH - (isMob?8:10));
+    if(x1>LW){ctx.strokeStyle='#e0e0e0';ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(x1,HH);ctx.lineTo(x1,H-LH);ctx.stroke();}
+  });
+  ctx.fillStyle='#1560a8';ctx.fillRect(0,0,LW,HH);
+  ctx.fillStyle='#fff';ctx.font='bold '+(isMob?'13px ':'17px ')+FN;ctx.textAlign='center';ctx.fillText('Item / Description',LW/2,HH - (isMob?8:10));
+  ctx.strokeStyle='#999';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(LW,0);ctx.lineTo(LW,H);ctx.stroke();
+  let y = HH;
+  rowData.forEach((rd, i) => {
+    const r = rd.r;
+    const RH = rd.rh;
+    if (rd.isHdr) { ctx.fillStyle = '#e8f0fb'; } else { ctx.fillStyle=i%2?'#fff':'#f7f9fb'; }
+    ctx.fillRect(0,y,W,RH);
+    ctx.strokeStyle=rd.isHdr ? '#1560a8' : '#e5e5e5';
+    ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(0,y+RH);ctx.lineTo(W,y+RH);ctx.stroke();
+    ctx.fillStyle=rd.isHdr ? '#1560a8' : (rd.isDesc?'#111':'#aaa');
+    let fStyle = (rd.isDesc ? (isMob?'13px ':'17px ') : (isMob?'italic 12px ':'italic 15px ')) + FN;
+    if (rd.isHdr) fStyle = 'bold ' + fStyle;
+    ctx.font = fStyle;
+    ctx.textAlign='left';
+    rd.lines.forEach((line, li) => {
+        const lh = isMob ? 14 : 18;
+        const textStartY = y + (RH - (rd.lines.length * lh)) / 2 + (isMob?10:13);
+        ctx.fillText(line, 5, textStartY + li * lh);
+    });
+    if (!rd.isHdr) {
+        const s=pd(r.ps),e=pd(r.pe);
+        if(s && e){
+            const bx=dx(s),ex=dx(e),bw=Math.max(ex-bx,3);
+            const pH=isMob?10:14, pY=y+(RH - (isMob?20:26))/2; 
+            ctx.fillStyle='#1560a8';
+            ctx.beginPath();if(ctx.roundRect)ctx.roundRect(bx,pY,bw,pH,3);else ctx.rect(bx,pY,bw,pH);ctx.fill();
+            if(bw>26){ctx.fillStyle='#fff';ctx.font='bold '+(isMob?'11px ':'14px ')+FN;ctx.textAlign='center';ctx.fillText(dd(s,e)+1+'d',bx+bw/2,pY+(isMob?8:10));}
+            const mY=pY+(isMob?8:11);
+            ctx.fillStyle='#666';ctx.font=(isMob?'11px ':'14px ')+FN;
+            ctx.textAlign='right';ctx.fillText(fd(r.ps),bx-3,mY);
+            ctx.textAlign='left';ctx.fillText(fd(r.pe),bx+bw+3,mY);
+            const as=pd(r.as||r.ps),ae=pd(r.ae||r.pe);
+            if(as && ae){
+                const ax=dx(as),aex=dx(ae),aw=Math.max(aex-ax,3);
+                const aH=isMob?8:10, aY=pY+pH+2;
+                ctx.fillStyle='#FFD700';
+                ctx.beginPath();if(ctx.roundRect)ctx.roundRect(ax,aY,aw,aH,3);else ctx.rect(ax,aY,aw,aH);ctx.fill();
+                const pct=+r.pct||0;
+                if(pct>0){
+                    const rx=ax+(pct/100)*aw, mAY=aY+aH/2;
+                    ctx.strokeStyle='#000';ctx.lineWidth=isMob?2:3;ctx.lineCap='round';
+                    ctx.beginPath();ctx.moveTo(ax,mAY);ctx.lineTo(rx,mAY);ctx.stroke();
+                    ctx.lineCap='butt';ctx.lineWidth=1;
+                    ctx.fillStyle='#000';ctx.font='bold '+(isMob?'11px ':'14px ')+FN;ctx.textAlign='right';
+                    ctx.fillText(Number(pct).toFixed(2)+'%',ax-3,aY+(isMob?7:8));
+                }
+            }
+        }
+    }
+    y += RH;
+  });
+  {const tc=today<ps?ps:today>pe?pe:today,tx=dx(tc);
+  ctx.strokeStyle='#c00';ctx.lineWidth=2;ctx.setLineDash([5,3]);
+  ctx.beginPath();ctx.moveTo(tx,HH);ctx.lineTo(tx,H-LH);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#c00';ctx.font='bold '+(isMob?'12px ':'15px ')+FN;ctx.textAlign='center';ctx.fillText('TODAY',tx,HH+(isMob?10:13));}
+  ctx.fillStyle='#f4f6f8';ctx.fillRect(0,H-LH,W,LH);
+  ctx.strokeStyle='#ddd';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,H-LH);ctx.lineTo(W,H-LH);ctx.stroke();
+  const ly=H-LH+(isMob?7:9);
+  ctx.fillStyle='#1560a8';ctx.fillRect(LW+8,ly-5,22,9);
+  ctx.fillStyle='#333';ctx.font=(isMob?'12px ':'15px ')+FN;ctx.textAlign='left';ctx.fillText('Plan',LW+34,ly+(isMob?3:2));
+  ctx.fillStyle='#FFD700';ctx.fillRect(LW+(isMob?60:74),ly-5,22,9);ctx.strokeStyle='#aaa';ctx.lineWidth=.5;ctx.strokeRect(LW+(isMob?60:74),ly-5,22,9);
+  ctx.fillStyle='#333';ctx.fillText('Actual',LW+(isMob?86:100),ly+(isMob?3:2));
+  ctx.strokeStyle='#000';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(LW+(isMob?62:76),ly);ctx.lineTo(LW+(isMob?80:94),ly);ctx.stroke();
+  ctx.lineWidth=1;ctx.fillStyle='#333';ctx.fillText('(black=Act%)',LW+(isMob?124:148),ly+(isMob?3:2));
+}
+
+function buildC(rows, snapData){
+  const {start:ps, days:td} = getRange(rows);
+  const tw = rows.reduce((s,r)=>s+(+r.bg||0),0);
+  const pl = new Array(td).fill(0);
+  const ac = new Array(td).fill(0);
+  const today = new Date();
+  const todD = Math.min(td-1, Math.max(0, dd(ps, today)));
+  if(tw>0){
+    rows.forEach(r=>{
+      const w=(+r.bg||0)/tw; if(!w)return;
+      const s=pd(r.ps), e=pd(r.pe); if(!s||!e)return;
+      const sd=Math.max(0,dd(ps,s)), ed=Math.min(td-1,dd(ps,e));
+      const sp=ed-sd+1; if(sp<=0)return;
+      for(let d=sd;d<=ed;d++) pl[d] += w/sp;
+    });
+    for(let d=1;d<td;d++) pl[d] += pl[d-1];
+  }
+  const snaps = JSON.parse(JSON.stringify(snapData || {})); 
+  const tStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+  snaps[tStr] = tw > 0 ? calcP(rows) : 0; 
+  const snapDates = Object.keys(snaps).sort((a,b) => new Date(a) - new Date(b));
+  if (snapDates.length > 0) {
+    let snapPts = snapDates.map(ds => {
+       return { day: dd(ps, new Date(ds)), val: snaps[ds] / 100 };
+    }).sort((a,b)=>a.day - b.day);
+    snapPts = snapPts.filter((v,i,a)=> i===0 || v.day !== a[i-1].day);
+    if (snapPts.length > 0) {
+        let ptIdx = 0;
+        for(let d=0; d<=todD; d++){
+            if (d < 0) continue; 
+            if (d <= snapPts[0].day) {
+                if (snapPts[0].day <= 0) ac[d] = snapPts[0].val;
+                else ac[d] = (d / snapPts[0].day) * snapPts[0].val;
+            } else if (ptIdx < snapPts.length - 1 && d > snapPts[ptIdx+1].day) {
+                ptIdx++; d--;
+            } else if (ptIdx < snapPts.length - 1) {
+                const p1 = snapPts[ptIdx], p2 = snapPts[ptIdx+1];
+                const ratio = (d - p1.day) / (p2.day - p1.day);
+                ac[d] = p1.val + ratio * (p2.val - p1.val);
+            } else {
+                ac[d] = snapPts[snapPts.length-1].val;
+            }
+        }
+    }
+  }
+  return {pl, ac, td, ps};
+}
+
+function drawSC(cvId,rows,snapData,pc,ac_color){
+  const cv=$(cvId);if(!cv)return;
+  const isMob = window.innerWidth <= 768;
+  const W = isMob ? window.innerWidth - 10 : (cv.parentElement.getBoundingClientRect().width||cv.parentElement.offsetWidth||400);
+  const H=parseInt(cv.getAttribute('height'))||200;
+  if(W<10)return;
+  cv.width=Math.round(W);cv.height=H;
+  const ctx=cv.getContext('2d');
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
+  const PL=40,PR=30,PT=26,PB=28;
+  const pw=W-PL-PR,ph=H-PT-PB;
+  const px1=PL,py1=PT,px2=PL+pw,py2=PT+ph;
+  const{pl,ac:act,td,ps}=buildC(rows, snapData); 
+  const{start:pst,end:pen}=getRange(rows);
+  const today=new Date();
+  const todD=Math.min(td-1,Math.max(0,dd(pst,today)));
+  const tw = rows.reduce((s,r)=>s+(+r.bg||0),0);
+  const overallAct = tw > 0 ? calcP(rows) : "0.00";
+  const baseTitle = cvId==='cSC'?(plan==='material'?'Material S-Curve':'Installation S-Curve'):cvId==='cMat'?'Material S-Curve':'Installation S-Curve';
+  const fullTitle = `${baseTitle} (Progress = ${overallAct}%)`;
+  ctx.fillStyle='#333';ctx.font='bold 12px '+FN;ctx.textAlign='left';ctx.fillText(fullTitle,px1,py1-8);
+  ctx.fillStyle='#666';ctx.font='10px '+FN;ctx.textAlign='right';
+  ctx.fillText('As of: '+today.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}),W-6,16);
+  const legY = py1 + 18; 
+  ctx.fillStyle=pc;ctx.fillRect(px1+3,legY-4,14,4);
+  ctx.fillStyle='#555';ctx.font='10px '+FN;ctx.textAlign='left';ctx.fillText('Plan',px1+20,legY);
+  ctx.strokeStyle=ac_color;ctx.lineWidth=2;ctx.setLineDash([5,3]);
+  ctx.beginPath();ctx.moveTo(px1+52,legY-2);ctx.lineTo(px1+66,legY-2);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#555';ctx.fillText('Actual',px1+69,legY);
+  [0,20,40,60,80,100].forEach(p=>{
+    const gy=py2-(p/100)*ph;
+    ctx.strokeStyle=p%100===0?'#bbb':'#eee';ctx.lineWidth=p%100===0?1:.5;
+    ctx.setLineDash(p%100===0?[]:[3,3]);
+    ctx.beginPath();ctx.moveTo(px1,gy);ctx.lineTo(px2,gy);ctx.stroke();
+    ctx.fillStyle='#888';ctx.font='10px '+FN;ctx.textAlign='right';ctx.fillText(p+'%',px1-3,gy+3.5);
+  });
+  ctx.setLineDash([]);
+  const mths=[];let mc=new Date(pst.getFullYear(),pst.getMonth(),1);
+  while(mc<=pen){mths.push(new Date(mc));mc=new Date(mc.getFullYear(),mc.getMonth()+1,1);}
+  mths.forEach(m=>{
+    const gx=px1+(dd(pst,m)/td)*pw;
+    ctx.strokeStyle='#eee';ctx.lineWidth=.5;ctx.setLineDash([2,3]);
+    ctx.beginPath();ctx.moveTo(gx,py1);ctx.lineTo(gx,py2);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='#888';ctx.font='10px '+FN;ctx.textAlign='center';
+    ctx.fillText(m.toLocaleString('default',{month:'short'}),gx,py2+14);
+  });
+  ctx.strokeStyle='#888';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(px1,py1);ctx.lineTo(px1,py2);ctx.lineTo(px2,py2);ctx.stroke();
+  const step=Math.max(1,Math.floor(td/300));
+  const pp=[],ap=[];
+  for(let d=0;d<td;d+=step){
+    pp.push([px1+(d/td)*pw,py2-pl[d]*ph]);
+    if(d<=todD)ap.push([px1+(d/td)*pw,py2-act[d]*ph]);
+  }
+  if(pp.length){
+    ctx.beginPath();ctx.moveTo(pp[0][0],py2);pp.forEach(([x,y])=>ctx.lineTo(x,y));
+    ctx.lineTo(pp[pp.length-1][0],py2);ctx.closePath();
+    ctx.fillStyle=pc+'22';ctx.fill();
+  }
+  const dl=(pts,col,dash)=>{if(!pts.length)return;ctx.strokeStyle=col;ctx.lineWidth=2;ctx.setLineDash(dash||[]);ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);pts.forEach(([x,y])=>ctx.lineTo(x,y));ctx.stroke();ctx.setLineDash([]);};
+  dl(pp,pc);dl(ap,ac_color,[6,3]);
+  if(pp.length){const[x,y]=pp[pp.length-1];const pct=Number(pl[Math.min(td-1,(pp.length-1)*step)]*100).toFixed(2);ctx.fillStyle=pc;ctx.font='bold 10px '+FN;ctx.textAlign='left';ctx.fillText(pct+'%',x+4,y+4);}
+  if(ap.length){const[x,y]=ap[ap.length-1];const pct=Number(act[todD]*100).toFixed(2);ctx.fillStyle=ac_color;ctx.font='bold 10px '+FN;ctx.textAlign='left';ctx.fillText(pct+'%',x+4,y+4);}
+  if(today>=pst&&today<=pen){
+    const tx=px1+(dd(pst,today)/td)*pw;
+    ctx.strokeStyle='#c00';ctx.lineWidth=1;ctx.setLineDash([3,3]);
+    ctx.beginPath();ctx.moveTo(tx,py1);ctx.lineTo(tx,py2);ctx.stroke();ctx.setLineDash([]);
   }
 }
 
-function updatePrevPay(plan2,val){
-  D[plan2].prevPay=Math.max(0,parseFloat(val)||0);
-  updateBilling();
-  // Auto-save after short delay
-  setTimeout(saveData,500);
+function renderSC(){if(!plan)return;drawSC('cSC',D[plan].rows,D[plan].snap,plan==='material'?'#1560a8':'#d97706','#2a8a2a');}
+function calcP(rows){
+    const tw=rows.reduce((s,r)=>s+(+r.bg||0),0);
+    if(!tw)return "0.00";
+    return (rows.reduce((s,r)=>s+(+r.bg||0)*(+r.pct||0)/100,0)/tw*100).toFixed(2);
 }
-
-// ── RESIZE ──
-let _rt;
-window.addEventListener('resize',()=>{
-  clearTimeout(_rt);
-  _rt=setTimeout(()=>{
-    if(plan){renderPlan();}
-    else renderHome();
-  },100);
-});
-
-// ── INIT ──
-window.onload=()=>{
-  restoreSession();
+function renderHome(){
+  drawSC('cMat',D.material.rows,D.material.snap,'#1560a8','#2a8a2a');
+  drawSC('cInst',D.installation.rows,D.installation.snap,'#d97706','#2a8a2a');
+  const mp=calcP(D.material.rows),ip=calcP(D.installation.rows);
+  const se=(id,v)=>{const e=$(id);if(e)e.textContent=v;};
+  const sw=(id,v)=>{const e=$(id);if(e)e.style.width=v+'%';};
+  se('hmp',mp+'%');se('hip',ip+'%');sw('hmb',mp);sw('hib',ip);
+}
+function renderAll(){
+  initD();
   const lp=sessionStorage.getItem('lastPlan');
   const lb=sessionStorage.getItem('lastPage');
-  if(lb==='billing'){showPg('bpg');$('nbB').classList.add('on');}
-  else if(lp){plan=lp;showPg('ppg');$(lp==='material'?'nbM':'nbI').classList.add('on');}
-  else showPg('hpg');
-  google.accounts.id.initialize({client_id:GCI,callback:onLogin,auto_select:true});
-  google.accounts.id.renderButton($('gBtn'),{theme:'filled_blue',size:'small',text:'signin_with',shape:'rectangular'});
-  loadData();
-  // Draw S-curves after DOM is ready regardless of data load
-  setTimeout(()=>{
-    initD();
-    if(plan) renderSC_plan();
-    else renderHome();
-    setTimeout(()=>{
-      if(plan) renderSC_plan();
-      else renderHome();
-    },400);
-  },200);
-};
+  if(lb==='billing'){
+    requestAnimationFrame(()=>requestAnimationFrame(()=>goBilling()));
+  } else if(lp){
+    requestAnimationFrame(()=>requestAnimationFrame(()=>goPlan(lp)));
+  } else {
+    requestAnimationFrame(()=>requestAnimationFrame(renderHome));
+  }
+}
+
+let _rt, _lastW = window.innerWidth;
+window.addEventListener('resize',()=>{
+  if(window.innerWidth === _lastW) return; 
+  _lastW = window.innerWidth;
+  clearTimeout(_rt);
+  _rt=setTimeout(()=>{renderGantt();renderSC();renderHome();},120);
+});
+window.addEventListener('orientationchange',()=>setTimeout(()=>{renderGantt();renderSC();},300));
 </script>
+<div class="mo" id="pinMo">
+  <div class="md">
+    <h2>Admin PIN</h2>
+    <input type="password" id="pinIn" placeholder="Enter PIN" maxlength="6" inputmode="numeric" style="width:100%;padding:6px 9px;border:1px solid #ccc;border-radius:4px;font-size:14px;margin-bottom:10px;font-family:Sarabun,sans-serif">
+    <div class="ma">
+      <button class="btn" onclick="$('pinMo').classList.remove('on')">Cancel</button>
+      <button class="btn btnp" onclick="confirmPIN()">Login</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
