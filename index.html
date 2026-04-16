@@ -238,11 +238,11 @@ body.ed .paste-hint{display:inline-block}
   <div class="h-main">
     <div class="h-chart">
       <div class="h-chart-title">Material S-Curve</div>
-      <svg id="svgMatSC" width="100%" height="200"></svg>
+      <svg id="svgMatSC" width="100%" height="220" style="display:block"></svg>
     </div>
     <div class="h-chart">
       <div class="h-chart-title">Installation S-Curve</div>
-      <svg id="svgInstSC" width="100%" height="200"></svg>
+      <svg id="svgInstSC" width="100%" height="220" style="display:block"></svg>
     </div>
   </div>
 </div>
@@ -762,9 +762,19 @@ function buildSCData(rows,snapData){
 
 function drawSC(svgElem,rows,snapData,planColor,actColor,title){
   const svg=svgElem;
-  while(svg.firstChild)svg.removeChild(svg.firstChild);
-  const W=Math.max(svg.getBoundingClientRect().width||svg.parentElement?.getBoundingClientRect().width||window.innerWidth-40,300);
   const H=parseInt(svg.getAttribute('height'))||220;
+  // Force explicit pixel width on SVG so getBoundingClientRect works
+  svg.style.width='100%';
+  svg.style.display='block';
+  const W=Math.max(
+    svg.getBoundingClientRect().width,
+    svg.parentElement?.getBoundingClientRect().width||0,
+    svg.parentElement?.parentElement?.getBoundingClientRect().width||0,
+    300
+  );
+  svg.setAttribute('width',W);
+  svg.setAttribute('height',H);
+  while(svg.firstChild)svg.removeChild(svg.firstChild);
   svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
   const PL=44,PR=20,PT=36,PB=28;
   const pw=W-PL-PR,ph=H-PT-PB;
@@ -1071,7 +1081,7 @@ function renderSC_plan(){
   setTimeout(()=>{
     const color=plan==='material'?'#1560a8':'#d97706';
     drawSC(svg,D[plan].rows,D[plan].snap,color,'#15803d',plan==='material'?'Material S-Curve':'Installation S-Curve');
-  },50);
+  },200);
 }
 
 function renderHome(){
@@ -1081,7 +1091,7 @@ function renderHome(){
   setTimeout(()=>{
     drawSC($('svgMatSC'),D.material.rows,D.material.snap,'#1560a8','#15803d','Material S-Curve');
     drawSC($('svgInstSC'),D.installation.rows,D.installation.snap,'#d97706','#15803d','Installation S-Curve');
-  },50);
+  },200);
 }
 
 // ── FIELD UPDATES ──
